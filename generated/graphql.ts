@@ -65,10 +65,6 @@ export type Collection_Filter = {
   id_lte?: Maybe<Scalars['ID']>;
   id_not?: Maybe<Scalars['ID']>;
   id_not_in?: Maybe<Array<Scalars['ID']>>;
-  listings?: Maybe<Array<Scalars['String']>>;
-  listings_contains?: Maybe<Array<Scalars['String']>>;
-  listings_not?: Maybe<Array<Scalars['String']>>;
-  listings_not_contains?: Maybe<Array<Scalars['String']>>;
   name?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
   name_ends_with?: Maybe<Scalars['String']>;
@@ -97,10 +93,6 @@ export type Collection_Filter = {
   symbol_not_in?: Maybe<Array<Scalars['String']>>;
   symbol_not_starts_with?: Maybe<Scalars['String']>;
   symbol_starts_with?: Maybe<Scalars['String']>;
-  tokens?: Maybe<Array<Scalars['String']>>;
-  tokens_contains?: Maybe<Array<Scalars['String']>>;
-  tokens_not?: Maybe<Array<Scalars['String']>>;
-  tokens_not_contains?: Maybe<Array<Scalars['String']>>;
 };
 
 export enum Collection_OrderBy {
@@ -302,6 +294,8 @@ export type Query = {
   tokenSearch: Array<Token>;
   tokens: Array<Token>;
   user?: Maybe<User>;
+  userToken?: Maybe<UserToken>;
+  userTokens: Array<UserToken>;
   users: Array<User>;
 };
 
@@ -392,6 +386,24 @@ export type QueryUserArgs = {
 };
 
 
+export type QueryUserTokenArgs = {
+  block?: Maybe<Block_Height>;
+  id: Scalars['ID'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QueryUserTokensArgs = {
+  block?: Maybe<Block_Height>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<UserToken_OrderBy>;
+  orderDirection?: Maybe<OrderDirection>;
+  skip?: Maybe<Scalars['Int']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: Maybe<UserToken_Filter>;
+};
+
+
 export type QueryUsersArgs = {
   block?: Maybe<Block_Height>;
   first?: Maybe<Scalars['Int']>;
@@ -422,6 +434,8 @@ export type Subscription = {
   token?: Maybe<Token>;
   tokens: Array<Token>;
   user?: Maybe<User>;
+  userToken?: Maybe<UserToken>;
+  userTokens: Array<UserToken>;
   users: Array<User>;
 };
 
@@ -503,6 +517,24 @@ export type SubscriptionUserArgs = {
 };
 
 
+export type SubscriptionUserTokenArgs = {
+  block?: Maybe<Block_Height>;
+  id: Scalars['ID'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionUserTokensArgs = {
+  block?: Maybe<Block_Height>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<UserToken_OrderBy>;
+  orderDirection?: Maybe<OrderDirection>;
+  skip?: Maybe<Scalars['Int']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: Maybe<UserToken_Filter>;
+};
+
+
 export type SubscriptionUsersArgs = {
   block?: Maybe<Block_Height>;
   first?: Maybe<Scalars['Int']>;
@@ -520,9 +552,7 @@ export type Token = {
   metadata?: Maybe<Metadata>;
   metadataUri?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  quantity: Scalars['BigInt'];
   tokenId: Scalars['BigInt'];
-  user: User;
 };
 
 export type Token_Filter = {
@@ -590,14 +620,6 @@ export type Token_Filter = {
   name_not_in?: Maybe<Array<Scalars['String']>>;
   name_not_starts_with?: Maybe<Scalars['String']>;
   name_starts_with?: Maybe<Scalars['String']>;
-  quantity?: Maybe<Scalars['BigInt']>;
-  quantity_gt?: Maybe<Scalars['BigInt']>;
-  quantity_gte?: Maybe<Scalars['BigInt']>;
-  quantity_in?: Maybe<Array<Scalars['BigInt']>>;
-  quantity_lt?: Maybe<Scalars['BigInt']>;
-  quantity_lte?: Maybe<Scalars['BigInt']>;
-  quantity_not?: Maybe<Scalars['BigInt']>;
-  quantity_not_in?: Maybe<Array<Scalars['BigInt']>>;
   tokenId?: Maybe<Scalars['BigInt']>;
   tokenId_gt?: Maybe<Scalars['BigInt']>;
   tokenId_gte?: Maybe<Scalars['BigInt']>;
@@ -606,6 +628,81 @@ export type Token_Filter = {
   tokenId_lte?: Maybe<Scalars['BigInt']>;
   tokenId_not?: Maybe<Scalars['BigInt']>;
   tokenId_not_in?: Maybe<Array<Scalars['BigInt']>>;
+};
+
+export enum Token_OrderBy {
+  Collection = 'collection',
+  Id = 'id',
+  Metadata = 'metadata',
+  MetadataUri = 'metadataUri',
+  Name = 'name',
+  TokenId = 'tokenId'
+}
+
+export type User = {
+  __typename?: 'User';
+  id: Scalars['ID'];
+  listings: Array<Listing>;
+  tokens: Array<UserToken>;
+};
+
+
+export type UserListingsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Listing_OrderBy>;
+  orderDirection?: Maybe<OrderDirection>;
+  skip?: Maybe<Scalars['Int']>;
+  where?: Maybe<Listing_Filter>;
+};
+
+
+export type UserTokensArgs = {
+  first?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<UserToken_OrderBy>;
+  orderDirection?: Maybe<OrderDirection>;
+  skip?: Maybe<Scalars['Int']>;
+  where?: Maybe<UserToken_Filter>;
+};
+
+export type UserToken = {
+  __typename?: 'UserToken';
+  id: Scalars['ID'];
+  quantity: Scalars['BigInt'];
+  token: Token;
+  user: User;
+};
+
+export type UserToken_Filter = {
+  id?: Maybe<Scalars['ID']>;
+  id_gt?: Maybe<Scalars['ID']>;
+  id_gte?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Scalars['ID']>>;
+  id_lt?: Maybe<Scalars['ID']>;
+  id_lte?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_not_in?: Maybe<Array<Scalars['ID']>>;
+  quantity?: Maybe<Scalars['BigInt']>;
+  quantity_gt?: Maybe<Scalars['BigInt']>;
+  quantity_gte?: Maybe<Scalars['BigInt']>;
+  quantity_in?: Maybe<Array<Scalars['BigInt']>>;
+  quantity_lt?: Maybe<Scalars['BigInt']>;
+  quantity_lte?: Maybe<Scalars['BigInt']>;
+  quantity_not?: Maybe<Scalars['BigInt']>;
+  quantity_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  token?: Maybe<Scalars['String']>;
+  token_contains?: Maybe<Scalars['String']>;
+  token_ends_with?: Maybe<Scalars['String']>;
+  token_gt?: Maybe<Scalars['String']>;
+  token_gte?: Maybe<Scalars['String']>;
+  token_in?: Maybe<Array<Scalars['String']>>;
+  token_lt?: Maybe<Scalars['String']>;
+  token_lte?: Maybe<Scalars['String']>;
+  token_not?: Maybe<Scalars['String']>;
+  token_not_contains?: Maybe<Scalars['String']>;
+  token_not_ends_with?: Maybe<Scalars['String']>;
+  token_not_in?: Maybe<Array<Scalars['String']>>;
+  token_not_starts_with?: Maybe<Scalars['String']>;
+  token_starts_with?: Maybe<Scalars['String']>;
   user?: Maybe<Scalars['String']>;
   user_contains?: Maybe<Scalars['String']>;
   user_ends_with?: Maybe<Scalars['String']>;
@@ -622,41 +719,12 @@ export type Token_Filter = {
   user_starts_with?: Maybe<Scalars['String']>;
 };
 
-export enum Token_OrderBy {
-  Collection = 'collection',
+export enum UserToken_OrderBy {
   Id = 'id',
-  Metadata = 'metadata',
-  MetadataUri = 'metadataUri',
-  Name = 'name',
   Quantity = 'quantity',
-  TokenId = 'tokenId',
+  Token = 'token',
   User = 'user'
 }
-
-export type User = {
-  __typename?: 'User';
-  id: Scalars['ID'];
-  listings: Array<Listing>;
-  tokens: Array<Token>;
-};
-
-
-export type UserListingsArgs = {
-  first?: Maybe<Scalars['Int']>;
-  orderBy?: Maybe<Listing_OrderBy>;
-  orderDirection?: Maybe<OrderDirection>;
-  skip?: Maybe<Scalars['Int']>;
-  where?: Maybe<Listing_Filter>;
-};
-
-
-export type UserTokensArgs = {
-  first?: Maybe<Scalars['Int']>;
-  orderBy?: Maybe<Token_OrderBy>;
-  orderDirection?: Maybe<OrderDirection>;
-  skip?: Maybe<Scalars['Int']>;
-  where?: Maybe<Token_Filter>;
-};
 
 export type User_Filter = {
   id?: Maybe<Scalars['ID']>;
@@ -667,14 +735,6 @@ export type User_Filter = {
   id_lte?: Maybe<Scalars['ID']>;
   id_not?: Maybe<Scalars['ID']>;
   id_not_in?: Maybe<Array<Scalars['ID']>>;
-  listings?: Maybe<Array<Scalars['String']>>;
-  listings_contains?: Maybe<Array<Scalars['String']>>;
-  listings_not?: Maybe<Array<Scalars['String']>>;
-  listings_not_contains?: Maybe<Array<Scalars['String']>>;
-  tokens?: Maybe<Array<Scalars['String']>>;
-  tokens_contains?: Maybe<Array<Scalars['String']>>;
-  tokens_not?: Maybe<Array<Scalars['String']>>;
-  tokens_not_contains?: Maybe<Array<Scalars['String']>>;
 };
 
 export enum User_OrderBy {
@@ -720,24 +780,32 @@ export type GetUserTokensQueryVariables = Exact<{
 }>;
 
 
-export type GetUserTokensQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, tokens: Array<{ __typename?: 'Token', id: string, quantity: any, tokenId: any, collection: { __typename?: 'Collection', address: any }, metadata?: { __typename?: 'Metadata', image?: string | null | undefined, name?: string | null | undefined, description?: string | null | undefined } | null | undefined }> } | null | undefined };
+export type GetUserTokensQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, listings: Array<{ __typename?: 'Listing', quantity: any, token: { __typename?: 'Token', id: string } }>, tokens: Array<{ __typename?: 'UserToken', id: string, quantity: any, token: { __typename?: 'Token', tokenId: any, collection: { __typename?: 'Collection', address: any }, metadata?: { __typename?: 'Metadata', image?: string | null | undefined, name?: string | null | undefined, description?: string | null | undefined } | null | undefined } }> } | null | undefined };
 
 
 export const GetUserTokensDocument = gql`
     query getUserTokens($id: ID!) {
   user(id: $id) {
+    listings {
+      quantity
+      token {
+        id
+      }
+    }
     tokens {
       id
-      collection {
-        address
-      }
-      metadata {
-        image
-        name
-        description
-      }
       quantity
-      tokenId
+      token {
+        collection {
+          address
+        }
+        metadata {
+          image
+          name
+          description
+        }
+        tokenId
+      }
     }
     id
   }
