@@ -321,20 +321,22 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
                       {needsContractApproval ? (
                         <button
                           type="button"
-                          className="flex-1 items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md w-full text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:border-red-300 disabled:text-red-300 disabled:pointer-events-none ease-linear duration-200"
+                          className="flex justify-center flex-1 items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md w-full text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:border-red-300 disabled:text-red-300 disabled:pointer-events-none ease-linear duration-200"
                           onClick={() => approveContract.send()}
                           disabled={approveContract.state.status === "Mining"}
                         >
                           {approveContract.state.status === "Mining" ? (
-                            <Spinner className="h-5 m-auto" />
+                            <>
+                              Approving... <Spinner className="h-5 ml-3" />
+                            </>
                           ) : (
-                            "Approve to Sell"
+                            "Approve Collection to List"
                           )}
                         </button>
                       ) : (
                         <button
                           type="button"
-                          className="flex-1 bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full disabled:bg-red-300 disabled:pointer-events-none transition-bg ease-linear duration-300"
+                          className="flex justify-center flex-1 bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full disabled:bg-red-300 disabled:pointer-events-none transition-bg ease-linear duration-300"
                           disabled={price.trim() === "" || isFormDisabled}
                           onClick={() =>
                             createListing.send(
@@ -348,9 +350,11 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
                           }
                         >
                           {createListing.state.status === "Mining" ? (
-                            <Spinner className="h-5 m-auto" />
+                            <>
+                              Listing... <Spinner className="h-5 ml-3" />
+                            </>
                           ) : (
-                            "Sell"
+                            "List"
                           )}
                         </button>
                       )}

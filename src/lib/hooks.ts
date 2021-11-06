@@ -82,7 +82,7 @@ export function useCreateListing() {
           break;
         }
 
-        toast.error("An error occurred while trying to create your listing.");
+        toast.error(`Transaction failed! ${sell.state.errorMessage}`);
 
         return;
       case "Success":
@@ -94,7 +94,7 @@ export function useCreateListing() {
 
         break;
     }
-  }, [name, quantity, sell.state.status]);
+  }, [name, quantity, sell.state.errorMessage, sell.state.status]);
 
   return useMemo(() => {
     const send = (
