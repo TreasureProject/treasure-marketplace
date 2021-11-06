@@ -321,7 +321,7 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
                       {needsContractApproval ? (
                         <button
                           type="button"
-                          className="flex-1 bg-white py-2 px-4 border border-red-600 rounded-md shadow-sm text-sm font-medium text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full disabled:border-red-300 disabled:text-red-300 disabled:pointer-events-none transition-text transition-bg ease-linear duration-200"
+                          className="flex-1 items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md w-full text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:border-red-300 disabled:text-red-300 disabled:pointer-events-none ease-linear duration-200"
                           onClick={() => approveContract.send()}
                           disabled={approveContract.state.status === "Mining"}
                         >
