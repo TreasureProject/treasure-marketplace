@@ -22,7 +22,7 @@ export function useApproveContract(contract: string) {
       case "Exception":
       case "Fail":
         toast.error(
-          `An error occurred while trying set approval on the contract: ${contract}`
+          `An error occurred while trying set approval on the contract: ${contract}\n${approve.state.errorMessage} `
         );
     }
   }, [approve.state]);
