@@ -1,22 +1,33 @@
-import { Fragment, useCallback, useEffect, useReducer, useState } from "react";
+import {
+  ReactNode,
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import { Dialog, Transition, Listbox } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
-import { Spinner } from "../components/Spinner";
+import { Spinner } from "../../components/Spinner";
 import classNames from "clsx";
-import client from "../lib/client";
+import client from "../../lib/client";
 import { useQuery } from "react-query";
 import { addMonths, addWeeks } from "date-fns";
 import { ethers } from "ethers";
 import {
   useApproveContract,
+  useCancelListing,
   useContractApprovals,
   useCreateListing,
-} from "../lib/hooks";
+} from "../../lib/hooks";
 import { useEthers } from "@yuyao17/corefork";
 import { AddressZero } from "@ethersproject/constants";
-import { generateIpfsLink } from "../utils";
+import { generateIpfsLink } from "../../utils";
+import { useRouter } from "next/router";
 import Image from "next/image";
+import Link from "next/link";
 
 type Nft = {
   name: string;
@@ -27,7 +38,17 @@ type Nft = {
   tokenId: string;
 };
 
+type ButtonProps = {
+  children: ReactNode;
+  disabled?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
+  onClick: () => void;
+  variant?: "secondary";
+};
+
 type DrawerProps = {
+  canCancelListing: boolean;
   needsContractApproval: boolean;
   nft: Nft;
   onClose: () => void;
@@ -41,27 +62,70 @@ const dates = [
 ];
 
 const tabs = [
-  { name: "Collected", href: "#", current: true },
-  { name: "Listed", href: "#", current: false },
-  { name: "Sold", href: "#", current: false },
+  { name: "Collected", href: "/inventory" },
+  { name: "Listed", href: "/inventory/listed" },
+  { name: "Sold", href: "#" },
 ];
 
-const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
+const Button = ({
+  children,
+  isLoading = false,
+  disabled = isLoading,
+  loadingText,
+  onClick,
+  variant,
+}: ButtonProps) => {
+  return (
+    <button
+      type="button"
+      className={classNames(
+        variant === "secondary"
+          ? "text-red-700 bg-red-100 hover:bg-red-200"
+          : "text-white bg-red-600 hover:bg-red-700",
+        "flex justify-center flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full disabled:bg-red-300 disabled:pointer-events-none transition-bg ease-linear duration-300"
+      )}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {isLoading ? (
+        <>
+          {loadingText} <Spinner className="h-5 ml-3" />
+        </>
+      ) : (
+        children
+      )}
+    </button>
+  );
+};
+
+const Drawer = ({
+  canCancelListing,
+  needsContractApproval,
+  nft,
+  onClose,
+}: DrawerProps) => {
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [selectedDate, setSelectedDate] = useState(dates[3]);
   const [show, toggle] = useReducer((value) => !value, true);
   const approveContract = useApproveContract(nft.address);
+  const cancelListing = useCancelListing();
   const createListing = useCreateListing();
 
   const isFormDisabled =
-    needsContractApproval || createListing.state.status === "Mining";
+    needsContractApproval ||
+    canCancelListing ||
+    [cancelListing.state.status, createListing.state.status].includes("Mining");
 
   useEffect(() => {
-    if (createListing.state.status === "Success") {
+    if (
+      [cancelListing.state.status, createListing.state.status].includes(
+        "Success"
+      )
+    ) {
       toggle();
     }
-  }, [createListing.state.status, toggle]);
+  }, [cancelListing.state.status, createListing.state.status, toggle]);
 
   return (
     <Transition.Root appear show={show} as={Fragment}>
@@ -89,7 +153,8 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
                   <div className="px-4 sm:px-6">
                     <div className="flex items-start justify-between">
                       <Dialog.Title className="text-lg font-medium text-gray-900">
-                        Sell {nft.name}
+                        {canCancelListing ? "Cancel" : "List"} {nft.name}{" "}
+                        {canCancelListing ? "Listing" : ""}
                       </Dialog.Title>
                       <div className="ml-3 h-7 flex items-center">
                         <button
@@ -319,25 +384,33 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
                       </div>
 
                       {needsContractApproval ? (
-                        <button
-                          type="button"
-                          className="flex justify-center flex-1 items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md w-full text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:border-red-300 disabled:text-red-300 disabled:pointer-events-none ease-linear duration-200"
+                        <Button
+                          isLoading={approveContract.state.status === "Mining"}
+                          loadingText="Approving..."
                           onClick={() => approveContract.send()}
-                          disabled={approveContract.state.status === "Mining"}
+                          variant="secondary"
                         >
-                          {approveContract.state.status === "Mining" ? (
-                            <>
-                              Approving... <Spinner className="h-5 ml-3" />
-                            </>
-                          ) : (
-                            "Approve Collection to List"
-                          )}
-                        </button>
+                          Approve Collection to List
+                        </Button>
+                      ) : canCancelListing ? (
+                        <Button
+                          isLoading={cancelListing.state.status === "Mining"}
+                          loadingText="Canceling..."
+                          onClick={() =>
+                            cancelListing.send(
+                              nft.name,
+                              nft.address,
+                              Number(nft.tokenId)
+                            )
+                          }
+                        >
+                          Cancel
+                        </Button>
                       ) : (
-                        <button
-                          type="button"
-                          className="flex justify-center flex-1 bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full disabled:bg-red-300 disabled:pointer-events-none transition-bg ease-linear duration-300"
+                        <Button
                           disabled={price.trim() === "" || isFormDisabled}
+                          isLoading={createListing.state.status === "Mining"}
+                          loadingText="Listing..."
                           onClick={() =>
                             createListing.send(
                               nft.name,
@@ -349,14 +422,8 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
                             )
                           }
                         >
-                          {createListing.state.status === "Mining" ? (
-                            <>
-                              Listing... <Spinner className="h-5 ml-3" />
-                            </>
-                          ) : (
-                            "List"
-                          )}
-                        </button>
+                          List
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -371,14 +438,47 @@ const Drawer = ({ needsContractApproval, nft, onClose }: DrawerProps) => {
 };
 
 const Inventory = () => {
+  const router = useRouter();
   const [nft, setNft] = useState<Nft | null>(null);
   const { account } = useEthers();
-  const { data } = useQuery(
+
+  const inventory = useQuery(
     "inventory",
     () => client.getUserTokens({ id: account?.toLowerCase() ?? AddressZero }),
     { enabled: !!account }
   );
-  const approvals = useContractApprovals(data);
+  const listed = useQuery(
+    "listed",
+    () => client.getUserListings({ id: account?.toLowerCase() ?? AddressZero }),
+    { enabled: !!account }
+  );
+
+  const data = useMemo(() => {
+    switch (router.query.section?.[0]) {
+      case "listed":
+        return listed.data?.user?.listings ?? [];
+      default:
+        return inventory.data?.user?.tokens ?? [];
+    }
+  }, [
+    inventory.data?.user?.tokens,
+    listed.data?.user?.listings,
+    router.query.section,
+  ]);
+
+  const approvals = useContractApprovals(
+    Array.from(
+      new Set(
+        data.map(
+          ({
+            token: {
+              collection: { address },
+            },
+          }) => address
+        )
+      )
+    )
+  );
 
   const onClose = useCallback(() => setNft(null), []);
 
@@ -413,21 +513,27 @@ const Inventory = () => {
                     className="flex-1 -mb-px flex space-x-6 xl:space-x-8"
                     aria-label="Tabs"
                   >
-                    {tabs.map((tab) => (
-                      <a
-                        key={tab.name}
-                        href={tab.href}
-                        aria-current={tab.current ? "page" : undefined}
-                        className={classNames(
-                          tab.current
-                            ? "border-red-500 text-red-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-                          "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                        )}
-                      >
-                        {tab.name}
-                      </a>
-                    ))}
+                    {tabs.map((tab) => {
+                      const isCurrentTab =
+                        (router.query.section?.[0] ?? "") ===
+                        tab.href.replace(/\/inventory\/?/, "");
+
+                      return (
+                        <Link key={tab.name} href={tab.href} passHref>
+                          <a
+                            aria-current={isCurrentTab ? "page" : undefined}
+                            className={classNames(
+                              isCurrentTab
+                                ? "border-red-500 text-red-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                              "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            )}
+                          >
+                            {tab.name}
+                          </a>
+                        </Link>
+                      );
+                    })}
                   </nav>
                 </div>
               </div>
@@ -438,7 +544,7 @@ const Inventory = () => {
                 role="list"
                 className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8"
               >
-                {data?.user?.tokens.map(({ id, quantity, token }) => (
+                {data.map(({ id, quantity, token }) => (
                   <li key={id} className="relative">
                     <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
                       <Image
@@ -490,6 +596,7 @@ const Inventory = () => {
 
         {nft ? (
           <Drawer
+            canCancelListing={Boolean(router.query.section?.[0])}
             needsContractApproval={!Boolean(approvals[nft.address])}
             nft={nft}
             onClose={onClose}

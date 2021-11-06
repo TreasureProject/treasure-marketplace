@@ -2,11 +2,14 @@ import * as abis from "./abis";
 import { ChainId } from "@yuyao17/corefork";
 import { Contract } from "ethers";
 import { Contracts } from "../const";
-import { GetUserTokensQuery } from "../../generated/graphql";
 import { Interface } from "@ethersproject/abi";
 import { toast } from "react-hot-toast";
 import { useEffect, useMemo, useState } from "react";
-import { useContractCalls, useContractFunction } from "@yuyao17/corefork";
+import {
+  useContractCalls,
+  useContractFunction,
+  useEthers,
+} from "@yuyao17/corefork";
 import { useQueryClient } from "react-query";
 import plur from "plur";
 
@@ -25,7 +28,7 @@ export function useApproveContract(contract: string) {
           `An error occurred while trying set approval on the contract: ${contract}\n${approve.state.errorMessage} `
         );
     }
-  }, [approve.state]);
+  }, [approve.state, contract]);
 
   return useMemo(() => {
     const send = () =>
@@ -35,14 +38,15 @@ export function useApproveContract(contract: string) {
   }, [approve]);
 }
 
-export function useContractApprovals(data?: GetUserTokensQuery) {
+export function useContractApprovals(addresses: string[]) {
+  const { account } = useEthers();
   const approvals = useContractCalls(
-    data?.user?.tokens.map(({ token }) => ({
+    addresses.map((address) => ({
       // TODO: Determine if nft collection is erc1155 or erc721
       abi: new Interface(abis.erc1155),
-      address: token.collection.address,
+      address,
       method: "isApprovedForAll",
-      args: [data?.user?.id, Contracts[ChainId.Rinkeby].marketplace],
+      args: [account, Contracts[ChainId.Rinkeby].marketplace],
     })) ?? []
   );
 
@@ -50,8 +54,7 @@ export function useContractApprovals(data?: GetUserTokensQuery) {
     .filter(Boolean)
     .flat()
     .reduce<Record<string, boolean>>((acc, value, index) => {
-      const { token: { collection: { address = null } = {} } = {} } =
-        data?.user?.tokens[index] ?? {};
+      const address = addresses[index];
 
       if (address) {
         acc[address] = value;
@@ -59,6 +62,49 @@ export function useContractApprovals(data?: GetUserTokensQuery) {
 
       return acc;
     }, {});
+}
+
+export function useCancelListing() {
+  const [name, setName] = useState("");
+  const queryClient = useQueryClient();
+
+  const cancel = useContractFunction(
+    new Contract(Contracts[ChainId.Rinkeby].marketplace, abis.marketplace),
+    "cancelListing"
+  );
+
+  useEffect(() => {
+    switch (cancel.state.status) {
+      case "Exception":
+      case "Fail":
+        if (cancel.state.errorMessage?.includes("not listed item")) {
+          toast.error("You do not have that item listed.");
+
+          break;
+        }
+
+        toast.error(`Transaction failed! ${cancel.state.errorMessage}`);
+
+        return;
+      case "Success":
+        toast.success(`Successfully canceled the listing for ${name}!`);
+
+        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+        queryClient.invalidateQueries("listed", { refetchInactive: true });
+
+        break;
+    }
+  }, [cancel.state.errorMessage, cancel.state.status, name, queryClient]);
+
+  return useMemo(() => {
+    const send = (name: string, address: string, tokenId: number) => {
+      setName(name);
+
+      cancel.send(address, tokenId);
+    };
+
+    return { ...cancel, send };
+  }, [cancel]);
 }
 
 export function useCreateListing() {
@@ -90,11 +136,12 @@ export function useCreateListing() {
           `Successfully listed ${quantity} ${plur(name, quantity)} for sale!`
         );
 
-        queryClient.invalidateQueries("inventory");
+        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+        queryClient.invalidateQueries("listed", { refetchInactive: true });
 
         break;
     }
-  }, [name, quantity, sell.state.errorMessage, sell.state.status]);
+  }, [name, quantity, queryClient, sell.state.errorMessage, sell.state.status]);
 
   return useMemo(() => {
     const send = (
