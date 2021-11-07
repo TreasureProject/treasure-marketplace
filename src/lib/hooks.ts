@@ -64,47 +64,47 @@ export function useContractApprovals(addresses: string[]) {
     }, {});
 }
 
-export function useCancelListing() {
+export function useRemoveListing() {
   const [name, setName] = useState("");
   const queryClient = useQueryClient();
 
-  const cancel = useContractFunction(
+  const remove = useContractFunction(
     new Contract(Contracts[ChainId.Rinkeby].marketplace, abis.marketplace),
     "cancelListing"
   );
 
   useEffect(() => {
-    switch (cancel.state.status) {
+    switch (remove.state.status) {
       case "Exception":
       case "Fail":
-        if (cancel.state.errorMessage?.includes("not listed item")) {
+        if (remove.state.errorMessage?.includes("not listed item")) {
           toast.error("You do not have that item listed.");
 
           break;
         }
 
-        toast.error(`Transaction failed! ${cancel.state.errorMessage}`);
+        toast.error(`Transaction failed! ${remove.state.errorMessage}`);
 
         return;
       case "Success":
-        toast.success(`Successfully canceled the listing for ${name}!`);
+        toast.success(`Successfully removed the listing for ${name}!`);
 
         queryClient.invalidateQueries("inventory", { refetchInactive: true });
         queryClient.invalidateQueries("listed", { refetchInactive: true });
 
         break;
     }
-  }, [cancel.state.errorMessage, cancel.state.status, name, queryClient]);
+  }, [remove.state.errorMessage, remove.state.status, name, queryClient]);
 
   return useMemo(() => {
     const send = (name: string, address: string, tokenId: number) => {
       setName(name);
 
-      cancel.send(address, tokenId);
+      remove.send(address, tokenId);
     };
 
-    return { ...cancel, send };
-  }, [cancel]);
+    return { ...remove, send };
+  }, [remove]);
 }
 
 export function useCreateListing() {

@@ -1,5 +1,4 @@
 import {
-  ReactNode,
   Fragment,
   useCallback,
   useEffect,
@@ -10,7 +9,6 @@ import {
 import { Dialog, Transition, Listbox } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
-import { Spinner } from "../../components/Spinner";
 import classNames from "clsx";
 import client from "../../lib/client";
 import { useQuery } from "react-query";
@@ -18,7 +16,7 @@ import { addMonths, addWeeks } from "date-fns";
 import { ethers } from "ethers";
 import {
   useApproveContract,
-  useCancelListing,
+  useRemoveListing,
   useContractApprovals,
   useCreateListing,
 } from "../../lib/hooks";
@@ -26,6 +24,7 @@ import { useEthers } from "@yuyao17/corefork";
 import { AddressZero } from "@ethersproject/constants";
 import { generateIpfsLink } from "../../utils";
 import { useRouter } from "next/router";
+import Button from "../../components/Button";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -36,15 +35,6 @@ type Nft = {
   address: string;
   quantity: string;
   tokenId: string;
-};
-
-type ButtonProps = {
-  children: ReactNode;
-  disabled?: boolean;
-  isLoading?: boolean;
-  loadingText?: string;
-  onClick: () => void;
-  variant?: "secondary";
 };
 
 type DrawerProps = {
@@ -67,37 +57,6 @@ const tabs = [
   { name: "Sold", href: "#" },
 ];
 
-const Button = ({
-  children,
-  isLoading = false,
-  disabled = isLoading,
-  loadingText,
-  onClick,
-  variant,
-}: ButtonProps) => {
-  return (
-    <button
-      type="button"
-      className={classNames(
-        variant === "secondary"
-          ? "text-red-700 bg-red-100 hover:bg-red-200"
-          : "text-white bg-red-600 hover:bg-red-700",
-        "flex justify-center flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full disabled:bg-red-300 disabled:pointer-events-none transition-bg ease-linear duration-300"
-      )}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {isLoading ? (
-        <>
-          {loadingText} <Spinner className="h-5 ml-3" />
-        </>
-      ) : (
-        children
-      )}
-    </button>
-  );
-};
-
 const Drawer = ({
   canCancelListing,
   needsContractApproval,
@@ -109,23 +68,23 @@ const Drawer = ({
   const [selectedDate, setSelectedDate] = useState(dates[3]);
   const [show, toggle] = useReducer((value) => !value, true);
   const approveContract = useApproveContract(nft.address);
-  const cancelListing = useCancelListing();
+  const removeListing = useRemoveListing();
   const createListing = useCreateListing();
 
   const isFormDisabled =
     needsContractApproval ||
     canCancelListing ||
-    [cancelListing.state.status, createListing.state.status].includes("Mining");
+    [removeListing.state.status, createListing.state.status].includes("Mining");
 
   useEffect(() => {
     if (
-      [cancelListing.state.status, createListing.state.status].includes(
+      [removeListing.state.status, createListing.state.status].includes(
         "Success"
       )
     ) {
       toggle();
     }
-  }, [cancelListing.state.status, createListing.state.status, toggle]);
+  }, [removeListing.state.status, createListing.state.status, toggle]);
 
   return (
     <Transition.Root appear show={show} as={Fragment}>
@@ -153,8 +112,8 @@ const Drawer = ({
                   <div className="px-4 sm:px-6">
                     <div className="flex items-start justify-between">
                       <Dialog.Title className="text-lg font-medium text-gray-900">
-                        {canCancelListing ? "Cancel" : "List"} {nft.name}{" "}
-                        {canCancelListing ? "Listing" : ""}
+                        {canCancelListing ? "Remove" : "List"} {nft.name}{" "}
+                        {canCancelListing && "Listing"}
                       </Dialog.Title>
                       <div className="ml-3 h-7 flex items-center">
                         <button
@@ -394,17 +353,17 @@ const Drawer = ({
                         </Button>
                       ) : canCancelListing ? (
                         <Button
-                          isLoading={cancelListing.state.status === "Mining"}
-                          loadingText="Canceling..."
+                          isLoading={removeListing.state.status === "Mining"}
+                          loadingText="Removing..."
                           onClick={() =>
-                            cancelListing.send(
+                            removeListing.send(
                               nft.name,
                               nft.address,
                               Number(nft.tokenId)
                             )
                           }
                         >
-                          Cancel
+                          Remove
                         </Button>
                       ) : (
                         <Button
