@@ -1,10 +1,12 @@
 import gql from "graphql-tag";
 
-export const getUserTokens = gql`
-  query getUserTokens($id: ID!) {
+export const getUserInventory = gql`
+  query getUserInventory($id: ID!) {
     user(id: $id) {
-      tokens {
+      listings {
         id
+        expires
+        pricePerItem
         quantity
         token {
           collection {
@@ -18,15 +20,7 @@ export const getUserTokens = gql`
           tokenId
         }
       }
-      id
-    }
-  }
-`;
-
-export const getUserListings = gql`
-  query getUserListings($id: ID!) {
-    user(id: $id) {
-      listings {
+      tokens {
         id
         quantity
         token {

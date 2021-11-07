@@ -12,13 +12,14 @@ import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import classNames from "clsx";
 import client from "../../lib/client";
 import { useQuery } from "react-query";
-import { addMonths, addWeeks } from "date-fns";
+import { addMonths, addWeeks, closestIndexTo } from "date-fns";
 import { ethers } from "ethers";
 import {
   useApproveContract,
-  useRemoveListing,
   useContractApprovals,
   useCreateListing,
+  useRemoveListing,
+  useUpdateListing,
 } from "../../lib/hooks";
 import { useEthers } from "@yuyao17/corefork";
 import { AddressZero } from "@ethersproject/constants";
@@ -29,11 +30,16 @@ import Image from "next/image";
 import Link from "next/link";
 
 type Nft = {
-  name: string;
-  source: string;
-  collection: string;
   address: string;
-  quantity: string;
+  collection: string;
+  listing?: {
+    expires: string;
+    pricePerItem: string;
+    quantity: number;
+  };
+  name: string;
+  total: number;
+  source: string;
   tokenId: string;
 };
 
@@ -63,28 +69,52 @@ const Drawer = ({
   nft,
   onClose,
 }: DrawerProps) => {
-  const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("1");
-  const [selectedDate, setSelectedDate] = useState(dates[3]);
+  const [price, setPrice] = useState(
+    nft.listing
+      ? ethers.utils.formatEther(nft.listing.pricePerItem).replace(".0", "")
+      : ""
+  );
+  const [quantity, setQuantity] = useState(nft.listing?.quantity ?? "1");
+  const [selectedDate, setSelectedDate] = useState(() =>
+    nft.listing
+      ? dates[
+          closestIndexTo(
+            new Date(Number(nft.listing.expires)),
+            dates.map(({ value }) => value)
+          )
+        ]
+      : dates[3]
+  );
   const [show, toggle] = useReducer((value) => !value, true);
+
   const approveContract = useApproveContract(nft.address);
-  const removeListing = useRemoveListing();
   const createListing = useCreateListing();
+  const removeListing = useRemoveListing();
+  const updateListing = useUpdateListing();
 
   const isFormDisabled =
     needsContractApproval ||
-    canCancelListing ||
-    [removeListing.state.status, createListing.state.status].includes("Mining");
+    [
+      createListing.state.status,
+      removeListing.state.status,
+      updateListing.state.status,
+    ].includes("Mining");
 
   useEffect(() => {
     if (
-      [removeListing.state.status, createListing.state.status].includes(
-        "Success"
-      )
+      [
+        createListing.state.status,
+        removeListing.state.status,
+        updateListing.state.status,
+      ].includes("Success")
     ) {
       toggle();
     }
-  }, [removeListing.state.status, createListing.state.status, toggle]);
+  }, [
+    createListing.state.status,
+    removeListing.state.status,
+    updateListing.state.status,
+  ]);
 
   return (
     <Transition.Root appear show={show} as={Fragment}>
@@ -112,7 +142,7 @@ const Drawer = ({
                   <div className="px-4 sm:px-6">
                     <div className="flex items-start justify-between">
                       <Dialog.Title className="text-lg font-medium text-gray-900">
-                        {canCancelListing ? "Remove" : "List"} {nft.name}{" "}
+                        {canCancelListing ? "Manage" : "List"} {nft.name}{" "}
                         {canCancelListing && "Listing"}
                       </Dialog.Title>
                       <div className="ml-3 h-7 flex items-center">
@@ -289,7 +319,7 @@ const Drawer = ({
                               >
                                 <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                   {Array.from({
-                                    length: Number(nft.quantity) || 0,
+                                    length: Number(nft.total) || 0,
                                   }).map((_, idx) => (
                                     <Listbox.Option
                                       key={idx}
@@ -352,19 +382,43 @@ const Drawer = ({
                           Approve Collection to List
                         </Button>
                       ) : canCancelListing ? (
-                        <Button
-                          isLoading={removeListing.state.status === "Mining"}
-                          loadingText="Removing..."
-                          onClick={() =>
-                            removeListing.send(
-                              nft.name,
-                              nft.address,
-                              Number(nft.tokenId)
-                            )
-                          }
-                        >
-                          Remove
-                        </Button>
+                        <div>
+                          <Button
+                            disabled={isFormDisabled}
+                            isLoading={updateListing.state.status === "Mining"}
+                            loadingText="Updating..."
+                            onClick={() =>
+                              updateListing.send(
+                                nft.name,
+                                nft.address,
+                                Number(nft.tokenId),
+                                Number(quantity),
+                                ethers.utils.parseEther(price),
+                                selectedDate.value.getTime()
+                              )
+                            }
+                          >
+                            Update {nft.name} Listing
+                          </Button>
+                          <div className="text-center relative border-b-2 h-10 mb-5 -mt-5">
+                            <span className="absolute text-gray-600 top-6 bg-white px-4 pt-1 -ml-4">OR</span>
+                          </div>
+                          <Button
+                            disabled={isFormDisabled}
+                            isLoading={removeListing.state.status === "Mining"}
+                            loadingText="Removing..."
+                            onClick={() =>
+                              removeListing.send(
+                                nft.name,
+                                nft.address,
+                                Number(nft.tokenId)
+                              )
+                            }
+                            variant="secondary"
+                          >
+                            Remove {nft.name} Listing
+                          </Button>
+                        </div>
                       ) : (
                         <Button
                           disabled={price.trim() === "" || isFormDisabled}
@@ -381,7 +435,7 @@ const Drawer = ({
                             )
                           }
                         >
-                          List
+                          List {nft.name}
                         </Button>
                       )}
                     </div>
@@ -403,27 +457,33 @@ const Inventory = () => {
 
   const inventory = useQuery(
     "inventory",
-    () => client.getUserTokens({ id: account?.toLowerCase() ?? AddressZero }),
-    { enabled: !!account }
-  );
-  const listed = useQuery(
-    "listed",
-    () => client.getUserListings({ id: account?.toLowerCase() ?? AddressZero }),
+    () =>
+      client.getUserInventory({ id: account?.toLowerCase() ?? AddressZero }),
     { enabled: !!account }
   );
 
-  const data = useMemo(() => {
+  const [data, totals] = useMemo(() => {
+    const { listings = [], tokens = [] } = inventory.data?.user ?? {};
+    const totals = [...listings, ...tokens].reduce<Record<string, number>>(
+      (acc, value) => {
+        const { collection, tokenId } = value.token;
+        const key = `${collection.address}-${tokenId}`;
+
+        acc[key] ??= 0;
+        acc[key] += Number(value.quantity);
+
+        return acc;
+      },
+      {}
+    );
+
     switch (router.query.section?.[0]) {
       case "listed":
-        return listed.data?.user?.listings ?? [];
+        return [listings, totals] as const;
       default:
-        return inventory.data?.user?.tokens ?? [];
+        return [tokens, totals] as const;
     }
-  }, [
-    inventory.data?.user?.tokens,
-    listed.data?.user?.listings,
-    router.query.section,
-  ]);
+  }, [inventory.data?.user, router.query.section]);
 
   const approvals = useContractApprovals(
     Array.from(
@@ -503,7 +563,7 @@ const Inventory = () => {
                 role="list"
                 className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8"
               >
-                {data.map(({ id, quantity, token }) => (
+                {data.map(({ id, expires, pricePerItem, quantity, token }) => (
                   <li key={id} className="relative">
                     <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
                       <Image
@@ -518,12 +578,18 @@ const Inventory = () => {
                         onClick={() =>
                           setNft({
                             address: token.collection.address,
+                            collection: token.metadata?.description || "",
                             name: token.metadata?.name || "",
+                            listing: pricePerItem
+                              ? { expires, pricePerItem, quantity }
+                              : undefined,
+                            total:
+                              totals[
+                                `${token.collection.address}-${token.tokenId}`
+                              ],
                             source: generateIpfsLink(
                               token.metadata?.image || ""
                             ),
-                            collection: token.metadata?.description || "",
-                            quantity,
                             tokenId: token.tokenId,
                           })
                         }

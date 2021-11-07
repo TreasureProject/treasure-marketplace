@@ -64,49 +64,6 @@ export function useContractApprovals(addresses: string[]) {
     }, {});
 }
 
-export function useRemoveListing() {
-  const [name, setName] = useState("");
-  const queryClient = useQueryClient();
-
-  const remove = useContractFunction(
-    new Contract(Contracts[ChainId.Rinkeby].marketplace, abis.marketplace),
-    "cancelListing"
-  );
-
-  useEffect(() => {
-    switch (remove.state.status) {
-      case "Exception":
-      case "Fail":
-        if (remove.state.errorMessage?.includes("not listed item")) {
-          toast.error("You do not have that item listed.");
-
-          break;
-        }
-
-        toast.error(`Transaction failed! ${remove.state.errorMessage}`);
-
-        return;
-      case "Success":
-        toast.success(`Successfully removed the listing for ${name}!`);
-
-        queryClient.invalidateQueries("inventory", { refetchInactive: true });
-        queryClient.invalidateQueries("listed", { refetchInactive: true });
-
-        break;
-    }
-  }, [remove.state.errorMessage, remove.state.status, name, queryClient]);
-
-  return useMemo(() => {
-    const send = (name: string, address: string, tokenId: number) => {
-      setName(name);
-
-      remove.send(address, tokenId);
-    };
-
-    return { ...remove, send };
-  }, [remove]);
-}
-
 export function useCreateListing() {
   const [{ name, quantity }, setInfo] = useState({ name: "", quantity: 0 });
   const queryClient = useQueryClient();
@@ -137,7 +94,6 @@ export function useCreateListing() {
         );
 
         queryClient.invalidateQueries("inventory", { refetchInactive: true });
-        queryClient.invalidateQueries("listed", { refetchInactive: true });
 
         break;
     }
@@ -157,4 +113,95 @@ export function useCreateListing() {
 
     return { ...sell, send };
   }, [sell]);
+}
+
+export function useRemoveListing() {
+  const [name, setName] = useState("");
+  const queryClient = useQueryClient();
+
+  const remove = useContractFunction(
+    new Contract(Contracts[ChainId.Rinkeby].marketplace, abis.marketplace),
+    "cancelListing"
+  );
+
+  useEffect(() => {
+    switch (remove.state.status) {
+      case "Exception":
+      case "Fail":
+        if (remove.state.errorMessage?.includes("not listed item")) {
+          toast.error("You do not have that item listed.");
+
+          break;
+        }
+
+        toast.error(`Transaction failed! ${remove.state.errorMessage}`);
+
+        return;
+      case "Success":
+        toast.success(`Successfully removed the listing for ${name}!`);
+
+        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+
+        break;
+    }
+  }, [remove.state.errorMessage, remove.state.status, name, queryClient]);
+
+  return useMemo(() => {
+    const send = (name: string, address: string, tokenId: number) => {
+      setName(name);
+
+      remove.send(address, tokenId);
+    };
+
+    return { ...remove, send };
+  }, [remove]);
+}
+
+export function useUpdateListing() {
+  const [{ name, quantity }, setInfo] = useState({ name: "", quantity: 0 });
+  const queryClient = useQueryClient();
+
+  const update = useContractFunction(
+    new Contract(Contracts[ChainId.Rinkeby].marketplace, abis.marketplace),
+    "updateListing"
+  );
+
+  useEffect(() => {
+    switch (update.state.status) {
+      case "Exception":
+      case "Fail":
+        if (update.state.errorMessage?.includes("not listed item")) {
+          toast.error("You do not have that item listed.");
+
+          break;
+        }
+
+        toast.error(`Transaction failed! ${update.state.errorMessage}`);
+
+        return;
+      case "Success":
+        toast.success(
+          `Successfully listed ${quantity} ${plur(name, quantity)} for sale!`
+        );
+
+        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+
+        break;
+    }
+  }, [name, quantity, queryClient, update.state.errorMessage, update.state.status]);
+
+  return useMemo(() => {
+    const send = (
+      name: string,
+      address: string,
+      tokenId: number,
+      quantity: number,
+      ...rest: unknown[]
+    ) => {
+      setInfo({ name, quantity });
+      update.send(address, tokenId, quantity, ...rest);
+    };
+
+    return { ...update, send };
+  }, [update]);
 }
