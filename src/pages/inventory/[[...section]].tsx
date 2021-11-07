@@ -60,7 +60,7 @@ const dates = [
 const tabs = [
   { name: "Collected", href: "/inventory" },
   { name: "Listed", href: "/inventory/listed" },
-  { name: "Sold", href: "#" },
+  { name: "Sold", href: "/inventory/sold" },
 ];
 
 const Drawer = ({
@@ -401,7 +401,9 @@ const Drawer = ({
                             Update {nft.name} Listing
                           </Button>
                           <div className="text-center relative border-b-2 h-10 mb-5 -mt-5">
-                            <span className="absolute text-gray-600 top-6 bg-white px-4 pt-1 -ml-4">OR</span>
+                            <span className="absolute text-gray-600 top-6 bg-white px-4 pt-1 -ml-4">
+                              OR
+                            </span>
                           </div>
                           <Button
                             disabled={isFormDisabled}
@@ -454,6 +456,7 @@ const Inventory = () => {
   const router = useRouter();
   const [nft, setNft] = useState<Nft | null>(null);
   const { account } = useEthers();
+  const [section] = router.query.section ?? [""];
 
   const inventory = useQuery(
     "inventory",
@@ -463,7 +466,11 @@ const Inventory = () => {
   );
 
   const [data, totals] = useMemo(() => {
-    const { listings = [], tokens = [] } = inventory.data?.user ?? {};
+    const {
+      listings = [],
+      sold = [],
+      tokens = [],
+    } = inventory.data?.user ?? {};
     const totals = [...listings, ...tokens].reduce<Record<string, number>>(
       (acc, value) => {
         const { collection, tokenId } = value.token;
@@ -477,13 +484,15 @@ const Inventory = () => {
       {}
     );
 
-    switch (router.query.section?.[0]) {
+    switch (section) {
       case "listed":
         return [listings, totals] as const;
+      case "sold":
+        return [sold, totals] as const;
       default:
         return [tokens, totals] as const;
     }
-  }, [inventory.data?.user, router.query.section]);
+  }, [inventory.data?.user, section]);
 
   const approvals = useContractApprovals(
     Array.from(
@@ -534,8 +543,7 @@ const Inventory = () => {
                   >
                     {tabs.map((tab) => {
                       const isCurrentTab =
-                        (router.query.section?.[0] ?? "") ===
-                        tab.href.replace(/\/inventory\/?/, "");
+                        section === tab.href.replace(/\/inventory\/?/, "");
 
                       return (
                         <Link key={tab.name} href={tab.href} passHref>
@@ -568,36 +576,41 @@ const Inventory = () => {
                     <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
                       <Image
                         alt={token.metadata?.name ?? ""}
-                        className="object-fill object-center pointer-events-none group-hover:opacity-80"
+                        className={classNames(
+                          section === "sold" ? "" : "group-hover:opacity-80",
+                          "object-fill object-center pointer-events-none"
+                        )}
                         layout="fill"
                         src={generateIpfsLink(token.metadata?.image ?? "")}
                       />
-                      <button
-                        type="button"
-                        className="absolute inset-0 focus:outline-none"
-                        onClick={() =>
-                          setNft({
-                            address: token.collection.address,
-                            collection: token.metadata?.description || "",
-                            name: token.metadata?.name || "",
-                            listing: pricePerItem
-                              ? { expires, pricePerItem, quantity }
-                              : undefined,
-                            total:
-                              totals[
-                                `${token.collection.address}-${token.tokenId}`
-                              ],
-                            source: generateIpfsLink(
-                              token.metadata?.image || ""
-                            ),
-                            tokenId: token.tokenId,
-                          })
-                        }
-                      >
-                        <span className="sr-only">
-                          View details for {token.metadata?.name}
-                        </span>
-                      </button>
+                      {section !== "sold" ? (
+                        <button
+                          type="button"
+                          className="absolute inset-0 focus:outline-none"
+                          onClick={() =>
+                            setNft({
+                              address: token.collection.address,
+                              collection: token.metadata?.description || "",
+                              name: token.metadata?.name || "",
+                              listing: pricePerItem
+                                ? { expires, pricePerItem, quantity }
+                                : undefined,
+                              total:
+                                totals[
+                                  `${token.collection.address}-${token.tokenId}`
+                                ],
+                              source: generateIpfsLink(
+                                token.metadata?.image || ""
+                              ),
+                              tokenId: token.tokenId,
+                            })
+                          }
+                        >
+                          <span className="sr-only">
+                            View details for {token.metadata?.name}
+                          </span>
+                        </button>
+                      ) : null}
                     </div>
                     <div className="flex justify-between mt-2">
                       <div>
@@ -614,6 +627,7 @@ const Inventory = () => {
                     </div>
                   </li>
                 ))}
+                {data.length === 0 && <div>Nothing to see here...</div>}
               </ul>
             </section>
           </div>
