@@ -577,8 +577,8 @@ const Inventory = () => {
                       <Image
                         alt={token.metadata?.name ?? ""}
                         className={classNames(
-                          section === "sold" ? "" : "group-hover:opacity-80",
-                          "object-fill object-center pointer-events-none"
+                          "object-fill object-center pointer-events-none",
+                          { "group-hover:opacity-80": section !== "sold" }
                         )}
                         layout="fill"
                         src={generateIpfsLink(token.metadata?.image ?? "")}
