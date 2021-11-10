@@ -69,10 +69,10 @@ const Collection = () => {
   const [modalProps, setModalProps] = useState<{
     isOpen: boolean;
     targetNft:
-      | Exclude<
+      | (Exclude<
           GetCollectionListingsQuery["collection"],
           null | undefined
-        >["listings"][number]
+        >["listings"][number] & { standard: "ERC721" | "ERC1155" })
       | null;
   }>({
     isOpen: false,
@@ -81,10 +81,10 @@ const Collection = () => {
 
   const sortParam = sort ?? OrderDirection.Asc;
 
-  const { data: nameData } = useQuery(
-    ["name", address],
+  const { data: collectionData } = useQuery(
+    ["collection", address],
     () =>
-      client.getCollectionName({
+      client.getCollectionInfo({
         id: Array.isArray(address)
           ? address[0]
           : address?.toLowerCase() ?? AddressZero,
@@ -128,7 +128,7 @@ const Collection = () => {
     threshold: 0,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (inView) {
       fetchNextPage();
     }
@@ -138,9 +138,9 @@ const Collection = () => {
     <main>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="py-24 text-center">
-          {nameData?.collection?.name ? (
+          {collectionData?.collection?.name ? (
             <h1 className="text-5xl font-extrabold tracking-tight text-gray-900">
-              {nameData.collection.name}
+              {collectionData.collection.name}
             </h1>
           ) : (
             <div className="animate-pulse w-56 bg-gray-300 h-12 rounded-md m-auto" />
@@ -239,10 +239,10 @@ const Collection = () => {
               </h3>
             </div>
           )}
-        {listingData && nameData && (
+        {listingData && collectionData && (
           <section aria-labelledby="products-heading" className="my-8">
             <h2 id="products-heading" className="sr-only">
-              {nameData.collection?.name}
+              {collectionData.collection?.name}
             </h2>
             <ul
               role="list"
@@ -256,9 +256,11 @@ const Collection = () => {
                       <li key={listing.id} className="group">
                         <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
                           <Image
-                            src={generateIpfsLink(
-                              listing.token.metadata?.image ?? ""
-                            )}
+                            src={
+                              listing.token.metadata?.image?.includes("ipfs")
+                                ? generateIpfsLink(listing.token.metadata.image)
+                                : listing.token.metadata?.image ?? ""
+                            }
                             alt={listing.token.metadata?.name ?? ""}
                             layout="fill"
                             className={classNames(
@@ -275,7 +277,12 @@ const Collection = () => {
                               onClick={() =>
                                 setModalProps({
                                   isOpen: true,
-                                  targetNft: listing,
+                                  targetNft: {
+                                    ...listing,
+                                    standard:
+                                      collectionData.collection?.standard ??
+                                      "ERC1155",
+                                  },
                                 })
                               }
                             >
@@ -287,7 +294,7 @@ const Collection = () => {
                         </div>
                         <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
                           <p className="text-gray-500 font-thin tracking-wide uppercase text-xs">
-                            {nameData.collection?.name}
+                            {collectionData.collection?.name}
                           </p>
                           <p>
                             {formatNumber(
@@ -309,14 +316,16 @@ const Collection = () => {
                             </span>
                           </p>
                         </div>
-                        <div className="flex mt-1 justify-end">
-                          <span className="text-gray-600 text-xs text-[0.6rem]">
-                            <span className="text-gray-500">Quantity:</span>{" "}
-                            <span className="font-bold text-gray-700">
-                              {listing.quantity}
+                        {collectionData.collection?.standard === "ERC1155" && (
+                          <div className="flex mt-1 justify-end">
+                            <span className="text-gray-600 text-xs text-[0.6rem]">
+                              <span className="text-gray-500">Quantity:</span>{" "}
+                              <span className="font-bold text-gray-700">
+                                {listing.quantity}
+                              </span>
                             </span>
-                          </span>
-                        </div>
+                          </div>
+                        )}
                         <div className="flex mt-1 justify-end">
                           <span className="text-gray-600 text-xs text-[0.6rem]">
                             <span className="text-gray-500">Owner:</span>{" "}
@@ -370,7 +379,7 @@ const PurchaseItemModal = ({
   list: Exclude<
     GetCollectionListingsQuery["collection"],
     null | undefined
-  >["listings"][number];
+  >["listings"][number] & { standard: "ERC721" | "ERC1155" };
 }) => {
   const [quantity, setQuantity] = useState(1);
   const { account } = useEthers();
@@ -419,7 +428,11 @@ const PurchaseItemModal = ({
             >
               <div className="flex-shrink-0">
                 <Image
-                  src={generateIpfsLink(list.token.metadata?.image ?? "")}
+                  src={
+                    list.token.metadata?.image?.includes("ipfs")
+                      ? generateIpfsLink(list.token.metadata.image)
+                      : list.token.metadata?.image ?? ""
+                  }
                   alt={list.token.metadata?.name ?? ""}
                   width="50%"
                   height="50%"
@@ -440,35 +453,37 @@ const PurchaseItemModal = ({
                   </div>
                 </div>
 
-                <div className="flex-1 sm:pt-2 flex items-end justify-between">
-                  <p className="mt-1 text-xs font-medium text-gray-900">
-                    {formatEther(list.pricePerItem)} $MAGIC{" "}
-                    <span className="text-[0.5rem] text-gray-500">
-                      Per Item
-                    </span>
-                  </p>
+                {list.standard === "ERC1155" && (
+                  <div className="flex-1 sm:pt-2 flex items-end justify-between">
+                    <p className="mt-1 text-xs font-medium text-gray-900">
+                      {formatEther(list.pricePerItem)} $MAGIC{" "}
+                      <span className="text-[0.5rem] text-gray-500">
+                        Per Item
+                      </span>
+                    </p>
 
-                  <div className="ml-4">
-                    <label htmlFor="quantity" className="sr-only">
-                      Quantity
-                    </label>
-                    <select
-                      id="quantity"
-                      name="quantity"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Number(e.target.value))}
-                      className="form-select rounded-md border border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                    >
-                      {Array.from({
-                        length: Number(list.quantity) || 0,
-                      }).map((_, idx) => (
-                        <option key={idx} value={idx + 1}>
-                          {idx + 1}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="ml-4">
+                      <label htmlFor="quantity" className="sr-only">
+                        Quantity
+                      </label>
+                      <select
+                        id="quantity"
+                        name="quantity"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                        className="form-select rounded-md border border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                      >
+                        {Array.from({
+                          length: Number(list.quantity) || 0,
+                        }).map((_, idx) => (
+                          <option key={idx} value={idx + 1}>
+                            {idx + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </li>
           </ul>

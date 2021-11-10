@@ -14,10 +14,12 @@ import { useQueryClient } from "react-query";
 import plur from "plur";
 import { MaxUint256 } from "@ethersproject/constants";
 
-export function useApproveContract(contract: string) {
+export function useApproveContract(
+  contract: string,
+  standard: "ERC721" | "ERC1155"
+) {
   const approve = useContractFunction(
-    // TODO: Determine if nft collection is erc1155 or erc721
-    new Contract(contract, abis.erc1155),
+    new Contract(contract, standard === "ERC721" ? abis.erc721 : abis.erc1155),
     "setApprovalForAll"
   );
 
@@ -39,12 +41,13 @@ export function useApproveContract(contract: string) {
   }, [approve]);
 }
 
-export function useContractApprovals(addresses: string[]) {
+export function useContractApprovals(
+  collections: Array<{ address: string; standard: "ERC721" | "ERC1155" }>
+) {
   const { account } = useEthers();
   const approvals = useContractCalls(
-    addresses.map((address) => ({
-      // TODO: Determine if nft collection is erc1155 or erc721
-      abi: new Interface(abis.erc1155),
+    collections.map(({ address, standard }) => ({
+      abi: new Interface(standard === "ERC721" ? abis.erc721 : abis.erc1155),
       address,
       method: "isApprovedForAll",
       args: [account, Contracts[ChainId.Rinkeby].marketplace],
@@ -55,7 +58,7 @@ export function useContractApprovals(addresses: string[]) {
     .filter(Boolean)
     .flat()
     .reduce<Record<string, boolean>>((acc, value, index) => {
-      const address = addresses[index];
+      const { address } = collections[index];
 
       if (address) {
         acc[address] = value;

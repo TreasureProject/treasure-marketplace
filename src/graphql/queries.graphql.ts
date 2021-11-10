@@ -33,6 +33,8 @@ export const getUserInventory = gql`
   fragment TokenFields on Token {
     collection {
       address
+      name
+      standard
     }
     metadata {
       image
@@ -43,11 +45,12 @@ export const getUserInventory = gql`
   }
 `;
 
-export const getCollectionName = gql`
-  query getCollectionName($id: ID!) {
+export const getCollectionInfo = gql`
+  query getCollectionInfo($id: ID!) {
     collection(id: $id) {
       id
       name
+      standard
     }
   }
 `;

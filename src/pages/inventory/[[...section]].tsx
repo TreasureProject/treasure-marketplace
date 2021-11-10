@@ -22,7 +22,7 @@ import {
   useUpdateListing,
 } from "../../lib/hooks";
 import { useEthers } from "@yuyao17/corefork";
-import { AddressZero, Zero } from "@ethersproject/constants";
+import { AddressZero } from "@ethersproject/constants";
 import { formatNumber, generateIpfsLink } from "../../utils";
 import { useRouter } from "next/router";
 import Button from "../../components/Button";
@@ -43,6 +43,7 @@ type Nft = {
   };
   name: string;
   total: number;
+  standard: "ERC721" | "ERC1155";
   source: string;
   tokenId: string;
 };
@@ -91,7 +92,7 @@ const Drawer = ({
   );
   const [show, toggle] = useReducer((value) => !value, true);
 
-  const approveContract = useApproveContract(nft.address);
+  const approveContract = useApproveContract(nft.address, nft.standard);
   const createListing = useCreateListing();
   const removeListing = useRemoveListing();
   const updateListing = useUpdateListing();
@@ -166,7 +167,11 @@ const Drawer = ({
                       <div>
                         <div className="block w-full aspect-w-1 aspect-h-1 sm:aspect-w-5 sm:aspect-h-5 rounded-lg overflow-hidden">
                           <Image
-                            src={nft.source}
+                            src={
+                              nft.source.includes("ipfs")
+                                ? generateIpfsLink(nft.source)
+                                : nft.source
+                            }
                             alt={nft.name}
                             layout="fill"
                             className="object-fill object-center"
@@ -344,87 +349,89 @@ const Drawer = ({
                             </div>
                           </Listbox>
                         </div>
-                        <div>
-                          <Listbox
-                            value={quantity}
-                            onChange={setQuantity}
-                            disabled={isFormDisabled}
-                          >
-                            <Listbox.Label className="block text-sm font-medium text-gray-700">
-                              Quantity
-                            </Listbox.Label>
-                            <div className="mt-1 relative">
-                              <Listbox.Button className="bg-white relative w-full border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm disabled:text-gray-300 disabled:pointer-events-none transition-text ease-linear duration-300">
-                                <span className="block truncate">
-                                  {quantity}
-                                </span>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                  <SelectorIcon
-                                    className="h-5 w-5 text-gray-400"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              </Listbox.Button>
+                        {nft.standard === "ERC1155" && (
+                          <div>
+                            <Listbox
+                              value={quantity}
+                              onChange={setQuantity}
+                              disabled={isFormDisabled}
+                            >
+                              <Listbox.Label className="block text-sm font-medium text-gray-700">
+                                Quantity
+                              </Listbox.Label>
+                              <div className="mt-1 relative">
+                                <Listbox.Button className="bg-white relative w-full border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm disabled:text-gray-300 disabled:pointer-events-none transition-text ease-linear duration-300">
+                                  <span className="block truncate">
+                                    {quantity}
+                                  </span>
+                                  <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                    <SelectorIcon
+                                      className="h-5 w-5 text-gray-400"
+                                      aria-hidden="true"
+                                    />
+                                  </span>
+                                </Listbox.Button>
 
-                              <Transition
-                                as={Fragment}
-                                leave="transition ease-in duration-100"
-                                leaveFrom="opacity-100"
-                                leaveTo="opacity-0"
-                              >
-                                <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                  {Array.from({
-                                    length: Number(nft.total) || 0,
-                                  }).map((_, idx) => (
-                                    <Listbox.Option
-                                      key={idx}
-                                      className={({ active }) =>
-                                        classNames(
-                                          active
-                                            ? "text-white bg-red-600"
-                                            : "text-gray-900",
-                                          "cursor-default select-none relative py-2 pl-3 pr-9"
-                                        )
-                                      }
-                                      value={idx + 1}
-                                    >
-                                      {({ selected, active }) => (
-                                        <>
-                                          <span
-                                            className={classNames(
-                                              selected
-                                                ? "font-semibold"
-                                                : "font-normal",
-                                              "block truncate"
-                                            )}
-                                          >
-                                            {idx + 1}
-                                          </span>
-
-                                          {selected ? (
+                                <Transition
+                                  as={Fragment}
+                                  leave="transition ease-in duration-100"
+                                  leaveFrom="opacity-100"
+                                  leaveTo="opacity-0"
+                                >
+                                  <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                    {Array.from({
+                                      length: Number(nft.total) || 0,
+                                    }).map((_, idx) => (
+                                      <Listbox.Option
+                                        key={idx}
+                                        className={({ active }) =>
+                                          classNames(
+                                            active
+                                              ? "text-white bg-red-600"
+                                              : "text-gray-900",
+                                            "cursor-default select-none relative py-2 pl-3 pr-9"
+                                          )
+                                        }
+                                        value={idx + 1}
+                                      >
+                                        {({ selected, active }) => (
+                                          <>
                                             <span
                                               className={classNames(
-                                                active
-                                                  ? "text-white"
-                                                  : "text-red-600",
-                                                "absolute inset-y-0 right-0 flex items-center pr-4"
+                                                selected
+                                                  ? "font-semibold"
+                                                  : "font-normal",
+                                                "block truncate"
                                               )}
                                             >
-                                              <CheckIcon
-                                                className="h-5 w-5"
-                                                aria-hidden="true"
-                                              />
+                                              {idx + 1}
                                             </span>
-                                          ) : null}
-                                        </>
-                                      )}
-                                    </Listbox.Option>
-                                  ))}
-                                </Listbox.Options>
-                              </Transition>
-                            </div>
-                          </Listbox>
-                        </div>
+
+                                            {selected ? (
+                                              <span
+                                                className={classNames(
+                                                  active
+                                                    ? "text-white"
+                                                    : "text-red-600",
+                                                  "absolute inset-y-0 right-0 flex items-center pr-4"
+                                                )}
+                                              >
+                                                <CheckIcon
+                                                  className="h-5 w-5"
+                                                  aria-hidden="true"
+                                                />
+                                              </span>
+                                            ) : null}
+                                          </>
+                                        )}
+                                      </Listbox.Option>
+                                    ))}
+                                  </Listbox.Options>
+                                </Transition>
+                              </div>
+                            </Listbox>
+                          </div>
+                        )}
                       </div>
 
                       {needsContractApproval ? (
@@ -549,18 +556,11 @@ const Inventory = () => {
     }
   }, [inventory.data?.user, section]);
 
+  const collections = data.map(({ token: { collection } }) => collection);
   const approvals = useContractApprovals(
-    Array.from(
-      new Set(
-        data.map(
-          ({
-            token: {
-              collection: { address },
-            },
-          }) => address
-        )
-      )
-    )
+    [...new Set(collections.map(({ address }) => address))]
+      .map((address) => collections.find((item) => address === item.address))
+      .filter(Boolean)
   );
 
   const onClose = useCallback(() => setNft(null), []);
@@ -630,7 +630,11 @@ const Inventory = () => {
                               { "group-hover:opacity-80": section !== "sold" }
                             )}
                             layout="fill"
-                            src={generateIpfsLink(token.metadata?.image ?? "")}
+                            src={
+                              token.metadata?.image.includes("ipfs")
+                                ? generateIpfsLink(token.metadata.image)
+                                : token.metadata?.image ?? ""
+                            }
                           />
                           {section !== "sold" ? (
                             <button
@@ -639,19 +643,20 @@ const Inventory = () => {
                               onClick={() =>
                                 setNft({
                                   address: token.collection.address,
-                                  collection: token.metadata?.description || "",
+                                  collection: token.collection.name,
                                   name: token.metadata?.name || "",
                                   listing: pricePerItem
                                     ? { expires, pricePerItem, quantity }
                                     : undefined,
+                                  source: token.metadata?.image.includes("ipfs")
+                                    ? generateIpfsLink(token.metadata.image)
+                                    : token.metadata?.image ?? "",
+                                  standard: token.collection.standard,
+                                  tokenId: token.tokenId,
                                   total:
                                     totals[
                                       `${token.collection.address}-${token.tokenId}`
                                     ],
-                                  source: generateIpfsLink(
-                                    token.metadata?.image || ""
-                                  ),
-                                  tokenId: token.tokenId,
                                 })
                               }
                             >
@@ -673,14 +678,17 @@ const Inventory = () => {
                               <span className="text-xs font-light">$MAGIC</span>
                             </p>
                           )}
-                          {!expires && !pricePerItem && quantity && (
-                            <span className="text-gray-600 text-xs text-[0.6rem]">
-                              <span className="text-gray-500">Quantity:</span>{" "}
-                              <span className="font-bold text-gray-700">
-                                {quantity}
+                          {!expires &&
+                            !pricePerItem &&
+                            quantity &&
+                            token.collection.standard === "ERC1155" && (
+                              <span className="text-gray-600 text-xs text-[0.6rem]">
+                                <span className="text-gray-500">Quantity:</span>{" "}
+                                <span className="font-bold text-gray-700">
+                                  {quantity}
+                                </span>
                               </span>
-                            </span>
-                          )}
+                            )}
                         </div>
                         <div className="flex items-baseline justify-between mt-1">
                           <p className="text-xs text-gray-800 font-semibold truncate">
@@ -694,25 +702,30 @@ const Inventory = () => {
                               </span>
                             </p>
                           )}
-                          {!expires && pricePerItem && quantity && (
-                            <span className="text-gray-600 text-xs text-[0.6rem]">
-                              <span className="text-gray-500">Quantity:</span>{" "}
-                              <span className="font-bold text-gray-700">
-                                {quantity}
+                          {!expires &&
+                            pricePerItem &&
+                            quantity &&
+                            token.collection.standard === "ERC1155" && (
+                              <span className="text-gray-600 text-xs text-[0.6rem]">
+                                <span className="text-gray-500">Quantity:</span>{" "}
+                                <span className="font-bold text-gray-700">
+                                  {quantity}
+                                </span>
                               </span>
-                            </span>
-                          )}
+                            )}
                         </div>
-                        {expires && quantity && (
-                          <div className="flex mt-1 justify-end">
-                            <span className="text-gray-600 text-xs text-[0.6rem]">
-                              <span className="text-gray-500">Quantity:</span>{" "}
-                              <span className="font-bold text-gray-700">
-                                {quantity}
+                        {expires &&
+                          quantity &&
+                          token.collection.standard === "ERC1155" && (
+                            <div className="flex mt-1 justify-end">
+                              <span className="text-gray-600 text-xs text-[0.6rem]">
+                                <span className="text-gray-500">Quantity:</span>{" "}
+                                <span className="font-bold text-gray-700">
+                                  {quantity}
+                                </span>
                               </span>
-                            </span>
-                          </div>
-                        )}
+                            </div>
+                          )}
                       </li>
                     )
                   )}

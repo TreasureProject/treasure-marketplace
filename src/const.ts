@@ -18,7 +18,7 @@ export const collections = [
   },
   {
     name: "Smol Brains",
-    address: "0xe7ad64be25149d25b3a6ea9556e7d38ec2777b3f",
+    address: "0xd72e14b8bcc89742b3f366ea80d175c3c4205b1d",
   },
   // { name: "Getting Bodied", address: "#" },
   {
