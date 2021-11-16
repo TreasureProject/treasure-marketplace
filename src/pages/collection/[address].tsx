@@ -1,3 +1,5 @@
+import type { ListedNft } from "../../types";
+
 import { useRouter } from "next/router";
 import React, { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
@@ -13,10 +15,7 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { Modal } from "../../components/Modal";
-import {
-  GetCollectionListingsQuery,
-  OrderDirection,
-} from "../../../generated/graphql";
+import { OrderDirection } from "../../../generated/graphql";
 import { useMagic } from "../../context/magicContext";
 import { BigNumber } from "@ethersproject/bignumber";
 import Button from "../../components/Button";
@@ -72,12 +71,7 @@ const Collection = () => {
     useState(false);
   const [modalProps, setModalProps] = useState<{
     isOpen: boolean;
-    targetNft:
-      | (Exclude<
-          GetCollectionListingsQuery["collection"],
-          null | undefined
-        >["listings"][number] & { standard: "ERC721" | "ERC1155" })
-      | null;
+    targetNft: ListedNft | null;
   }>({
     isOpen: false,
     targetNft: null,
@@ -136,11 +130,6 @@ const Collection = () => {
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
     }
   );
-
-  // const onClose = React.useCallback(
-  //   () => setModalProps({ isOpen: false, targetNft: null }),
-  //   []
-  // );
 
   const keyParams = React.useMemo(
     () => ({
@@ -521,26 +510,28 @@ const DetailedFloorPriceModal = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.keys(lists).sort().map((list, listIdx) => {
-                      const floorPrice = lists[list];
-                      return (
-                        <tr
-                          key={list}
-                          className={
-                            listIdx % 2 === 0
-                              ? "bg-white dark:bg-gray-200"
-                              : "bg-gray-50 dark:bg-gray-300"
-                          }
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-700">
-                            {list}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
-                            {floorPrice}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {Object.keys(lists)
+                      .sort()
+                      .map((list, listIdx) => {
+                        const floorPrice = lists[list];
+                        return (
+                          <tr
+                            key={list}
+                            className={
+                              listIdx % 2 === 0
+                                ? "bg-white dark:bg-gray-200"
+                                : "bg-gray-50 dark:bg-gray-300"
+                            }
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-700">
+                              {list}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
+                              {floorPrice}
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
@@ -561,12 +552,10 @@ const PurchaseItemModal = ({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  list: Exclude<
-    GetCollectionListingsQuery["collection"],
-    null | undefined
-  >["listings"][number] & { standard: "ERC721" | "ERC1155" };
+  list: ListedNft;
   state: TransactionStatus;
   send: (
+    nft: ListedNft,
     address: string,
     ownerAddress: string,
     tokenId: number,
@@ -703,6 +692,7 @@ const PurchaseItemModal = ({
                   loadingText="Confirming order..."
                   onClick={() => {
                     send(
+                      list,
                       normalizedAddress,
                       list.user.id,
                       Number(list.token.tokenId),

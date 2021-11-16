@@ -1,3 +1,5 @@
+import type { ListedNft, Nft } from "../types";
+
 import * as abis from "./abis";
 import {
   ChainId,
@@ -6,11 +8,12 @@ import {
   useContractFunction,
   useEthers,
 } from "@yuyao17/corefork";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { Contracts } from "../const";
 import { Interface } from "@ethersproject/abi";
+import { formatPrice, generateIpfsLink } from "../utils";
 import { toast } from "react-hot-toast";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
@@ -85,9 +88,16 @@ export function useContractApprovals(
 }
 
 export function useCreateListing() {
-  const [{ name, quantity }, setInfo] = useState({ name: "", quantity: 0 });
+  const [{ nft: { name = "" } = {}, quantity }, setInfo] = useState<{
+    nft?: Nft;
+    quantity: number;
+  }>({
+    quantity: 0,
+  });
+  const { account } = useEthers();
   const queryClient = useQueryClient();
   const chainId = useChainId();
+  const webhook = useRef<() => void>();
 
   const sell = useContractFunction(
     new Contract(Contracts[chainId].marketplace, abis.marketplace),
@@ -116,24 +126,46 @@ export function useCreateListing() {
 
         queryClient.invalidateQueries("inventory", { refetchInactive: true });
 
+        webhook.current?.();
+
         break;
     }
   }, [name, quantity, queryClient, sell.state.errorMessage, sell.state.status]);
 
   return useMemo(() => {
     const send = (
-      name: string,
+      nft: Nft,
       address: string,
       tokenId: number,
       quantity: number,
-      ...rest: unknown[]
+      price: BigNumber,
+      expires: number
     ) => {
-      setInfo({ name, quantity });
-      sell.send(address, tokenId, quantity, ...rest);
+      setInfo({ nft, quantity });
+      sell.send(address, tokenId, quantity, price, expires);
+
+      webhook.current = () => {
+        const { collection, name, source } = nft;
+
+        fetch("/api/webhook/list", {
+          method: "post",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            address,
+            collection,
+            expires,
+            image: source,
+            name,
+            price: formatPrice(price.toString()),
+            quantity,
+            user: account,
+          }),
+        });
+      };
     };
 
     return { ...sell, send };
-  }, [sell]);
+  }, [account, sell]);
 }
 
 export function useRemoveListing() {
@@ -186,6 +218,8 @@ export function useBuyItem(keys: {
 }) {
   const queryClient = useQueryClient();
   const chainId = useChainId();
+  const { account } = useEthers();
+  const webhook = useRef<() => void>();
 
   const { send: sendBuy, state } = useContractFunction(
     new Contract(Contracts[chainId].marketplace, abis.marketplace),
@@ -200,28 +234,53 @@ export function useBuyItem(keys: {
         return;
       case "Success":
         toast.success("Successfully purchased!");
+
         queryClient.invalidateQueries(["listings", keys], {
           refetchInactive: true,
         });
         queryClient.invalidateQueries(["stats", keys.address], {
           refetchInactive: true,
         });
+
+        webhook.current?.();
+
         break;
     }
   }, [queryClient, state.errorMessage, keys, state.status]);
 
   return useMemo(() => {
     const send = (
+      nft: ListedNft,
       address: string,
       ownerAddress: string,
       tokenId: number,
       quantity: number
     ) => {
       sendBuy(address, tokenId, ownerAddress, quantity);
+
+      webhook.current = () => {
+        const { pricePerItem, token } = nft;
+
+        fetch("/api/webhook/sold", {
+          method: "post",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            address,
+            collection: token.metadata?.description,
+            image: token.metadata?.image?.includes("ipfs")
+              ? generateIpfsLink(token.metadata.image)
+              : token.metadata?.image ?? "",
+            name: token.metadata?.name,
+            price: formatPrice(pricePerItem),
+            quantity,
+            user: account,
+          }),
+        });
+      };
     };
 
     return { send, state };
-  }, [sendBuy, state]);
+  }, [account, sendBuy, state]);
 }
 
 export function useUpdateListing() {

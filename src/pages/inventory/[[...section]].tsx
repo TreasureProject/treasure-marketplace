@@ -1,3 +1,5 @@
+import type { Nft } from "../../types";
+
 import {
   Fragment,
   useCallback,
@@ -32,21 +34,6 @@ import { CenterLoadingDots } from "../../components/CenterLoadingDots";
 import { formatEther } from "ethers/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { FEE, USER_SHARE } from "../../const";
-
-type Nft = {
-  address: string;
-  collection: string;
-  listing?: {
-    expires: string;
-    pricePerItem: string;
-    quantity: number;
-  };
-  name: string;
-  total: number;
-  standard: "ERC721" | "ERC1155";
-  source: string;
-  tokenId: string;
-};
 
 type DrawerProps = {
   actions: Array<"create" | "remove" | "update">;
@@ -443,7 +430,7 @@ const Drawer = ({
                                     loadingText="Listing..."
                                     onClick={() =>
                                       createListing.send(
-                                        nft.name,
+                                        nft,
                                         nft.address,
                                         Number(nft.tokenId),
                                         Number(quantity),
