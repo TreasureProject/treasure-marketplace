@@ -377,7 +377,7 @@ const Collection = () => {
                         </div>
                         <div className="flex items-baseline mt-1">
                           <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                            {listing.token.metadata?.name}
+                            {listing.token.name}
                           </p>
                           <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
                             <span className="text-gray-500 dark:text-gray-400">

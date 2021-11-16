@@ -290,7 +290,7 @@ export function useBuyItem(keys: {
           image: token.metadata?.image?.includes("ipfs")
             ? generateIpfsLink(token.metadata.image)
             : token.metadata?.image ?? "",
-          name: token.metadata?.name ?? "",
+          name: token.name ?? "",
           price: pricePerItem.toString(),
           quantity,
           user: String(account),
