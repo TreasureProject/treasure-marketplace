@@ -41,6 +41,7 @@ export const getUserInventory = gql`
       name
       description
     }
+    name
     tokenId
   }
 `;
@@ -101,6 +102,7 @@ export const getCollectionListings = gql`
             name
             description
           }
+          name
         }
         quantity
       }

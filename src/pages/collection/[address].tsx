@@ -333,7 +333,7 @@ const Collection = () => {
                                 ? generateIpfsLink(listing.token.metadata.image)
                                 : listing.token.metadata?.image ?? ""
                             }
-                            alt={listing.token.metadata?.name ?? ""}
+                            alt={listing.token.name ?? ""}
                             layout="fill"
                             className={classNames(
                               "w-full h-full object-center object-fill",
@@ -359,7 +359,7 @@ const Collection = () => {
                               }
                             >
                               <span className="sr-only">
-                                View details for {listing.token.metadata?.name}
+                                View details for {listing.token.name}
                               </span>
                             </button>
                           )}
@@ -608,7 +608,7 @@ const PurchaseItemModal = ({
                       ? generateIpfsLink(list.token.metadata.image)
                       : list.token.metadata?.image ?? ""
                   }
-                  alt={list.token.metadata?.name ?? ""}
+                  alt={list.token.name ?? ""}
                   width="50%"
                   height="50%"
                 />
@@ -622,7 +622,7 @@ const PurchaseItemModal = ({
                         {list.token.metadata?.description}
                       </p>
                       <p className="mt-1 font-medium text-gray-800 dark:text-gray-50 hover:text-gray-800">
-                        {list.token.metadata?.name ?? ""}
+                        {list.token.name ?? ""}
                       </p>
                     </h4>
                   </div>

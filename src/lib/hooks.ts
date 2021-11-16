@@ -11,12 +11,39 @@ import {
 import { BigNumber, Contract } from "ethers";
 import { Contracts } from "../const";
 import { Interface } from "@ethersproject/abi";
-import { formatPrice, generateIpfsLink } from "../utils";
+import { generateIpfsLink } from "../utils";
 import { toast } from "react-hot-toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
+
+type WebhookBody = {
+  address: string;
+  collection: string;
+  expires?: number;
+  image: string;
+  name: string;
+  price: string;
+  quantity: number;
+  updates?: Pick<WebhookBody, "expires" | "price" | "quantity">;
+  user: string;
+};
+
+function callWebhook(
+  type: "list" | "sold" | "update",
+  { image, user, ...body }: WebhookBody
+) {
+  fetch(`/api/webhook/${type}`, {
+    method: "post",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      ...body,
+      image: image.replace(/ /g, "%20"),
+      user: user.toLowerCase(),
+    }),
+  });
+}
 
 export function useChainId() {
   const { chainId } = useEthers();
@@ -147,19 +174,15 @@ export function useCreateListing() {
       webhook.current = () => {
         const { collection, name, source } = nft;
 
-        fetch("/api/webhook/list", {
-          method: "post",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            address,
-            collection,
-            expires,
-            image: source,
-            name,
-            price: formatPrice(price.toString()),
-            quantity,
-            user: account,
-          }),
+        callWebhook("list", {
+          address,
+          collection,
+          expires,
+          image: source,
+          name,
+          price: price.toString(),
+          quantity,
+          user: String(account),
         });
       };
     };
@@ -261,20 +284,16 @@ export function useBuyItem(keys: {
       webhook.current = () => {
         const { pricePerItem, token } = nft;
 
-        fetch("/api/webhook/sold", {
-          method: "post",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            address,
-            collection: token.metadata?.description,
-            image: token.metadata?.image?.includes("ipfs")
-              ? generateIpfsLink(token.metadata.image)
-              : token.metadata?.image ?? "",
-            name: token.metadata?.name,
-            price: formatPrice(pricePerItem),
-            quantity,
-            user: account,
-          }),
+        callWebhook("sold", {
+          address,
+          collection: token.metadata?.description ?? "",
+          image: token.metadata?.image?.includes("ipfs")
+            ? generateIpfsLink(token.metadata.image)
+            : token.metadata?.image ?? "",
+          name: token.metadata?.name ?? "",
+          price: pricePerItem.toString(),
+          quantity,
+          user: String(account),
         });
       };
     };
@@ -284,9 +303,16 @@ export function useBuyItem(keys: {
 }
 
 export function useUpdateListing() {
-  const [{ name, quantity }, setInfo] = useState({ name: "", quantity: 0 });
-  const chainId = useChainId();
+  const [{ nft: { name = "" } = {}, quantity }, setInfo] = useState<{
+    nft?: Nft;
+    quantity: number;
+  }>({
+    quantity: 0,
+  });
+  const { account } = useEthers();
   const queryClient = useQueryClient();
+  const chainId = useChainId();
+  const webhook = useRef<() => void>();
 
   const update = useContractFunction(
     new Contract(Contracts[chainId].marketplace, abis.marketplace),
@@ -313,6 +339,8 @@ export function useUpdateListing() {
 
         queryClient.invalidateQueries("inventory", { refetchInactive: true });
 
+        webhook.current?.();
+
         break;
     }
   }, [
@@ -325,18 +353,39 @@ export function useUpdateListing() {
 
   return useMemo(() => {
     const send = (
-      name: string,
+      nft: Nft,
       address: string,
       tokenId: number,
       quantity: number,
-      ...rest: unknown[]
+      price: BigNumber,
+      expires: number
     ) => {
-      setInfo({ name, quantity });
-      update.send(address, tokenId, quantity, ...rest);
+      setInfo({ nft, quantity });
+      update.send(address, tokenId, quantity, price, expires);
+
+      webhook.current = () => {
+        const { collection, listing, name, source } = nft;
+
+        callWebhook("update", {
+          address,
+          collection,
+          expires: Number(listing?.expires ?? 0),
+          image: source,
+          name,
+          price: listing?.pricePerItem.toString() ?? "",
+          quantity: Number(listing?.quantity ?? 0),
+          updates: {
+            quantity,
+            price: price.toString(),
+            expires,
+          },
+          user: String(account),
+        });
+      };
     };
 
     return { ...update, send };
-  }, [update]);
+  }, [account, update]);
 }
 
 export const useApproveMagic = () => {
