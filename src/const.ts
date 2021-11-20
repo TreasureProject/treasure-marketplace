@@ -11,7 +11,7 @@ export const Contracts = {
   },
 };
 
-export const coreCollections = ["Legions", "Treasures"]; // TODO: Add smol brains later
+export const coreCollections = ["Legions", "Treasures", "Smol Brains"];
 
 export const collections = {
   [ChainId.Rinkeby]: [
@@ -30,6 +30,14 @@ export const collections = {
       address: "0xAC2F8732A67C15Bf81f8A6181364cE753E915037",
     },
     // { name: "Life", address: "#" },
+    {
+      name: "Smol Brains",
+      address: "0x4FeeA06250D9f315a6a454c9c8a7fcBCf8701210",
+    },
+    {
+      name: "Smol Brains Land",
+      address: "0xe42C57AB8E093d21e52cB07B5f32b1B106cDBfe4",
+    },
     {
       name: "Seed of Life",
       address: "0x6A67fbf40142E3Db2e6a950A4D48B0EB41107cE8",
@@ -59,10 +67,14 @@ export const collections = {
       address: "0xE83c0200E93Cb1496054e387BDdaE590C07f0194",
     },
     // { name: "Life", address: "#" },
-    // {
-    //   name: "Smol Brains",
-    //   address: "0xd72e14b8bcc89742b3f366ea80d175c3c4205b1d",
-    // },
+    {
+      name: "Smol Brains",
+      address: "0x6325439389E0797Ab35752B4F43a14C004f22A9c",
+    },
+    {
+      name: "Smol Brains Land",
+      address: "0xd666d1CC3102cd03e07794A61E5F4333B4239F53",
+    },
     {
       name: "Treasures",
       address: "0xEBba467eCB6b21239178033189CeAE27CA12EaDf",
