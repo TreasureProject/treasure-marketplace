@@ -52,6 +52,7 @@ const dates = [
 const tabs = [
   { name: "Collected", href: "/inventory" },
   { name: "Listed", href: "/inventory/listed" },
+  { name: "Hidden", href: "/inventory/hidden" },
   { name: "Sold", href: "/inventory/sold" },
 ];
 
@@ -537,9 +538,10 @@ const Inventory = () => {
     { enabled: !!account }
   );
 
-  const [data, totals, updates] = useMemo(() => {
+  const [data, totals, updates, emptyMessage] = useMemo(() => {
     const empty: Record<string, NonNullable<Nft["listing"]>> = {};
     const {
+      hidden = [],
       listings = [],
       sold = [],
       tokens = [],
@@ -578,12 +580,14 @@ const Inventory = () => {
     );
 
     switch (section) {
+      case "hidden":
+        return [hidden, totals, updates, "No hidden listings 🙂"] as const;
       case "listed":
-        return [listings, totals, empty] as const;
+        return [listings, totals, empty, "No NFTs listed 🙂"] as const;
       case "sold":
-        return [sold, totals, empty] as const;
+        return [sold, totals, empty, null] as const;
       default:
-        return [tokens, totals, updates] as const;
+        return [tokens, totals, updates, null] as const;
     }
   }, [inventory.data?.user, section]);
 
@@ -641,7 +645,10 @@ const Inventory = () => {
               {data.length === 0 && !inventory.isLoading && (
                 <div className="flex flex-col justify-center items-center h-36">
                   <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
-                    No NFTs {section.length === 0 ? "collected" : section} 😞
+                    {emptyMessage ??
+                      `No NFTs ${
+                        section.length === 0 ? "collected" : section
+                      } 😞`}
                   </h3>
                 </div>
               )}

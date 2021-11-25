@@ -12,6 +12,15 @@ export const getUserInventory = gql`
           ...TokenFields
         }
       }
+      hidden: listings(where: { status: Hidden }) {
+        id
+        expires
+        quantity
+        pricePerItem
+        token {
+          ...TokenFields
+        }
+      }
       sold: listings(where: { status: Sold }) {
         id
         quantity
