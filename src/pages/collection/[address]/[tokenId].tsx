@@ -63,7 +63,7 @@ export default function Example() {
     }
   );
 
-  const { send, state } = useBuyItem(formattedTokenId);
+  // const { send, state } = useBuyItem(formattedTokenId);
   const chainId = useChainId();
 
   const tokenInfo =
