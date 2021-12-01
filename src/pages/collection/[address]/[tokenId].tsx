@@ -108,7 +108,6 @@ export default function Example() {
               </a>
             </Link>
             <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start mt-8">
-              {/* Image gallery */}
               <div className="w-full aspect-w-1 aspect-h-1">
                 <Image
                   src={
@@ -121,7 +120,6 @@ export default function Example() {
                 />
               </div>
 
-              {/* Product info */}
               <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
                 <h2 className="tracking-tight text-red-500">
                   {tokenInfo.collection.name}
