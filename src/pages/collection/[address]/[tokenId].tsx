@@ -198,13 +198,13 @@ export default function Example() {
                                       key={attribute.id}
                                       className="border-2 border-red-400 rounded-md bg-red-200 flex items-center flex-col py-2"
                                     >
-                                      <p className="text-red-700">
+                                      <p className="text-red-700 text-xs">
                                         {attribute.name}
                                       </p>
                                       <p className="mt-1 font-medium">
                                         {attribute.value}
                                       </p>
-                                      <p className="mt-3 text-xs text-gray-500">
+                                      <p className="mt-2 text-xs text-gray-600">
                                         {Number(
                                           attribute.percentage
                                         ).toLocaleString("en-US", {
