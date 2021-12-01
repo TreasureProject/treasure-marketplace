@@ -98,7 +98,11 @@ export const getCollectionListings = gql`
         skip: $skipBy
         orderBy: $orderBy
         orderDirection: $orderDirection
-        where: { status: Active, tokenName_contains: $tokenName, quantity_gt: 0 }
+        where: {
+          status: Active
+          tokenName_contains: $tokenName
+          quantity_gt: 0
+        }
       ) {
         user {
           id
@@ -164,6 +168,47 @@ export const getAllActivities = gql`
   query getAllActivities($orderBy: Listing_orderBy!) {
     listings(where: { status: Sold }, orderBy: $orderBy, orderDirection: desc) {
       ...ListingFields
+    }
+  }
+`;
+
+export const getTokenDetails = gql`
+  query getTokenDetails($collectionId: ID!, $tokenId: BigInt!) {
+    collection(id: $collectionId) {
+      tokens(where: { tokenId: $tokenId }) {
+        metadata {
+          attributes {
+            attribute {
+              id
+              name
+              percentage
+              value
+            }
+          }
+          id
+          image
+          name
+        }
+        listings {
+          id
+          status
+          buyer {
+            id
+          }
+          pricePerItem
+          user {
+            id
+          }
+          blockTimestamp
+        }
+        rarity
+        owner {
+          id
+        }
+        collection {
+          name
+        }
+      }
     }
   }
 `;

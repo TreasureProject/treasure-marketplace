@@ -1,4 +1,4 @@
-import type { ListedNft } from "../../types";
+import type { ListedNft } from "../../../types";
 
 import { useRouter } from "next/router";
 import React, { Fragment, useEffect, useState } from "react";
@@ -6,32 +6,37 @@ import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/solid";
 
 import { useInfiniteQuery, useQuery } from "react-query";
-import client from "../../lib/client";
+import client from "../../../lib/client";
 import { AddressZero, Zero } from "@ethersproject/constants";
-import { CenterLoadingDots } from "../../components/CenterLoadingDots";
-import { abbreviatePrice, formatNumber, formatPrice, generateIpfsLink } from "../../utils";
+import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
+import {
+  abbreviatePrice,
+  formatNumber,
+  formatPrice,
+  generateIpfsLink,
+} from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { Modal } from "../../components/Modal";
-import { Listing_OrderBy, OrderDirection } from "../../../generated/graphql";
-import { useMagic } from "../../context/magicContext";
+import { Modal } from "../../../components/Modal";
+import { Listing_OrderBy, OrderDirection } from "../../../../generated/graphql";
+import { useMagic } from "../../../context/magicContext";
 import { BigNumber } from "@ethersproject/bignumber";
-import Button from "../../components/Button";
-import { useApproveMagic, useBuyItem, useChainId } from "../../lib/hooks";
+import Button from "../../../components/Button";
+import { useApproveMagic, useBuyItem, useChainId } from "../../../lib/hooks";
 import {
   shortenAddress,
   TransactionStatus,
   useEthers,
   useTokenAllowance,
 } from "@yuyao17/corefork";
-import { Contracts } from "../../const";
+import { Contracts } from "../../../const";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
-import { SearchAutocomplete } from "../../components/SearchAutocomplete";
+import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
 import { Item } from "react-stately";
-import Listings from "../../components/Listings";
+import Listings from "../../../components/Listings";
 
 const MAX_ITEMS_PER_PAGE = 42;
 

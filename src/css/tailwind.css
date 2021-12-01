@@ -7,6 +7,19 @@ body {
   font-family: "Roboto Mono", monospace;
 }
 
+/* https://seek-oss.github.io/capsize/ */
+.capsize::before {
+  content: "";
+  margin-bottom: -0.1641em;
+  display: table;
+}
+
+.capsize::after {
+  content: "";
+  margin-top: -0.1914em;
+  display: table;
+}
+
 .footer {
   flex: 0 0 50px;
   margin-top: auto;

@@ -116,7 +116,7 @@ const Drawer = ({
     <Transition.Root appear show={show} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 overflow-hidden z-20"
+        className="fixed inset-0 overflow-hidden z-50"
         onClose={toggle}
       >
         <div className="absolute inset-0 overflow-hidden">

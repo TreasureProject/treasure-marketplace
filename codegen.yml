@@ -1,5 +1,5 @@
 overwrite: true
-schema: "https://api.thegraph.com/subgraphs/name/wyze/treasure-marketplace"
+schema: "https://api.thegraph.com/subgraphs/name/wyze/treasure-marketplace-dev"
 documents: "src/graphql/**/*.graphql.ts"
 generates:
   generated/graphql.ts:
