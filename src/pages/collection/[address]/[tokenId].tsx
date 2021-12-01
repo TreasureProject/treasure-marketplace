@@ -37,10 +37,7 @@ import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import { formatPrice, generateIpfsLink } from "../../../utils";
 import { GetTokenDetailsQuery, Status } from "../../../../generated/graphql";
 import { formatDistanceToNow } from "date-fns";
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+import classNames from "clsx";
 
 export default function Example() {
   const router = useRouter();
