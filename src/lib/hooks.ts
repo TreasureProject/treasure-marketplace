@@ -234,7 +234,11 @@ export function useRemoveListing() {
   }, [remove]);
 }
 
-export function useBuyItem(tokenId: string | undefined) {
+export function useBuyItem(keys: {
+  address: string | string[] | undefined;
+  sortParam: string | string[];
+  searchParams: string;
+}) {
   const queryClient = useQueryClient();
   const chainId = useChainId();
   const { account } = useEthers();
@@ -254,7 +258,10 @@ export function useBuyItem(tokenId: string | undefined) {
       case "Success":
         toast.success("Successfully purchased!");
 
-        queryClient.invalidateQueries(["details", tokenId], {
+        queryClient.invalidateQueries(["listings", keys], {
+          refetchInactive: true,
+        });
+        queryClient.invalidateQueries(["stats", keys.address], {
           refetchInactive: true,
         });
 
@@ -263,7 +270,7 @@ export function useBuyItem(tokenId: string | undefined) {
 
         break;
     }
-  }, [queryClient, state.errorMessage, state.status, tokenId]);
+  }, [queryClient, state.errorMessage, keys, state.status]);
 
   return useMemo(() => {
     const send = (
