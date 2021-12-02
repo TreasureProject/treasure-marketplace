@@ -91,16 +91,82 @@ export default function Example() {
               </a>
             </Link>
             <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start mt-8">
-              <div className="w-full aspect-w-1 aspect-h-1">
-                <Image
-                  src={
-                    tokenInfo.metadata?.image?.includes("ipfs")
-                      ? generateIpfsLink(tokenInfo.metadata.image)
-                      : tokenInfo.metadata?.image ?? ""
-                  }
-                  layout="fill"
-                  alt={tokenInfo.metadata?.name ?? ""}
-                />
+              <div>
+                <div className="w-full aspect-w-1 aspect-h-1">
+                  <Image
+                    src={
+                      tokenInfo.metadata?.image?.includes("ipfs")
+                        ? generateIpfsLink(tokenInfo.metadata.image)
+                        : tokenInfo.metadata?.image ?? ""
+                    }
+                    layout="fill"
+                    alt={tokenInfo.metadata?.name ?? ""}
+                  />
+                </div>
+                <div>
+                  <Disclosure as="div" defaultOpen>
+                    {({ open }) => (
+                      <>
+                        <h3>
+                          <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
+                            <span
+                              className={classNames(
+                                open ? "text-red-700" : "text-gray-900",
+                                "text-sm font-medium"
+                              )}
+                            >
+                              Attributes
+                            </span>
+                            <span className="ml-6 flex items-center">
+                              {open ? (
+                                <MinusSmIcon
+                                  className="block h-6 w-6 text-red-400 group-hover:text-red-500"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <PlusSmIcon
+                                  className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </span>
+                          </Disclosure.Button>
+                        </h3>
+                        <Disclosure.Panel as="div">
+                          {tokenInfo.metadata?.attributes ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {tokenInfo.metadata?.attributes.map(
+                                ({ attribute }) => (
+                                  <div
+                                    key={attribute.id}
+                                    className="border-2 border-red-400 rounded-md bg-red-200 flex items-center flex-col py-2"
+                                  >
+                                    <p className="text-red-700 text-xs">
+                                      {attribute.name}
+                                    </p>
+                                    <p className="mt-1 font-medium">
+                                      {attribute.value}
+                                    </p>
+                                    <p className="mt-2 text-xs text-gray-600">
+                                      {Number(
+                                        attribute.percentage
+                                      ).toLocaleString("en-US", {
+                                        style: "percent",
+                                      })}{" "}
+                                      have this trait
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-gray-500">No attributes</div>
+                          )}
+                        </Disclosure.Panel>
+                      </>
+                    )}
+                  </Disclosure>
+                </div>
               </div>
 
               <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
@@ -155,68 +221,6 @@ export default function Example() {
                                   "text-sm font-medium"
                                 )}
                               >
-                                Attributes
-                              </span>
-                              <span className="ml-6 flex items-center">
-                                {open ? (
-                                  <MinusSmIcon
-                                    className="block h-6 w-6 text-red-400 group-hover:text-red-500"
-                                    aria-hidden="true"
-                                  />
-                                ) : (
-                                  <PlusSmIcon
-                                    className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
-                                    aria-hidden="true"
-                                  />
-                                )}
-                              </span>
-                            </Disclosure.Button>
-                          </h3>
-                          <Disclosure.Panel as="div">
-                            {tokenInfo.metadata?.attributes ? (
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pb-6">
-                                {tokenInfo.metadata?.attributes.map(
-                                  ({ attribute }) => (
-                                    <div
-                                      key={attribute.id}
-                                      className="border-2 border-red-400 rounded-md bg-red-200 flex items-center flex-col py-2"
-                                    >
-                                      <p className="text-red-700 text-xs">
-                                        {attribute.name}
-                                      </p>
-                                      <p className="mt-1 font-medium">
-                                        {attribute.value}
-                                      </p>
-                                      <p className="mt-2 text-xs text-gray-600">
-                                        {Number(
-                                          attribute.percentage
-                                        ).toLocaleString("en-US", {
-                                          style: "percent",
-                                        })}{" "}
-                                        have this trait
-                                      </p>
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            ) : (
-                              <div className="text-gray-500">No attributes</div>
-                            )}
-                          </Disclosure.Panel>
-                        </>
-                      )}
-                    </Disclosure>
-                    <Disclosure as="div" defaultOpen>
-                      {({ open }) => (
-                        <>
-                          <h3>
-                            <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
-                              <span
-                                className={classNames(
-                                  open ? "text-red-700" : "text-gray-900",
-                                  "text-sm font-medium"
-                                )}
-                              >
                                 Details
                               </span>
                               <span className="ml-6 flex items-center">
@@ -235,7 +239,7 @@ export default function Example() {
                             </Disclosure.Button>
                           </h3>
                           <Disclosure.Panel as="div">
-                            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 pb-6">
                               <div className="sm:col-span-1">
                                 <dt className="text-sm font-medium text-gray-500">
                                   Contract ID
@@ -280,91 +284,119 @@ export default function Example() {
                                 </dd>
                               </div>
                             </div>
-                            <div className="mt-12">
-                              <p className="text-sm font-medium text-gray-500">
+                          </Disclosure.Panel>
+                        </>
+                      )}
+                    </Disclosure>
+                    <Disclosure as="div" defaultOpen>
+                      {({ open }) => (
+                        <>
+                          <h3>
+                            <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
+                              <span
+                                className={classNames(
+                                  open ? "text-red-700" : "text-gray-900",
+                                  "text-sm font-medium"
+                                )}
+                              >
                                 Item Activity
-                              </p>
-                              <div className="flow-root mt-4">
-                                <ul role="list" className="-mb-8">
-                                  {!tokenInfo.listings ||
-                                    (tokenInfo.listings.length === 0 && (
-                                      <p className="mt-1 text-sm text-gray-900">
-                                        No Timeline Available
-                                      </p>
-                                    ))}
-                                  {tokenInfo.listings &&
-                                    tokenInfo.listings
-                                      .slice(0)
-                                      // Latest one to the top
-                                      .reverse()
-                                      .map((listing, listingIdx) => (
-                                        <li key={listing.id}>
-                                          <div className="relative pb-8">
-                                            {listingIdx !==
-                                            (tokenInfo.listings ?? []).length -
-                                              1 ? (
-                                              <span
-                                                className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
-                                                aria-hidden="true"
-                                              />
-                                            ) : null}
-                                            <div className="relative flex space-x-3">
+                              </span>
+                              <span className="ml-6 flex items-center">
+                                {open ? (
+                                  <MinusSmIcon
+                                    className="block h-6 w-6 text-red-400 group-hover:text-red-500"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <PlusSmIcon
+                                    className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                                    aria-hidden="true"
+                                  />
+                                )}
+                              </span>
+                            </Disclosure.Button>
+                          </h3>
+                          <Disclosure.Panel as="div">
+                            <div className="flow-root">
+                              <ul role="list" className="-mb-8">
+                                {!tokenInfo.listings ||
+                                  (tokenInfo.listings.length === 0 && (
+                                    <p className="mt-1 text-sm text-gray-900">
+                                      No Timeline Available
+                                    </p>
+                                  ))}
+                                {tokenInfo.listings &&
+                                  tokenInfo.listings
+                                    .slice(0)
+                                    // Latest one to the top
+                                    .reverse()
+                                    .map((listing, listingIdx) => (
+                                      <li key={listing.id}>
+                                        <div className="relative pb-8">
+                                          {listingIdx !==
+                                          (tokenInfo.listings ?? []).length -
+                                            1 ? (
+                                            <span
+                                              className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                                              aria-hidden="true"
+                                            />
+                                          ) : null}
+                                          <div className="relative flex space-x-3">
+                                            <div>
+                                              {(() => {
+                                                switch (listing.status) {
+                                                  case Status.Sold:
+                                                    return (
+                                                      <span className="bg-blue-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
+                                                        <ShoppingCartIcon
+                                                          className="h-5 w-5 text-white"
+                                                          aria-hidden="true"
+                                                        />
+                                                      </span>
+                                                    );
+                                                  case Status.Active:
+                                                    return (
+                                                      <span className="bg-red-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
+                                                        <CurrencyDollarIcon
+                                                          className="h-5 w-5 text-white"
+                                                          aria-hidden="true"
+                                                        />
+                                                      </span>
+                                                    );
+                                                  case Status.Hidden:
+                                                    return (
+                                                      <span className="bg-gray-400 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
+                                                        <EyeOffIcon
+                                                          className="h-5 w-5 text-white"
+                                                          aria-hidden="true"
+                                                        />
+                                                      </span>
+                                                    );
+                                                }
+                                              })()}
+                                            </div>
+                                            <div className="min-w-0 flex-1 pt-2 flex justify-between space-x-4">
                                               <div>
-                                                {(() => {
-                                                  switch (listing.status) {
-                                                    case Status.Sold:
-                                                      return (
-                                                        <span className="bg-blue-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
-                                                          <ShoppingCartIcon
-                                                            className="h-5 w-5 text-white"
-                                                            aria-hidden="true"
-                                                          />
-                                                        </span>
-                                                      );
-                                                    case Status.Active:
-                                                      return (
-                                                        <span className="bg-red-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
-                                                          <CurrencyDollarIcon
-                                                            className="h-5 w-5 text-white"
-                                                            aria-hidden="true"
-                                                          />
-                                                        </span>
-                                                      );
-                                                    case Status.Hidden:
-                                                      return (
-                                                        <span className="bg-gray-400 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
-                                                          <EyeOffIcon
-                                                            className="h-5 w-5 text-white"
-                                                            aria-hidden="true"
-                                                          />
-                                                        </span>
-                                                      );
-                                                  }
-                                                })()}
+                                                <p className="text-xs text-gray-500">
+                                                  {timelineContent(listing)}
+                                                </p>
                                               </div>
-                                              <div className="min-w-0 flex-1 pt-2 flex justify-between space-x-4">
-                                                <div>
-                                                  <p className="text-xs text-gray-500">
-                                                    {timelineContent(listing)}
-                                                  </p>
-                                                </div>
-                                                <div className="text-right text-xs whitespace-nowrap text-gray-500">
-                                                  {formatDistanceToNow(
-                                                    new Date(
-                                                      Number(
-                                                        listing.blockTimestamp
-                                                      ) * 1000
-                                                    ),
-                                                    { addSuffix: true }
-                                                  )}
-                                                </div>
+                                              <div className="text-right text-xs whitespace-nowrap text-gray-500">
+                                                {formatDistanceToNow(
+                                                  new Date(
+                                                    Number(
+                                                      listing.blockTimestamp
+                                                    ) * 1000
+                                                  ),
+                                                  { addSuffix: true }
+                                                )}
                                               </div>
                                             </div>
                                           </div>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </div>
+                                        </div>
+                                      </li>
+                                    ))}
+                              </ul>
                             </div>
                           </Disclosure.Panel>
                         </>
