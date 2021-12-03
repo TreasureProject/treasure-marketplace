@@ -466,24 +466,17 @@ const Collection = () => {
                                 }
                                 alt={listing.token.name ?? ""}
                                 layout="fill"
-                                className={classNames(
-                                  "w-full h-full object-center object-fill",
-                                  {
-                                    "group-hover:opacity-75": !yourItem,
-                                  }
-                                )}
+                                className="w-full h-full object-center object-fill group-hover:opacity-75"
                               />
-                              {!yourItem && (
-                                <Link
-                                  href={`/collection/${formattedAddress}/${listing.token.tokenId}`}
-                                >
-                                  <a className="absolute inset-0 focus:outline-none">
-                                    <span className="sr-only">
-                                      View details for {listing.token.name}
-                                    </span>
-                                  </a>
-                                </Link>
-                              )}
+                              <Link
+                                href={`/collection/${formattedAddress}/${listing.token.tokenId}`}
+                              >
+                                <a className="absolute inset-0 focus:outline-none">
+                                  <span className="sr-only">
+                                    View details for {listing.token.name}
+                                  </span>
+                                </a>
+                              </Link>
                             </div>
                             <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
                               <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
