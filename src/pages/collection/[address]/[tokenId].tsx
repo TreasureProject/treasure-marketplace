@@ -382,7 +382,7 @@ export default function Example() {
                         <div className="-my-2 overflow-x-auto mx-0 xl:-mx-8">
                           <div className="py-2 align-middle inline-block min-w-full px-0 xl:px-8">
                             <div className="shadow border-b border-gray-200 rounded-lg overflow-auto max-h-72">
-                              <table className="min-w-full divide-y divide-gray-400">
+                              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-400">
                                 <thead className="bg-gray-50 dark:bg-gray-500 sticky top-0 z-10">
                                   <tr>
                                     <th
@@ -938,15 +938,21 @@ const PurchaseItemModal = ({
                       <p className="text-sm text-gray-500 dark:text-gray-400 uppercase">
                         {metadata?.description}
                       </p>
-                      <p className="mt-1 font-medium text-gray-800 dark:text-gray-50 hover:text-gray-800">
+                      <p className="mt-1 font-medium text-gray-800 dark:text-gray-50">
                         {metadata?.name ?? ""}
+                      </p>
+                      <p className="mt-2 text-gray-400 dark:text-gray-500 text-xs">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Sold by:
+                        </span>{" "}
+                        {shortenAddress(payload.user.id)}
                       </p>
                     </h4>
                   </div>
                 </div>
 
                 {payload.standard === "ERC1155" && (
-                  <div className="flex-1 pt-2 flex items-end justify-between">
+                  <div className="flex-1 pt-4 flex items-end justify-between">
                     <p className="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">
                       {formatEther(payload.pricePerItem)} $MAGIC{" "}
                       <span className="text-[0.5rem] text-gray-500 dark:text-gray-400">
