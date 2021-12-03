@@ -183,11 +183,11 @@ export default function Example() {
         {loading && <CenterLoadingDots className="h-96" />}
         {!tokenInfo && !loading && (
           <div className="text-center">
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+            <h3 className="mt-24 lg:mt-2 text-sm font-medium text-gray-900 dark:text-gray-400">
               Sorry, we couldn&apos;t find this item. 😞
             </h3>
             <Link href={`/collection/${formattedAddress}`}>
-              <a className="mt-7 inline-flex space-x-2 items-center text-red-500 hover:underline">
+              <a className="mt-7 inline-flex space-x-2 items-center text-red-500 hover:underline dark:text-gray-100">
                 <ArrowLeftIcon className="h-4 w-4" />
                 <p className="capsize">Back to Collection</p>
               </a>
@@ -197,7 +197,7 @@ export default function Example() {
         {data?.collection && tokenInfo && (
           <>
             <Link href={`/collection/${formattedAddress}`} passHref>
-              <a className="text-gray-600 inline-flex items-center space-x-2 hover:text-gray-800">
+              <a className="text-gray-600 dark:text-gray-400 dark:hover:text-gray-500 inline-flex items-center space-x-2 hover:text-gray-800">
                 <ArrowLeftIcon className="h-3 w-3" />
                 <p className="capsize text-xs">Back to Collection</p>
               </a>
@@ -224,7 +224,9 @@ export default function Example() {
                           <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
                             <span
                               className={classNames(
-                                open ? "text-red-700" : "text-gray-900",
+                                open
+                                  ? "text-red-700 dark:text-gray-300"
+                                  : "text-gray-900 dark:text-gray-600",
                                 "text-sm font-medium"
                               )}
                             >
@@ -233,12 +235,12 @@ export default function Example() {
                             <span className="ml-6 flex items-center">
                               {open ? (
                                 <MinusSmIcon
-                                  className="block h-6 w-6 text-red-400 group-hover:text-red-500"
+                                  className="block h-6 w-6 text-red-400 dark:text-gray-400 group-hover:text-gray-500"
                                   aria-hidden="true"
                                 />
                               ) : (
                                 <PlusSmIcon
-                                  className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                                  className="block h-6 w-6 text-gray-400 dark:text-gray-400 group-hover:text-gray-200"
                                   aria-hidden="true"
                                 />
                               )}
@@ -253,15 +255,15 @@ export default function Example() {
                                 ({ attribute }) => (
                                   <div
                                     key={attribute.id}
-                                    className="border-2 border-red-400 rounded-md bg-red-200 flex items-center flex-col py-2"
+                                    className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2"
                                   >
-                                    <p className="text-red-700 text-xs">
+                                    <p className="text-red-700 dark:text-gray-500 text-xs font-light">
                                       {attribute.name}
                                     </p>
-                                    <p className="mt-1 font-medium">
+                                    <p className="mt-1 font-medium dark:text-gray-900">
                                       {attribute.value}
                                     </p>
-                                    <p className="mt-2 text-xs text-gray-600">
+                                    <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
                                       {Number(
                                         attribute.percentage
                                       ).toLocaleString("en-US", {
@@ -274,7 +276,9 @@ export default function Example() {
                               )}
                             </div>
                           ) : (
-                            <div className="text-gray-500">No attributes</div>
+                            <div className="text-gray-500 dark:text-gray-400">
+                              No attributes
+                            </div>
                           )}
                         </Disclosure.Panel>
                       </>
@@ -284,18 +288,18 @@ export default function Example() {
               </div>
 
               <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0 lg:col-span-3">
-                <h2 className="tracking-tight text-red-500 uppercase">
+                <h2 className="text-red-500 dark:text-gray-500 tracking-wide uppercase">
                   {data.collection.name}
                 </h2>
                 <div className="mt-3">
-                  <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">
+                  <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-200">
                     {tokenInfo.metadata?.name ?? ""}
                   </h2>
                 </div>
                 {data.collection.standard === TokenStandard.Erc721 &&
                   tokenInfo.owner &&
                   account && (
-                    <div className="mt-2 text-xs">
+                    <div className="mt-2 text-xs text-gray-400">
                       Owned by:{" "}
                       <span>
                         {isYourListing
@@ -309,9 +313,11 @@ export default function Example() {
                   <>
                     <div className="mt-10">
                       <h2 className="sr-only">Price</h2>
-                      <p className="text-3xl text-gray-900">
+                      <p className="text-3xl text-gray-900 dark:text-gray-300">
                         {formatPrice(tokenInfo.lowestPrice[0].pricePerItem)}
-                        <span className="ml-2 text-xs">$MAGIC</span>
+                        <span className="ml-2 text-xs dark:text-gray-400">
+                          $MAGIC
+                        </span>
                       </p>
                     </div>
 
@@ -321,39 +327,41 @@ export default function Example() {
                         tokenInfo.lowestPrice[0].user.id,
                         account ?? AddressZero
                       ) ? (
-                        <div className="mt-10 text-gray-500">
+                        <div className="mt-10 text-gray-500 dark:text-gray-400">
                           This listing is created by you
                         </div>
                       ) : (
-                        <button
-                          onClick={() => {
-                            if (
-                              tokenInfo.lowestPrice &&
-                              tokenInfo.lowestPrice.length > 0 &&
-                              data.collection?.standard
-                            ) {
-                              setModalProps({
-                                isOpen: true,
-                                targetNft: {
-                                  metadata: tokenInfo.metadata,
-                                  payload: {
-                                    ...tokenInfo.lowestPrice[0],
-                                    standard: data.collection.standard,
-                                    tokenId: tokenInfo.tokenId,
+                        <div className="max-w-xs flex-1">
+                          <Button
+                            className="py-3 px-8 text-base"
+                            onClick={() => {
+                              if (
+                                tokenInfo.lowestPrice &&
+                                tokenInfo.lowestPrice.length > 0 &&
+                                data.collection?.standard
+                              ) {
+                                setModalProps({
+                                  isOpen: true,
+                                  targetNft: {
+                                    metadata: tokenInfo.metadata,
+                                    payload: {
+                                      ...tokenInfo.lowestPrice[0],
+                                      standard: data.collection.standard,
+                                      tokenId: tokenInfo.tokenId,
+                                    },
                                   },
-                                },
-                              });
-                            }
-                          }}
-                          className="max-w-xs flex-1 bg-red-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-red-500 sm:w-full"
-                        >
-                          Purchase
-                        </button>
+                                });
+                              }
+                            }}
+                          >
+                            Purchase
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </>
                 ) : (
-                  <div className="mt-10 text-gray-500">
+                  <div className="mt-10 text-gray-500 dark:text-gray-400">
                     This item is currently not for sale
                   </div>
                 )}
@@ -374,36 +382,36 @@ export default function Example() {
                         <div className="-my-2 overflow-x-auto mx-0 xl:-mx-8">
                           <div className="py-2 align-middle inline-block min-w-full px-0 xl:px-8">
                             <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-auto max-h-72">
-                              <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50 sticky top-0 z-10">
+                              <table className="min-w-full divide-y divide-gray-400">
+                                <thead className="bg-gray-50 dark:bg-gray-500 sticky top-0 z-10">
                                   <tr>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                                     >
                                       Unit Price
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                                     >
                                       USD Unit Price
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                     >
                                       Quantity
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                     >
                                       Expiration
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                     >
                                       From
                                     </th>
@@ -415,7 +423,7 @@ export default function Example() {
                                     </th>
                                   </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-400 dark:bg-gray-300">
                                   {listingData.pages.map((page, i) => (
                                     <React.Fragment key={i}>
                                       {(
@@ -426,7 +434,7 @@ export default function Example() {
                                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {formatPrice(listing.pricePerItem)}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
                                             ≈ $
                                             {formatNumber(
                                               Number(
@@ -438,15 +446,15 @@ export default function Example() {
                                               ) * magicPrice
                                             )}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
                                             {listing.quantity}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
                                             {formatDistanceToNow(
                                               new Date(Number(listing.expires))
                                             )}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
                                             {shortenAddress(listing.user.id)}
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -527,7 +535,9 @@ export default function Example() {
                           <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
                             <span
                               className={classNames(
-                                open ? "text-red-700" : "text-gray-900",
+                                open
+                                  ? "text-red-700 dark:text-gray-300"
+                                  : "text-gray-900 dark:text-gray-600",
                                 "text-sm font-medium"
                               )}
                             >
@@ -536,12 +546,12 @@ export default function Example() {
                             <span className="ml-6 flex items-center">
                               {open ? (
                                 <MinusSmIcon
-                                  className="block h-6 w-6 text-red-400 group-hover:text-red-500"
+                                  className="block h-6 w-6 text-red-400 dark:text-gray-400 group-hover:text-gray-500"
                                   aria-hidden="true"
                                 />
                               ) : (
                                 <PlusSmIcon
-                                  className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                                  className="block h-6 w-6 text-gray-400 dark:text-gray-400 group-hover:text-gray-200"
                                   aria-hidden="true"
                                 />
                               )}
@@ -556,15 +566,15 @@ export default function Example() {
                                 ({ attribute }) => (
                                   <div
                                     key={attribute.id}
-                                    className="border-2 border-red-400 rounded-md bg-red-200 flex items-center flex-col py-2"
+                                    className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2"
                                   >
-                                    <p className="text-red-700 text-xs">
+                                    <p className="text-red-700 dark:text-gray-500 text-xs font-light">
                                       {attribute.name}
                                     </p>
-                                    <p className="mt-1 font-medium">
+                                    <p className="mt-1 font-medium dark:text-gray-900">
                                       {attribute.value}
                                     </p>
-                                    <p className="mt-2 text-xs text-gray-600">
+                                    <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
                                       {Number(
                                         attribute.percentage
                                       ).toLocaleString("en-US", {
@@ -577,13 +587,15 @@ export default function Example() {
                               )}
                             </div>
                           ) : (
-                            <div className="text-gray-500">No attributes</div>
+                            <div className="text-gray-500 dark:text-gray-400">
+                              No attributes
+                            </div>
                           )}
                         </Disclosure.Panel>
                       </>
                     )}
                   </Disclosure>
-                  <div className="border-t divide-y divide-gray-200">
+                  <div className="border-t dark:border-gray-400 divide-y divide-gray-200 dark:divide-gray-400">
                     <Disclosure as="div" defaultOpen>
                       {({ open }) => (
                         <>
@@ -591,7 +603,9 @@ export default function Example() {
                             <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
                               <span
                                 className={classNames(
-                                  open ? "text-red-700" : "text-gray-900",
+                                  open
+                                    ? "text-red-700 dark:text-gray-300"
+                                    : "text-gray-900 dark:text-gray-600",
                                   "text-sm font-medium"
                                 )}
                               >
@@ -600,12 +614,12 @@ export default function Example() {
                               <span className="ml-6 flex items-center">
                                 {open ? (
                                   <MinusSmIcon
-                                    className="block h-6 w-6 text-red-400 group-hover:text-red-500"
+                                    className="block h-6 w-6 text-red-400 dark:text-gray-400 group-hover:text-gray-500"
                                     aria-hidden="true"
                                   />
                                 ) : (
                                   <PlusSmIcon
-                                    className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                                    className="block h-6 w-6 text-gray-400 dark:text-gray-400 group-hover:text-gray-200"
                                     aria-hidden="true"
                                   />
                                 )}
@@ -624,7 +638,7 @@ export default function Example() {
                                       formattedAddress,
                                       chainId
                                     )}
-                                    className="text-red-500 hover:text-red-700 text-sm flex items-center space-x-1"
+                                    className="text-red-500 hover:text-red-700 dark:text-gray-200 dark:hover:text-gray-300 text-sm flex items-center space-x-1"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
@@ -637,7 +651,7 @@ export default function Example() {
                                 <dt className="text-sm font-medium text-gray-500">
                                   Token ID
                                 </dt>
-                                <dd className="mt-1 text-sm text-gray-900">
+                                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-300">
                                   {formattedTokenId}
                                 </dd>
                               </div>
@@ -645,7 +659,7 @@ export default function Example() {
                                 <dt className="text-sm font-medium text-gray-500">
                                   Token Standard
                                 </dt>
-                                <dd className="mt-1 text-sm text-gray-900">
+                                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-300">
                                   {data.collection?.standard}
                                 </dd>
                               </div>
@@ -655,9 +669,9 @@ export default function Example() {
                                   <dt className="text-sm font-medium text-gray-500">
                                     Rank
                                   </dt>
-                                  <dd className="mt-1 text-sm text-gray-900 space-x-1">
+                                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-300 space-x-1">
                                     <span>{tokenInfo.rank}</span>
-                                    <span className="text-gray-700">
+                                    <span className="text-gray-400">
                                       ({getRarity(tokenInfo.rank ?? 0)})
                                     </span>
                                   </dd>
@@ -675,7 +689,9 @@ export default function Example() {
                             <Disclosure.Button className="group relative w-full py-6 flex justify-between items-center text-left">
                               <span
                                 className={classNames(
-                                  open ? "text-red-700" : "text-gray-900",
+                                  open
+                                    ? "text-red-700 dark:text-gray-300"
+                                    : "text-gray-900 dark:text-gray-600",
                                   "text-sm font-medium"
                                 )}
                               >
@@ -684,12 +700,12 @@ export default function Example() {
                               <span className="ml-6 flex items-center">
                                 {open ? (
                                   <MinusSmIcon
-                                    className="block h-6 w-6 text-red-400 group-hover:text-red-500"
+                                    className="block h-6 w-6 text-red-400 dark:text-gray-400 group-hover:text-gray-500"
                                     aria-hidden="true"
                                   />
                                 ) : (
                                   <PlusSmIcon
-                                    className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                                    className="block h-6 w-6 text-gray-400 dark:text-gray-400 group-hover:text-gray-200"
                                     aria-hidden="true"
                                   />
                                 )}
@@ -727,7 +743,7 @@ export default function Example() {
                                                 switch (listing.status) {
                                                   case Status.Sold:
                                                     return (
-                                                      <span className="bg-blue-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
+                                                      <span className="bg-blue-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-900">
                                                         <ShoppingCartIcon
                                                           className="h-5 w-5 text-white"
                                                           aria-hidden="true"
@@ -736,7 +752,7 @@ export default function Example() {
                                                     );
                                                   case Status.Active:
                                                     return (
-                                                      <span className="bg-red-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
+                                                      <span className="bg-red-500 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-900">
                                                         <CurrencyDollarIcon
                                                           className="h-5 w-5 text-white"
                                                           aria-hidden="true"
@@ -745,7 +761,7 @@ export default function Example() {
                                                     );
                                                   case Status.Hidden:
                                                     return (
-                                                      <span className="bg-gray-400 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
+                                                      <span className="bg-gray-400 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-900">
                                                         <EyeOffIcon
                                                           className="h-5 w-5 text-white"
                                                           aria-hidden="true"
@@ -819,7 +835,7 @@ const timelineContent = (
           {shortenIfAddress(listing.user.id)} sold to{" "}
           {listing.buyer?.id ? shortenIfAddress(listing.buyer.id) : "Unknown"}{" "}
           for{" "}
-          <span className="font-medium text-gray-900">
+          <span className="font-medium text-gray-900 dark:text-gray-300">
             {formatPrice(listing.pricePerItem)}
           </span>{" "}
           $MAGIC
@@ -829,7 +845,7 @@ const timelineContent = (
       return (
         <p>
           {shortenIfAddress(listing.user.id)} listed this item for{" "}
-          <span className="font-medium text-gray-900">
+          <span className="font-medium text-gray-900 dark:text-gray-300">
             {formatPrice(listing.pricePerItem)}
           </span>{" "}
           $MAGIC
