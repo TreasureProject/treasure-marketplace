@@ -436,25 +436,28 @@ const Collection = () => {
                                 )}
                               />
                               {!yourItem && (
-                                <button
-                                  type="button"
-                                  className="absolute inset-0 focus:outline-none"
-                                  onClick={() =>
-                                    setModalProps({
-                                      isOpen: true,
-                                      targetNft: {
-                                        ...listing,
-                                        standard:
-                                          collectionData.collection?.standard ??
-                                          "ERC1155",
-                                      },
-                                    })
-                                  }
+                                <Link
+                                  href={`/collection/${formattedAddress}/${listing.token.tokenId}`}
                                 >
-                                  <span className="sr-only">
-                                    View details for {listing.token.name}
-                                  </span>
-                                </button>
+                                  <a
+                                    className="absolute inset-0 focus:outline-none"
+                                    // onClick={() =>
+                                    //   setModalProps({
+                                    //     isOpen: true,
+                                    //     targetNft: {
+                                    //       ...listing,
+                                    //       standard:
+                                    //         collectionData.collection?.standard ??
+                                    //         "ERC1155",
+                                    //     },
+                                    //   })
+                                    // }
+                                  >
+                                    <span className="sr-only">
+                                      View details for {listing.token.name}
+                                    </span>
+                                  </a>
+                                </Link>
                               )}
                             </div>
                             <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
