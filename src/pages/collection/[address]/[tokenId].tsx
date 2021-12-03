@@ -906,10 +906,17 @@ const PurchaseItemModal = ({
     Contracts[chainId].marketplace
   );
 
+  const buttonRef = React.useRef() as React.MutableRefObject<HTMLButtonElement>;
+
   const notAllowed = magicAllowance?.isZero() ?? true;
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} title="Order Summary">
+    <Modal
+      onClose={onClose}
+      isOpen={isOpen}
+      title="Order Summary"
+      ref={buttonRef}
+    >
       <div className="sm:mt-10 lg:mt-0">
         <div className="sm:mt-4">
           <h3 className="sr-only">Items in your cart</h3>
@@ -1000,6 +1007,7 @@ const PurchaseItemModal = ({
           <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
             {notAllowed ? (
               <Button
+                ref={buttonRef}
                 onClick={approve}
                 isLoading={approveState.status === "Mining"}
                 loadingText="Approving $MAGIC..."
@@ -1010,6 +1018,7 @@ const PurchaseItemModal = ({
             ) : (
               <>
                 <Button
+                  ref={buttonRef}
                   disabled={!canPurchase || state.status === "Mining"}
                   isLoading={state.status === "Mining"}
                   loadingText="Confirming order..."
