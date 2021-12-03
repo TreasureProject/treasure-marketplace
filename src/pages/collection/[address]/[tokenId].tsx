@@ -387,7 +387,7 @@ export default function Example() {
                                   <tr>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
+                                      className="px-6 py-3 text-left text-[0.5rem] md:text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                                     >
                                       Unit Price
                                     </th>
@@ -399,10 +399,16 @@ export default function Example() {
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-[0.5rem] md:text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                     >
-                                      Quantity
+                                      <span className="hidden md:inline">
+                                        Quantity
+                                      </span>
+                                      <span className="inline md:hidden">
+                                        Qty
+                                      </span>
                                     </th>
+
                                     <th
                                       scope="col"
                                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell"
@@ -415,15 +421,12 @@ export default function Example() {
                                     >
                                       From
                                     </th>
-                                    <th
-                                      scope="col"
-                                      className="relative px-6 py-3"
-                                    >
+                                    <th scope="col" className="px-6 py-3">
                                       <span className="sr-only">Purchase</span>
                                     </th>
                                   </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-400 dark:bg-gray-300">
+                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-400 dark:bg-gray-300 relative">
                                   {listingData.pages.map((page, i) => (
                                     <React.Fragment key={i}>
                                       {(
@@ -431,7 +434,7 @@ export default function Example() {
                                         []
                                       ).map((listing) => (
                                         <tr key={listing.id}>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                          <td className="px-6 py-4 whitespace-nowrap text-[0.7rem] md:text-sm font-medium text-gray-900">
                                             {formatPrice(listing.pricePerItem)}
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
@@ -446,7 +449,7 @@ export default function Example() {
                                               ) * magicPrice
                                             )}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
+                                          <td className="px-6 py-4 whitespace-nowrap text-[0.7rem] md:text-sm text-gray-500 dark:text-gray-700">
                                             {listing.quantity}
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
@@ -943,7 +946,7 @@ const PurchaseItemModal = ({
                 </div>
 
                 {payload.standard === "ERC1155" && (
-                  <div className="flex-1 sm:pt-2 flex items-end justify-between">
+                  <div className="flex-1 pt-2 flex items-end justify-between">
                     <p className="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">
                       {formatEther(payload.pricePerItem)} $MAGIC{" "}
                       <span className="text-[0.5rem] text-gray-500 dark:text-gray-400">
