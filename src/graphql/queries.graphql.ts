@@ -264,6 +264,7 @@ export const getTokenDetails = gql`
           blockTimestamp
         }
         rarity
+        rank
         owner {
           id
         }

@@ -44,6 +44,26 @@ import { targetNftT } from "../../../types";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
+const getRarity = (rank: number) => {
+  if (rank >= 0 && rank <= 10) {
+    return "Rare AF";
+  }
+
+  if (rank >= 11 && rank <= 100) {
+    return "Super Rare";
+  }
+
+  if (rank >= 101 && rank <= 2000) {
+    return "Looks Rare";
+  }
+
+  if (rank >= 2001 && rank <= 4000) {
+    return "Uncommon";
+  }
+
+  return "Common";
+};
+
 export default function Example() {
   const router = useRouter();
   const { account } = useEthers();
@@ -633,10 +653,13 @@ export default function Example() {
                                 TokenStandard.Erc721 && (
                                 <div className="sm:col-span-1">
                                   <dt className="text-sm font-medium text-gray-500">
-                                    Rarity
+                                    Rank
                                   </dt>
-                                  <dd className="mt-1 text-sm text-gray-900">
-                                    Rare AF
+                                  <dd className="mt-1 text-sm text-gray-900 space-x-1">
+                                    <span>{tokenInfo.rank}</span>
+                                    <span className="text-gray-700">
+                                      ({getRarity(tokenInfo.rank ?? 0)})
+                                    </span>
                                   </dd>
                                 </div>
                               )}
