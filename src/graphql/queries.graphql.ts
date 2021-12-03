@@ -119,7 +119,7 @@ export const getCollectionListings = gql`
       name
       address
       standard
-      tokens @include(if: $isERC1155) {
+      tokens(where: { name_contains: $tokenName }) @include(if: $isERC1155) {
         id
         name
         tokenId
