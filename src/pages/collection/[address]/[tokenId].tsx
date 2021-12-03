@@ -45,19 +45,19 @@ import { targetNftT } from "../../../types";
 const MAX_ITEMS_PER_PAGE = 10;
 
 const getRarity = (rank: number) => {
-  if (rank >= 0 && rank <= 10) {
+  if (rank >= 0 && rank <= 50) {
     return "Rare AF";
   }
 
-  if (rank >= 11 && rank <= 100) {
+  if (rank >= 51 && rank <= 300) {
     return "Super Rare";
   }
 
-  if (rank >= 101 && rank <= 2000) {
+  if (rank >= 301 && rank <= 3000) {
     return "Looks Rare";
   }
 
-  if (rank >= 2001 && rank <= 4000) {
+  if (rank >= 3001 && rank <= 4000) {
     return "Uncommon";
   }
 
