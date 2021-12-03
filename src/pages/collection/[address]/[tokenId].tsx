@@ -327,7 +327,7 @@ export default function Example() {
                         tokenInfo.lowestPrice[0].user.id,
                         account ?? AddressZero
                       ) ? (
-                        <div className="mt-10 text-gray-500 dark:text-gray-400">
+                        <div className="mt-10 text-sm sm:text-base text-gray-500 dark:text-gray-400">
                           This listing is created by you
                         </div>
                       ) : (
