@@ -81,6 +81,29 @@ export const getCollectionStats = gql`
   }
 `;
 
+export const getERC1155Listings = gql`
+  query getERC1155Listings(
+    $collectionId: ID!
+    $tokenId: BigInt!
+    $skipBy: Int!
+    $first: Int!
+  ) {
+    collection(id: $collectionId) {
+      tokens(where: { tokenId: $tokenId }) {
+        listings(where: { status: Active }, skip: $skipBy, first: $first) {
+          user {
+            id
+          }
+          expires
+          id
+          pricePerItem
+          quantity
+        }
+      }
+    }
+  }
+`;
+
 export const getCollectionListings = gql`
   query getCollectionListings(
     $id: ID!
@@ -175,7 +198,16 @@ export const getAllActivities = gql`
 export const getTokenDetails = gql`
   query getTokenDetails($collectionId: ID!, $tokenId: BigInt!) {
     collection(id: $collectionId) {
+      name
+      standard
       tokens(where: { tokenId: $tokenId }) {
+        lowestPrice: listings(
+          where: { status: Active }
+          first: 1
+          orderDirection: desc
+        ) {
+          pricePerItem
+        }
         metadata {
           attributes {
             attribute {
@@ -204,9 +236,6 @@ export const getTokenDetails = gql`
         rarity
         owner {
           id
-        }
-        collection {
-          name
         }
       }
     }
