@@ -251,7 +251,7 @@ export const getTokenDetails = gql`
           image
           name
         }
-        listings {
+        listings(orderBy: blockTimestamp, orderDirection: desc) {
           id
           status
           buyer {

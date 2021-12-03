@@ -19,7 +19,7 @@ import {
   TransactionStatus,
 } from "@yuyao17/corefork";
 import Link from "next/link";
-import { useInfiniteQuery, useQuery } from "react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { useRouter } from "next/router";
 import client from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
@@ -47,6 +47,8 @@ const MAX_ITEMS_PER_PAGE = 10;
 export default function Example() {
   const router = useRouter();
   const { account } = useEthers();
+  const queryClient = useQueryClient();
+
   const { address, tokenId } = router.query;
   const [modalProps, setModalProps] = React.useState<{
     isOpen: boolean;
@@ -113,6 +115,20 @@ export default function Example() {
       fetchNextPage();
     }
   }, [fetchNextPage, inView]);
+
+  React.useEffect(() => {
+    // Removing cache because old image remains in the cache, so a blink of the image is seen when doing client-side routing
+    const handleRouteChange = () => {
+      queryClient.removeQueries("details");
+      queryClient.removeQueries("erc1155Listings");
+    };
+
+    router.events.on("routeChangeStart", handleRouteChange);
+
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, [queryClient, router]);
 
   const hasErc1155Listings =
     listingData?.pages[0]?.collection?.tokens &&

@@ -254,12 +254,7 @@ export function useBuyItem() {
       case "Success":
         toast.success("Successfully purchased!");
 
-        queryClient.invalidateQueries("details", {
-          refetchInactive: true,
-        });
-        queryClient.invalidateQueries("erc1155Listings", {
-          refetchInactive: true,
-        });
+        queryClient.invalidateQueries();
 
         webhook.current?.();
         webhook.current = undefined;
