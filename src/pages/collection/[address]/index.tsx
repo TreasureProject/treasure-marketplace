@@ -414,74 +414,76 @@ const Collection = () => {
                   {listingData.pages.map((group, i) => (
                     <React.Fragment key={i}>
                       {/* ERC1155 */}
-                      {group.collection?.tokens?.map((token) => {
-                        return (
-                          <li key={token.id} className="group">
-                            <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                              <Image
-                                src={
-                                  token.metadata?.image?.includes("ipfs")
-                                    ? generateIpfsLink(token.metadata.image)
-                                    : token.metadata?.image ?? ""
-                                }
-                                alt={token.name ?? ""}
-                                layout="fill"
-                                className={
-                                  "w-full h-full object-center object-fill group-hover:opacity-75"
-                                }
-                              />
-                              <Link
-                                href={`/collection/${formattedAddress}/${token.tokenId}`}
-                                passHref
-                              >
-                                <a className="absolute inset-0 focus:outline-none">
-                                  <span className="sr-only">
-                                    View details for {token.name}
-                                  </span>
-                                </a>
-                              </Link>
-                            </div>
-                            <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
-                              <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
-                                {collectionData.collection?.name}
-                              </p>
-                              <p className="dark:text-gray-100">
-                                {formatNumber(
-                                  parseFloat(
-                                    formatEther(
-                                      token?.listings?.[0]?.pricePerItem
-                                    )
-                                  )
-                                )}{" "}
-                                <span className="text-xs font-light">
-                                  $MAGIC
-                                </span>
-                              </p>
-                            </div>
-                            <div className="flex items-baseline mt-1">
-                              <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                                {token.name}
-                              </p>
-                              <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Listings:
-                                </span>{" "}
-                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                  {group.collection?._listingIds
-                                    .filter((id) =>
-                                      id.endsWith(
-                                        `-0x${Number(token.tokenId).toString(
-                                          16
-                                        )}`
+                      {group.collection?.tokens
+                        ?.filter((token) => Boolean(token?.listings?.length))
+                        .map((token) => {
+                          return (
+                            <li key={token.id} className="group">
+                              <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
+                                <Image
+                                  src={
+                                    token.metadata?.image?.includes("ipfs")
+                                      ? generateIpfsLink(token.metadata.image)
+                                      : token.metadata?.image ?? ""
+                                  }
+                                  alt={token.name ?? ""}
+                                  layout="fill"
+                                  className={
+                                    "w-full h-full object-center object-fill group-hover:opacity-75"
+                                  }
+                                />
+                                <Link
+                                  href={`/collection/${formattedAddress}/${token.tokenId}`}
+                                  passHref
+                                >
+                                  <a className="absolute inset-0 focus:outline-none">
+                                    <span className="sr-only">
+                                      View details for {token.name}
+                                    </span>
+                                  </a>
+                                </Link>
+                              </div>
+                              <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
+                                <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
+                                  {collectionData.collection?.name}
+                                </p>
+                                <p className="dark:text-gray-100">
+                                  {formatNumber(
+                                    parseFloat(
+                                      formatEther(
+                                        token?.listings?.[0]?.pricePerItem
                                       )
                                     )
-                                    .length.toLocaleString()}
-                                </span>
-                              </p>
-                            </div>
-                          </li>
-                        );
-                      })}
+                                  )}{" "}
+                                  <span className="text-xs font-light">
+                                    $MAGIC
+                                  </span>
+                                </p>
+                              </div>
+                              <div className="flex items-baseline mt-1">
+                                <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
+                                  {token.name}
+                                </p>
+                                <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    Listings:
+                                  </span>{" "}
+                                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                                    {group.collection?._listingIds
+                                      .filter((id) =>
+                                        id.endsWith(
+                                          `-0x${Number(token.tokenId).toString(
+                                            16
+                                          )}`
+                                        )
+                                      )
+                                      .length.toLocaleString()}
+                                  </span>
+                                </p>
+                              </div>
+                            </li>
+                          );
+                        })}
                       {/* ERC721 */}
                       {group.collection?.listings?.map((listing) => {
                         const yourItem =
