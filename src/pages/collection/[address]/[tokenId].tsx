@@ -381,7 +381,7 @@ export default function Example() {
                       <div className="flex flex-col relative mt-4">
                         <div className="-my-2 overflow-x-auto mx-0 xl:-mx-8">
                           <div className="py-2 align-middle inline-block min-w-full px-0 xl:px-8">
-                            <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-auto max-h-72">
+                            <div className="shadow border-b border-gray-200 rounded-lg overflow-auto max-h-72">
                               <table className="min-w-full divide-y divide-gray-400">
                                 <thead className="bg-gray-50 dark:bg-gray-500 sticky top-0 z-10">
                                   <tr>
@@ -393,7 +393,7 @@ export default function Example() {
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell"
                                     >
                                       USD Unit Price
                                     </th>
@@ -405,13 +405,13 @@ export default function Example() {
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell"
                                     >
                                       Expiration
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell"
                                     >
                                       From
                                     </th>
@@ -434,7 +434,7 @@ export default function Example() {
                                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {formatPrice(listing.pricePerItem)}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
                                             ≈ $
                                             {formatNumber(
                                               Number(
@@ -449,12 +449,12 @@ export default function Example() {
                                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
                                             {listing.quantity}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
                                             {formatDistanceToNow(
                                               new Date(Number(listing.expires))
                                             )}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
                                             {shortenAddress(listing.user.id)}
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
