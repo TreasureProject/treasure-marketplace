@@ -112,21 +112,33 @@ export const getCollectionListings = gql`
     $skipBy: Int!
     $first: Int!
     $orderBy: Listing_orderBy!
+    $isERC1155: Boolean!
   ) {
     collection(id: $id) {
+      _listingIds
       name
       address
+      standard
+      tokens @include(if: $isERC1155) {
+        id
+        name
+        tokenId
+        listings(first: 1, where: { status: Active }, orderBy: pricePerItem) {
+          pricePerItem
+        }
+        metadata {
+          image
+          name
+          description
+        }
+      }
       listings(
         first: $first
         skip: $skipBy
         orderBy: $orderBy
         orderDirection: $orderDirection
-        where: {
-          status: Active
-          tokenName_contains: $tokenName
-          quantity_gt: 0
-        }
-      ) {
+        where: { status: Active, tokenName_contains: $tokenName }
+      ) @skip(if: $isERC1155) {
         user {
           id
         }

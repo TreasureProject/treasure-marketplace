@@ -144,6 +144,8 @@ const Collection = () => {
     }
   );
 
+  const isERC1155 = collectionData?.collection?.standard === "ERC1155";
+
   const {
     data: listingData,
     isLoading: isListingLoading,
@@ -153,6 +155,7 @@ const Collection = () => {
     ({ queryKey, pageParam = 0 }) =>
       client.getCollectionListings({
         id: formattedAddress,
+        isERC1155,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         tokenName: queryKey[1].searchParams,
@@ -166,7 +169,7 @@ const Collection = () => {
           : OrderDirection.Asc,
       }),
     {
-      enabled: !!address,
+      enabled: !!address && !!collectionData,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
     }
   );
@@ -193,9 +196,11 @@ const Collection = () => {
     setSearchParams("");
   }, [address]);
 
-  const hasNextPage =
-    listingData?.pages[listingData.pages.length - 1]?.collection?.listings
-      .length === MAX_ITEMS_PER_PAGE;
+  const collection =
+    listingData?.pages[listingData.pages.length - 1]?.collection;
+  const data = isERC1155 ? collection?.tokens : collection?.listings;
+
+  const hasNextPage = data?.length === MAX_ITEMS_PER_PAGE;
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -254,15 +259,14 @@ const Collection = () => {
                     </dd>
                   </div>
                 </dl>
-                {collectionData.collection.standard === "ERC1155" &&
-                  statData.collection.totalListings > 0 && (
-                    <button
-                      className="text-[0.5rem] sm:text-xs block underline place-self-start mt-2 dark:text-gray-300"
-                      onClick={() => setDetailedFloorPriceModalOpen(true)}
-                    >
-                      Compare floor prices &gt;
-                    </button>
-                  )}
+                {isERC1155 && statData.collection.totalListings > 0 && (
+                  <button
+                    className="text-[0.5rem] sm:text-xs block underline place-self-start mt-2 dark:text-gray-300"
+                    onClick={() => setDetailedFloorPriceModalOpen(true)}
+                  >
+                    Compare floor prices &gt;
+                  </button>
+                )}
               </div>
             </>
           ) : (
@@ -391,14 +395,13 @@ const Collection = () => {
               )}
             </section>
             {isListingLoading && <CenterLoadingDots className="h-60" />}
-            {listingData?.pages[0]?.collection?.listings.length === 0 &&
-              !isListingLoading && (
-                <div className="flex flex-col justify-center items-center h-36">
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
-                    No NFTs listed 😞
-                  </h3>
-                </div>
-              )}
+            {data?.length === 0 && !isListingLoading && (
+              <div className="flex flex-col justify-center items-center h-36">
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
+                  No NFTs listed 😞
+                </h3>
+              </div>
+            )}
             {listingData && collectionData && (
               <section aria-labelledby="products-heading" className="my-8">
                 <h2 id="products-heading" className="sr-only">
@@ -410,7 +413,77 @@ const Collection = () => {
                 >
                   {listingData.pages.map((group, i) => (
                     <React.Fragment key={i}>
-                      {group.collection?.listings.map((listing) => {
+                      {/* ERC1155 */}
+                      {group.collection?.tokens?.map((token) => {
+                        return (
+                          <li key={token.id} className="group">
+                            <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
+                              <Image
+                                src={
+                                  token.metadata?.image?.includes("ipfs")
+                                    ? generateIpfsLink(token.metadata.image)
+                                    : token.metadata?.image ?? ""
+                                }
+                                alt={token.name ?? ""}
+                                layout="fill"
+                                className={
+                                  "w-full h-full object-center object-fill group-hover:opacity-75"
+                                }
+                              />
+                              <Link
+                                href={`/collection/${formattedAddress}/${token.tokenId}`}
+                                passHref
+                              >
+                                <a className="absolute inset-0 focus:outline-none">
+                                  <span className="sr-only">
+                                    View details for {token.name}
+                                  </span>
+                                </a>
+                              </Link>
+                            </div>
+                            <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
+                              <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
+                                {collectionData.collection?.name}
+                              </p>
+                              <p className="dark:text-gray-100">
+                                {formatNumber(
+                                  parseFloat(
+                                    formatEther(
+                                      token?.listings?.[0]?.pricePerItem
+                                    )
+                                  )
+                                )}{" "}
+                                <span className="text-xs font-light">
+                                  $MAGIC
+                                </span>
+                              </p>
+                            </div>
+                            <div className="flex items-baseline mt-1">
+                              <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
+                                {token.name}
+                              </p>
+                              <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
+                                <span className="text-gray-500 dark:text-gray-400">
+                                  Listings:
+                                </span>{" "}
+                                <span className="font-bold text-gray-700 dark:text-gray-300">
+                                  {group.collection?._listingIds
+                                    .filter((id) =>
+                                      id.endsWith(
+                                        `-0x${Number(token.tokenId).toString(
+                                          16
+                                        )}`
+                                      )
+                                    )
+                                    .length.toLocaleString()}
+                                </span>
+                              </p>
+                            </div>
+                          </li>
+                        );
+                      })}
+                      {/* ERC721 */}
+                      {group.collection?.listings?.map((listing) => {
                         const yourItem =
                           account?.toLowerCase() === listing.user.id;
                         return (
@@ -439,20 +512,7 @@ const Collection = () => {
                                 <Link
                                   href={`/collection/${formattedAddress}/${listing.token.tokenId}`}
                                 >
-                                  <a
-                                    className="absolute inset-0 focus:outline-none"
-                                    // onClick={() =>
-                                    //   setModalProps({
-                                    //     isOpen: true,
-                                    //     targetNft: {
-                                    //       ...listing,
-                                    //       standard:
-                                    //         collectionData.collection?.standard ??
-                                    //         "ERC1155",
-                                    //     },
-                                    //   })
-                                    // }
-                                  >
+                                  <a className="absolute inset-0 focus:outline-none">
                                     <span className="sr-only">
                                       View details for {listing.token.name}
                                     </span>
@@ -488,8 +548,7 @@ const Collection = () => {
                                 </span>
                               </p>
                             </div>
-                            {collectionData.collection?.standard ===
-                              "ERC1155" && (
+                            {isERC1155 && (
                               <div className="flex mt-1 justify-end">
                                 <span className="text-gray-600 text-xs text-[0.6rem]">
                                   <span className="text-gray-500 dark:text-gray-400">
