@@ -118,7 +118,7 @@ export default function Example() {
 
   return (
     <div className="pt-12">
-      <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-[88rem] lg:px-8 pt-12">
+      <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-[96rem] lg:px-8 pt-12">
         {loading && <CenterLoadingDots className="h-96" />}
         {!tokenInfo && !loading && (
           <div className="text-center">
@@ -273,21 +273,21 @@ export default function Example() {
                     )}
                     {hasErc1155Listings && (
                       <div className="flex flex-col relative mt-4">
-                        <div className="-my-2 overflow-x-auto mx-0 lg:-mx-8">
-                          <div className="py-2 align-middle inline-block min-w-full px-0 lg:px-8">
+                        <div className="-my-2 overflow-x-auto mx-0 xl:-mx-8">
+                          <div className="py-2 align-middle inline-block min-w-full px-0 xl:px-8">
                             <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-auto max-h-72">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
                                   <tr>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                                     >
                                       Unit Price
                                     </th>
                                     <th
                                       scope="col"
-                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                                     >
                                       USD Unit Price
                                     </th>
