@@ -1,9 +1,19 @@
-import { GetCollectionListingsQuery } from "../generated/graphql";
+import {
+  GetTokenDetailsQuery,
+  ListingFieldsWithTokenFragment,
+  TokenStandard,
+} from "../generated/graphql";
 
-export type ListedNft = Exclude<
-  GetCollectionListingsQuery["collection"],
-  null | undefined
->["listings"][number] & { standard: "ERC721" | "ERC1155" };
+export type targetNftT = {
+  metadata: Exclude<
+    GetTokenDetailsQuery["collection"],
+    null | undefined
+  >["tokens"][number]["metadata"];
+  payload: ListingFieldsWithTokenFragment & {
+    standard: TokenStandard;
+    tokenId: string;
+  };
+};
 
 export type Nft = {
   address: string;

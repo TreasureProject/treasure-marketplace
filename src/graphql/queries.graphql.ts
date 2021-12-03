@@ -81,29 +81,6 @@ export const getCollectionStats = gql`
   }
 `;
 
-export const getERC1155Listings = gql`
-  query getERC1155Listings(
-    $collectionId: ID!
-    $tokenId: BigInt!
-    $skipBy: Int!
-    $first: Int!
-  ) {
-    collection(id: $collectionId) {
-      tokens(where: { tokenId: $tokenId }) {
-        listings(where: { status: Active }, skip: $skipBy, first: $first) {
-          user {
-            id
-          }
-          expires
-          id
-          pricePerItem
-          quantity
-        }
-      }
-    }
-  }
-`;
-
 export const getCollectionListings = gql`
   query getCollectionListings(
     $id: ID!
@@ -183,6 +160,18 @@ const LISTING_FRAGMENT = gql`
   }
 `;
 
+const LISTING_FRAGMENT_WITH_TOKEN = gql`
+  fragment ListingFieldsWithToken on Listing {
+    user {
+      id
+    }
+    expires
+    id
+    pricePerItem
+    quantity
+  }
+`;
+
 export const getActivity = gql`
   ${LISTING_FRAGMENT}
   query getActivity($id: ID!, $orderBy: Listing_orderBy!) {
@@ -207,18 +196,46 @@ export const getAllActivities = gql`
   }
 `;
 
+export const getERC1155Listings = gql`
+  ${LISTING_FRAGMENT_WITH_TOKEN}
+  query getERC1155Listings(
+    $collectionId: ID!
+    $tokenId: BigInt!
+    $skipBy: Int!
+    $first: Int!
+  ) {
+    collection(id: $collectionId) {
+      tokens(where: { tokenId: $tokenId }) {
+        tokenId
+        listings(
+          where: { status: Active }
+          skip: $skipBy
+          first: $first
+          orderBy: pricePerItem
+          orderDirection: asc
+        ) {
+          ...ListingFieldsWithToken
+        }
+      }
+    }
+  }
+`;
+
 export const getTokenDetails = gql`
+  ${LISTING_FRAGMENT_WITH_TOKEN}
   query getTokenDetails($collectionId: ID!, $tokenId: BigInt!) {
     collection(id: $collectionId) {
       name
       standard
       tokens(where: { tokenId: $tokenId }) {
+        tokenId
         lowestPrice: listings(
           where: { status: Active }
           first: 1
-          orderDirection: desc
+          orderBy: pricePerItem
+          orderDirection: asc
         ) {
-          pricePerItem
+          ...ListingFieldsWithToken
         }
         metadata {
           attributes {
@@ -229,6 +246,7 @@ export const getTokenDetails = gql`
               value
             }
           }
+          description
           id
           image
           name

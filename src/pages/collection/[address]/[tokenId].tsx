@@ -13,13 +13,17 @@ import {
   getExplorerAddressLink,
   shortenAddress,
   shortenIfAddress,
+  useEthers,
+  addressEqual,
+  useTokenAllowance,
+  TransactionStatus,
 } from "@yuyao17/corefork";
 import Link from "next/link";
 import { useInfiniteQuery, useQuery } from "react-query";
 import { useRouter } from "next/router";
 import client from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
-import { useBuyItem, useChainId } from "../../../lib/hooks";
+import { useApproveMagic, useBuyItem, useChainId } from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import { formatNumber, formatPrice, generateIpfsLink } from "../../../utils";
 import {
@@ -33,13 +37,24 @@ import { useInView } from "react-intersection-observer";
 import { useMagic } from "../../../context/magicContext";
 import { formatEther } from "ethers/lib/utils";
 import Button from "../../../components/Button";
+import { Modal } from "../../../components/Modal";
+import { BigNumber } from "@ethersproject/bignumber";
+import { Contracts } from "../../../const";
+import { targetNftT } from "../../../types";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
 export default function Example() {
   const router = useRouter();
-
+  const { account } = useEthers();
   const { address, tokenId } = router.query;
+  const [modalProps, setModalProps] = React.useState<{
+    isOpen: boolean;
+    targetNft: targetNftT | null;
+  }>({
+    isOpen: false,
+    targetNft: null,
+  });
   const { magicPrice } = useMagic();
 
   const formattedTokenId = Array.isArray(tokenId) ? tokenId[0] : tokenId;
@@ -49,7 +64,7 @@ export default function Example() {
     : address?.toLowerCase() ?? AddressZero;
 
   const { data, isLoading, isIdle } = useQuery(
-    ["details", formattedTokenId],
+    "details",
     () =>
       client.getTokenDetails({
         collectionId: formattedAddress,
@@ -67,7 +82,7 @@ export default function Example() {
     fetchNextPage,
   } = useInfiniteQuery(
     "erc1155Listings",
-    (_, pageParam = 0) =>
+    ({ pageParam = 0 }) =>
       client.getERC1155Listings({
         collectionId: formattedAddress,
         tokenId: formattedTokenId,
@@ -76,14 +91,13 @@ export default function Example() {
       }),
     {
       enabled:
-        !!address ||
-        !!tokenId ||
+        !!address &&
+        !!tokenId &&
         data?.collection?.standard === TokenStandard.Erc1155,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
     }
   );
 
-  console.log(listingData);
   const hasNextPage =
     listingData?.pages[listingData.pages.length - 1]?.collection?.tokens
       .length &&
@@ -105,16 +119,27 @@ export default function Example() {
     listingData?.pages[0]?.collection?.tokens[0]?.listings &&
     listingData?.pages[0].collection.tokens[0].listings.length > 0;
 
-  // const { send, state } = useBuyItem(formattedTokenId);
+  const { send, state } = useBuyItem();
+
   const chainId = useChainId();
 
+  React.useEffect(() => {
+    if (state.status === "Success") {
+      setModalProps({ isOpen: false, targetNft: null });
+    }
+  }, [state.status]);
+
   const tokenInfo =
-    data &&
-    data?.collection?.tokens &&
-    data?.collection?.tokens.length > 0 &&
-    data.collection.tokens[0];
+    data && data?.collection?.tokens && data?.collection?.tokens.length > 0
+      ? data.collection.tokens[0]
+      : null;
 
   const loading = isLoading || isIdle;
+
+  const isYourListing = addressEqual(
+    account ?? AddressZero,
+    tokenInfo?.owner ? tokenInfo.owner.id : AddressZero
+  );
 
   return (
     <div className="pt-12">
@@ -231,14 +256,20 @@ export default function Example() {
                     {tokenInfo.metadata?.name ?? ""}
                   </h2>
                 </div>
-                {data.collection.standard === TokenStandard.Erc721 && (
-                  <div className="mt-2 text-xs">
-                    Owned by:{" "}
-                    <span>{shortenIfAddress(tokenInfo.owner?.id)}</span>
-                  </div>
-                )}
+                {data.collection.standard === TokenStandard.Erc721 &&
+                  tokenInfo.owner &&
+                  account && (
+                    <div className="mt-2 text-xs">
+                      Owned by:{" "}
+                      <span>
+                        {isYourListing
+                          ? "You"
+                          : shortenIfAddress(tokenInfo.owner.id)}
+                      </span>
+                    </div>
+                  )}
 
-                {tokenInfo.lowestPrice ? (
+                {tokenInfo.lowestPrice?.length ? (
                   <>
                     <div className="mt-10">
                       <h2 className="sr-only">Price</h2>
@@ -249,9 +280,40 @@ export default function Example() {
                     </div>
 
                     <div className="mt-6">
-                      <button className="max-w-xs flex-1 bg-red-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-red-500 sm:w-full">
-                        Purchase
-                      </button>
+                      {isYourListing ||
+                      addressEqual(
+                        tokenInfo.lowestPrice[0].user.id,
+                        account ?? AddressZero
+                      ) ? (
+                        <div className="mt-10 text-gray-500">
+                          This listing is created by you
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (
+                              tokenInfo.lowestPrice &&
+                              tokenInfo.lowestPrice.length > 0 &&
+                              data.collection?.standard
+                            ) {
+                              setModalProps({
+                                isOpen: true,
+                                targetNft: {
+                                  metadata: tokenInfo.metadata,
+                                  payload: {
+                                    ...tokenInfo.lowestPrice[0],
+                                    standard: data.collection.standard,
+                                    tokenId: tokenInfo.tokenId,
+                                  },
+                                },
+                              });
+                            }
+                          }}
+                          className="max-w-xs flex-1 bg-red-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-red-500 sm:w-full"
+                        >
+                          Purchase
+                        </button>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -319,12 +381,12 @@ export default function Example() {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                   {listingData.pages.map((page, i) => (
-                                    <>
+                                    <React.Fragment key={i}>
                                       {(
                                         page.collection?.tokens[0].listings ||
                                         []
                                       ).map((listing) => (
-                                        <tr key={i}>
+                                        <tr key={listing.id}>
                                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {formatPrice(listing.pricePerItem)}
                                           </td>
@@ -353,7 +415,37 @@ export default function Example() {
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Button
-                                              onClick={() => {}}
+                                              disabled={addressEqual(
+                                                listing.user.id,
+                                                account ?? AddressZero
+                                              )}
+                                              tooltip={
+                                                addressEqual(
+                                                  listing.user.id,
+                                                  account ?? AddressZero
+                                                )
+                                                  ? "You cannot purchase your own listing"
+                                                  : undefined
+                                              }
+                                              onClick={() => {
+                                                if (data.collection?.standard) {
+                                                  setModalProps({
+                                                    isOpen: true,
+                                                    targetNft: {
+                                                      metadata:
+                                                        tokenInfo.metadata,
+                                                      payload: {
+                                                        ...listing,
+                                                        standard:
+                                                          data.collection
+                                                            .standard,
+                                                        tokenId:
+                                                          tokenInfo.tokenId,
+                                                      },
+                                                    },
+                                                  });
+                                                }
+                                              }}
                                               variant="secondary"
                                             >
                                               Purchase
@@ -361,7 +453,17 @@ export default function Example() {
                                           </td>
                                         </tr>
                                       ))}
-                                    </>
+                                      {hasNextPage && (
+                                        <tr ref={ref}>
+                                          <td
+                                            className="px-6 py-4 span"
+                                            colSpan={100}
+                                          >
+                                            <CenterLoadingDots />
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </React.Fragment>
                                   ))}
                                 </tbody>
                               </table>
@@ -511,14 +613,17 @@ export default function Example() {
                                   {data.collection?.standard}
                                 </dd>
                               </div>
-                              <div className="sm:col-span-1">
-                                <dt className="text-sm font-medium text-gray-500">
-                                  Rarity
-                                </dt>
-                                <dd className="mt-1 text-sm text-gray-900">
-                                  Rare AF
-                                </dd>
-                              </div>
+                              {data.collection?.standard ===
+                                TokenStandard.Erc721 && (
+                                <div className="sm:col-span-1">
+                                  <dt className="text-sm font-medium text-gray-500">
+                                    Rarity
+                                  </dt>
+                                  <dd className="mt-1 text-sm text-gray-900">
+                                    Rare AF
+                                  </dd>
+                                </div>
+                              )}
                             </div>
                           </Disclosure.Panel>
                         </>
@@ -565,11 +670,8 @@ export default function Example() {
                                     </p>
                                   ))}
                                 {tokenInfo.listings &&
-                                  tokenInfo.listings
-                                    .slice(0)
-                                    // Latest one to the top
-                                    .reverse()
-                                    .map((listing, listingIdx) => (
+                                  tokenInfo.listings.map(
+                                    (listing, listingIdx) => (
                                       <li key={listing.id}>
                                         <div className="relative pb-8">
                                           {listingIdx !==
@@ -616,11 +718,11 @@ export default function Example() {
                                             </div>
                                             <div className="min-w-0 flex-1 pt-2 flex justify-between space-x-4">
                                               <div>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-xs lg:text-sm text-gray-500">
                                                   {timelineContent(listing)}
                                                 </p>
                                               </div>
-                                              <div className="text-right text-xs whitespace-nowrap text-gray-500">
+                                              <div className="text-right text-xs lg:text-sm whitespace-nowrap text-gray-500">
                                                 {formatDistanceToNow(
                                                   new Date(
                                                     Number(
@@ -634,7 +736,8 @@ export default function Example() {
                                           </div>
                                         </div>
                                       </li>
-                                    ))}
+                                    )
+                                  )}
                               </ul>
                             </div>
                           </Disclosure.Panel>
@@ -648,6 +751,15 @@ export default function Example() {
           </>
         )}
       </div>
+      {modalProps.isOpen && modalProps.targetNft && (
+        <PurchaseItemModal
+          isOpen={true}
+          state={state}
+          send={send}
+          onClose={() => setModalProps({ isOpen: false, targetNft: null })}
+          targetNft={modalProps.targetNft}
+        />
+      )}
     </div>
   );
 }
@@ -687,4 +799,186 @@ const timelineContent = (
     case Status.Hidden:
       return <p>{shortenIfAddress(listing.user.id)} hidden this item</p>;
   }
+};
+
+const PurchaseItemModal = ({
+  isOpen,
+  onClose,
+  targetNft,
+  state,
+  send,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  targetNft: targetNftT;
+  state: TransactionStatus;
+  send: (
+    nft: targetNftT,
+    address: string,
+    ownerAddress: string,
+    tokenId: number,
+    quantity: number
+  ) => void;
+}) => {
+  const [quantity, setQuantity] = React.useState(1);
+  const { account } = useEthers();
+  const { metadata, payload } = targetNft;
+  const chainId = useChainId();
+
+  const router = useRouter();
+  const { address } = router.query;
+  const { magicBalance, magicPrice, setSushiModalOpen } = useMagic();
+
+  const normalizedAddress = Array.isArray(address)
+    ? address[0]
+    : address ?? AddressZero;
+
+  const totalPrice =
+    quantity * Number(parseFloat(formatEther(targetNft.payload.pricePerItem)));
+
+  const canPurchase = magicBalance.gte(
+    BigNumber.from(targetNft.payload.pricePerItem).mul(quantity)
+  );
+
+  const { send: approve, state: approveState } = useApproveMagic();
+
+  const magicAllowance = useTokenAllowance(
+    Contracts[chainId].magic,
+    account ?? AddressZero,
+    Contracts[chainId].marketplace
+  );
+
+  const notAllowed = magicAllowance?.isZero() ?? true;
+
+  return (
+    <Modal onClose={onClose} isOpen={isOpen} title="Order Summary">
+      <div className="sm:mt-10 lg:mt-0">
+        <div className="sm:mt-4">
+          <h3 className="sr-only">Items in your cart</h3>
+          <ul role="list" className="divide-y divide-gray-200">
+            <li
+              key={payload.id}
+              className="flex flex-col sm:flex-row py-6 px-4 sm:px-6"
+            >
+              <div className="flex-shrink-0">
+                <Image
+                  src={
+                    metadata?.image?.includes("ipfs")
+                      ? generateIpfsLink(metadata.image)
+                      : metadata?.image ?? ""
+                  }
+                  alt={metadata?.name ?? ""}
+                  width="50%"
+                  height="50%"
+                />
+              </div>
+
+              <div className="sm:ml-6 sm:space-y-0 mt-2 sm:mt-0 space-y-2 flex-1 flex flex-col">
+                <div className="flex">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 uppercase">
+                        {metadata?.description}
+                      </p>
+                      <p className="mt-1 font-medium text-gray-800 dark:text-gray-50 hover:text-gray-800">
+                        {metadata?.name ?? ""}
+                      </p>
+                    </h4>
+                  </div>
+                </div>
+
+                {payload.standard === "ERC1155" && (
+                  <div className="flex-1 sm:pt-2 flex items-end justify-between">
+                    <p className="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">
+                      {formatEther(payload.pricePerItem)} $MAGIC{" "}
+                      <span className="text-[0.5rem] text-gray-500 dark:text-gray-400">
+                        Per Item
+                      </span>
+                    </p>
+
+                    <div className="ml-4">
+                      <label htmlFor="quantity" className="sr-only">
+                        Quantity
+                      </label>
+                      <select
+                        id="quantity"
+                        name="quantity"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                        className="form-select rounded-md border dark:text-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:focus:ring-gray-300 dark:focus:border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                      >
+                        {Array.from({
+                          length: Number(payload.quantity) || 0,
+                        }).map((_, idx) => (
+                          <option key={idx} value={idx + 1}>
+                            {idx + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </li>
+          </ul>
+          <dl className="py-6 px-4 space-y-6 sm:px-6">
+            <div className="flex items-center justify-between border-t border-gray-200 pt-6">
+              <dt className="text-base font-medium">Total</dt>
+              <dd className="text-base font-medium text-gray-900 dark:text-gray-100 flex flex-col items-end">
+                <p>{totalPrice} $MAGIC</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  ≈ ${formatNumber(totalPrice * magicPrice)}
+                </p>
+              </dd>
+            </div>
+          </dl>
+
+          <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
+            {notAllowed ? (
+              <Button
+                onClick={approve}
+                isLoading={approveState.status === "Mining"}
+                loadingText="Approving $MAGIC..."
+                variant="secondary"
+              >
+                Approve $MAGIC to purchase this item
+              </Button>
+            ) : (
+              <>
+                <Button
+                  disabled={!canPurchase || state.status === "Mining"}
+                  isLoading={state.status === "Mining"}
+                  loadingText="Confirming order..."
+                  onClick={() => {
+                    send(
+                      targetNft,
+                      normalizedAddress,
+                      payload.user.id,
+                      Number(payload.tokenId),
+                      quantity
+                    );
+                  }}
+                >
+                  {canPurchase
+                    ? "Confirm order"
+                    : "You have insufficient funds"}
+                </Button>
+                {!canPurchase && (
+                  <button
+                    className="mt-4 text-xs w-full m-auto text-red-500 underline"
+                    onClick={() => {
+                      onClose();
+                      setSushiModalOpen(true);
+                    }}
+                  >
+                    Purchase MAGIC on SushiSwap
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
 };

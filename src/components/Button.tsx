@@ -9,6 +9,7 @@ type ButtonProps = {
   loadingText?: string;
   onClick: () => void;
   variant?: "secondary";
+  tooltip?: string;
 };
 
 const Button = ({
@@ -18,15 +19,17 @@ const Button = ({
   loadingText,
   onClick,
   variant,
+  tooltip,
 }: ButtonProps) => {
   return (
     <button
       type="button"
+      title={tooltip}
       className={classNames(
         variant === "secondary"
           ? "text-red-700 bg-red-100 hover:bg-red-200 dark:bg-gray-200 dark:text-gray-600"
           : "text-white bg-red-600 hover:bg-red-700 dark:bg-gray-700 dark:text-gray-200",
-        "flex justify-center flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-gray-400 w-full disabled:bg-red-300 dark:disabled:opacity-30 disabled:cursor-not-allowed ease-linear duration-300"
+        "flex justify-center flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-gray-400 w-full disabled:opacity-50 disabled:cursor-not-allowed ease-linear duration-300"
       )}
       disabled={disabled}
       onClick={onClick}

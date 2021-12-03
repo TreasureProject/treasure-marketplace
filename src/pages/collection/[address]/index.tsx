@@ -1,5 +1,3 @@
-import type { ListedNft } from "../../../types";
-
 import { useRouter } from "next/router";
 import React, { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
@@ -21,17 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
 import { Listing_OrderBy, OrderDirection } from "../../../../generated/graphql";
-import { useMagic } from "../../../context/magicContext";
-import { BigNumber } from "@ethersproject/bignumber";
-import Button from "../../../components/Button";
-import { useApproveMagic, useBuyItem, useChainId } from "../../../lib/hooks";
-import {
-  shortenAddress,
-  TransactionStatus,
-  useEthers,
-  useTokenAllowance,
-} from "@yuyao17/corefork";
-import { Contracts } from "../../../const";
+import { shortenAddress, useEthers } from "@yuyao17/corefork";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
 import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
@@ -90,13 +78,6 @@ const Collection = () => {
   const [searchParams, setSearchParams] = useState("");
   const [isDetailedFloorPriceModalOpen, setDetailedFloorPriceModalOpen] =
     useState(false);
-  const [modalProps, setModalProps] = useState<{
-    isOpen: boolean;
-    targetNft: ListedNft | null;
-  }>({
-    isOpen: false,
-    targetNft: null,
-  });
 
   const sortParam = sort ?? OrderDirection.Asc;
   const activitySortParam = activitySort ?? "time";
@@ -173,23 +154,6 @@ const Collection = () => {
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
     }
   );
-
-  const keyParams = React.useMemo(
-    () => ({
-      address,
-      sortParam,
-      searchParams,
-    }),
-    [address, searchParams, sortParam]
-  );
-
-  const { send, state } = useBuyItem(keyParams);
-
-  useEffect(() => {
-    if (state.status === "Success") {
-      setModalProps({ isOpen: false, targetNft: null });
-    }
-  }, [state.status]);
 
   // reset searchParams on address change
   useEffect(() => {
@@ -282,7 +246,6 @@ const Collection = () => {
               >
                 {tabs.map((tab) => {
                   const isCurrentTab = formattedTab === tab.name.toLowerCase();
-                  console.log(formattedTab);
                   return (
                     <Link
                       key={tab.name}
@@ -608,15 +571,7 @@ const Collection = () => {
           </>
         )}
       </div>
-      {modalProps.isOpen && modalProps.targetNft && (
-        <PurchaseItemModal
-          isOpen={true}
-          state={state}
-          send={send}
-          onClose={() => setModalProps({ isOpen: false, targetNft: null })}
-          list={modalProps.targetNft}
-        />
-      )}
+
       {statData?.collection && isDetailedFloorPriceModalOpen && (
         <DetailedFloorPriceModal
           isOpen={true}
@@ -708,187 +663,6 @@ const DetailedFloorPriceModal = ({
                 </table>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-const PurchaseItemModal = ({
-  isOpen,
-  onClose,
-  list,
-  state,
-  send,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  list: ListedNft;
-  state: TransactionStatus;
-  send: (
-    nft: ListedNft,
-    address: string,
-    ownerAddress: string,
-    tokenId: number,
-    quantity: number
-  ) => void;
-}) => {
-  const [quantity, setQuantity] = useState(1);
-  const { account } = useEthers();
-  const chainId = useChainId();
-
-  const router = useRouter();
-  const { address } = router.query;
-  const { magicBalance, magicPrice, setSushiModalOpen } = useMagic();
-
-  const normalizedAddress = Array.isArray(address)
-    ? address[0]
-    : address ?? AddressZero;
-
-  const totalPrice =
-    quantity * Number(parseFloat(formatEther(list.pricePerItem)));
-
-  const canPurchase = magicBalance.gte(
-    BigNumber.from(list.pricePerItem).mul(quantity)
-  );
-
-  const { send: approve, state: approveState } = useApproveMagic();
-
-  const magicAllowance = useTokenAllowance(
-    Contracts[chainId].magic,
-    account ?? AddressZero,
-    Contracts[chainId].marketplace
-  );
-
-  const notAllowed = magicAllowance?.isZero() ?? true;
-
-  return (
-    <Modal onClose={onClose} isOpen={isOpen} title="Order Summary">
-      <div className="sm:mt-10 lg:mt-0">
-        <div className="sm:mt-4">
-          <h3 className="sr-only">Items in your cart</h3>
-          <ul role="list" className="divide-y divide-gray-200">
-            <li
-              key={list.id}
-              className="flex flex-col sm:flex-row py-6 px-4 sm:px-6"
-            >
-              <div className="flex-shrink-0">
-                <Image
-                  src={
-                    list.token.metadata?.image?.includes("ipfs")
-                      ? generateIpfsLink(list.token.metadata.image)
-                      : list.token.metadata?.image ?? ""
-                  }
-                  alt={list.token.name ?? ""}
-                  width="50%"
-                  height="50%"
-                />
-              </div>
-
-              <div className="sm:ml-6 sm:space-y-0 mt-2 sm:mt-0 space-y-2 flex-1 flex flex-col">
-                <div className="flex">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 uppercase">
-                        {list.token.metadata?.description}
-                      </p>
-                      <p className="mt-1 font-medium text-gray-800 dark:text-gray-50 hover:text-gray-800">
-                        {list.token.name ?? ""}
-                      </p>
-                    </h4>
-                  </div>
-                </div>
-
-                {list.standard === "ERC1155" && (
-                  <div className="flex-1 sm:pt-2 flex items-end justify-between">
-                    <p className="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">
-                      {formatEther(list.pricePerItem)} $MAGIC{" "}
-                      <span className="text-[0.5rem] text-gray-500 dark:text-gray-400">
-                        Per Item
-                      </span>
-                    </p>
-
-                    <div className="ml-4">
-                      <label htmlFor="quantity" className="sr-only">
-                        Quantity
-                      </label>
-                      <select
-                        id="quantity"
-                        name="quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        className="form-select rounded-md border dark:text-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:focus:ring-gray-300 dark:focus:border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                      >
-                        {Array.from({
-                          length: Number(list.quantity) || 0,
-                        }).map((_, idx) => (
-                          <option key={idx} value={idx + 1}>
-                            {idx + 1}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </li>
-          </ul>
-          <dl className="py-6 px-4 space-y-6 sm:px-6">
-            <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-              <dt className="text-base font-medium">Total</dt>
-              <dd className="text-base font-medium text-gray-900 dark:text-gray-100 flex flex-col items-end">
-                <p>{totalPrice} $MAGIC</p>
-                <p className="text-gray-500 text-sm mt-1">
-                  ≈ ${formatNumber(totalPrice * magicPrice)}
-                </p>
-              </dd>
-            </div>
-          </dl>
-
-          <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
-            {notAllowed ? (
-              <Button
-                onClick={approve}
-                isLoading={approveState.status === "Mining"}
-                loadingText="Approving $MAGIC..."
-                variant="secondary"
-              >
-                Approve $MAGIC to purchase this item
-              </Button>
-            ) : (
-              <>
-                <Button
-                  disabled={!canPurchase || state.status === "Mining"}
-                  isLoading={state.status === "Mining"}
-                  loadingText="Confirming order..."
-                  onClick={() => {
-                    send(
-                      list,
-                      normalizedAddress,
-                      list.user.id,
-                      Number(list.token.tokenId),
-                      quantity
-                    );
-                  }}
-                >
-                  {canPurchase
-                    ? "Confirm order"
-                    : "You have insufficient funds"}
-                </Button>
-                {!canPurchase && (
-                  <button
-                    className="mt-4 text-xs w-full m-auto text-red-500 underline"
-                    onClick={() => {
-                      onClose();
-                      setSushiModalOpen(true);
-                    }}
-                  >
-                    Purchase MAGIC on SushiSwap
-                  </button>
-                )}
-              </>
-            )}
           </div>
         </div>
       </div>

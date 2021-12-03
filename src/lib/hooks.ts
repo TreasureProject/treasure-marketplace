@@ -1,4 +1,4 @@
-import type { ListedNft, Nft } from "../types";
+import type { Nft, targetNftT } from "../types";
 
 import * as abis from "./abis";
 import {
@@ -234,11 +234,7 @@ export function useRemoveListing() {
   }, [remove]);
 }
 
-export function useBuyItem(keys: {
-  address: string | string[] | undefined;
-  sortParam: string | string[];
-  searchParams: string;
-}) {
+export function useBuyItem() {
   const queryClient = useQueryClient();
   const chainId = useChainId();
   const { account } = useEthers();
@@ -258,10 +254,10 @@ export function useBuyItem(keys: {
       case "Success":
         toast.success("Successfully purchased!");
 
-        queryClient.invalidateQueries(["listings", keys], {
+        queryClient.invalidateQueries("details", {
           refetchInactive: true,
         });
-        queryClient.invalidateQueries(["stats", keys.address], {
+        queryClient.invalidateQueries("erc1155Listings", {
           refetchInactive: true,
         });
 
@@ -270,11 +266,11 @@ export function useBuyItem(keys: {
 
         break;
     }
-  }, [queryClient, state.errorMessage, keys, state.status]);
+  }, [queryClient, state.errorMessage, state.status]);
 
   return useMemo(() => {
     const send = (
-      nft: ListedNft,
+      nft: targetNftT,
       address: string,
       ownerAddress: string,
       tokenId: number,
@@ -283,16 +279,16 @@ export function useBuyItem(keys: {
       sendBuy(address, tokenId, ownerAddress, quantity);
 
       webhook.current = () => {
-        const { pricePerItem, token } = nft;
+        const { metadata, payload } = nft;
 
         callWebhook("sold", {
           address,
-          collection: token.metadata?.description ?? "",
-          image: token.metadata?.image?.includes("ipfs")
-            ? generateIpfsLink(token.metadata.image)
-            : token.metadata?.image ?? "",
-          name: token.name ?? "",
-          price: pricePerItem.toString(),
+          collection: metadata?.description ?? "",
+          image: metadata?.image?.includes("ipfs")
+            ? generateIpfsLink(metadata.image)
+            : metadata?.image ?? "",
+          name: metadata?.name ?? "",
+          price: payload.pricePerItem.toString(),
           quantity,
           user: String(account),
         });
