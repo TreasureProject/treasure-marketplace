@@ -25,7 +25,12 @@ import client from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
 import { useApproveMagic, useBuyItem, useChainId } from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
-import { formatNumber, formatPrice, generateIpfsLink } from "../../../utils";
+import {
+  formatNumber,
+  formatPrice,
+  formattable,
+  generateIpfsLink,
+} from "../../../utils";
 import {
   GetTokenDetailsQuery,
   Status,
@@ -261,7 +266,7 @@ export default function Example() {
                                       {attribute.name}
                                     </p>
                                     <p className="mt-1 font-medium dark:text-gray-900">
-                                      {attribute.value}
+                                      {formattable(attribute.value)}
                                     </p>
                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
                                       {Number(
@@ -575,7 +580,7 @@ export default function Example() {
                                       {attribute.name}
                                     </p>
                                     <p className="mt-1 font-medium dark:text-gray-900">
-                                      {attribute.value}
+                                      {attribute.value} {formatEther}
                                     </p>
                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
                                       {Number(

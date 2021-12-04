@@ -14,6 +14,14 @@ export const formatNumber = (number: number) =>
 export const formatPrice = (price: string) =>
   formatNumber(parseFloat(formatEther(price)));
 
+export const formattable = (string: string) => {
+  if (isNaN(Number(string))) {
+    return string;
+  }
+
+  return formatPrice(string);
+};
+
 export const abbreviatePrice = (number: string) => {
   if (!number) return 0;
 
