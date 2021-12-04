@@ -960,7 +960,7 @@ const PurchaseItemModal = ({
                   </div>
                 </div>
 
-                {payload.standard === "ERC1155" && (
+                {payload.standard === TokenStandard.Erc1155 && (
                   <div className="flex-1 pt-4 flex items-end justify-between">
                     <p className="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">
                       {formatEther(payload.pricePerItem)} $MAGIC{" "}

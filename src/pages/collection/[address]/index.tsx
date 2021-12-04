@@ -18,7 +18,11 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
-import { Listing_OrderBy, OrderDirection } from "../../../../generated/graphql";
+import {
+  Listing_OrderBy,
+  OrderDirection,
+  TokenStandard,
+} from "../../../../generated/graphql";
 import { shortenAddress, useEthers } from "@yuyao17/corefork";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
@@ -125,7 +129,8 @@ const Collection = () => {
     }
   );
 
-  const isERC1155 = collectionData?.collection?.standard === "ERC1155";
+  const isERC1155 =
+    collectionData?.collection?.standard === TokenStandard.Erc1155;
 
   const {
     data: listingData,

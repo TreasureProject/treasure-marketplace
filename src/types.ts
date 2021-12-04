@@ -25,7 +25,7 @@ export type Nft = {
   };
   name: string;
   total: number;
-  standard: "ERC721" | "ERC1155";
+  standard: TokenStandard;
   source: string;
   tokenId: string;
 };

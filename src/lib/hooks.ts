@@ -17,6 +17,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
+import { TokenStandard } from "../../generated/graphql";
 
 type WebhookBody = {
   address: string;
@@ -56,14 +57,14 @@ export function useChainId() {
   }
 }
 
-export function useApproveContract(
-  contract: string,
-  standard: "ERC721" | "ERC1155"
-) {
+export function useApproveContract(contract: string, standard: TokenStandard) {
   const chainId = useChainId();
 
   const approve = useContractFunction(
-    new Contract(contract, standard === "ERC721" ? abis.erc721 : abis.erc1155),
+    new Contract(
+      contract,
+      standard === TokenStandard.Erc721 ? abis.erc721 : abis.erc1155
+    ),
     "setApprovalForAll"
   );
 
@@ -85,7 +86,7 @@ export function useApproveContract(
 }
 
 export function useContractApprovals(
-  collections: Array<{ address: string; standard: "ERC721" | "ERC1155" }>
+  collections: Array<{ address: string; standard: TokenStandard }>
 ) {
   const { account } = useEthers();
   const chainId = useChainId();
