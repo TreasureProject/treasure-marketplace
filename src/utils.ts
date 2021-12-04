@@ -22,6 +22,15 @@ export const formattable = (string: string) => {
   return formatPrice(string);
 };
 
+export const formatPercent = (percentage: string) => {
+  const number = parseFloat(percentage);
+  return number.toLocaleString("en-US", {
+    style: "percent",
+    // if its a whole number, don't add the decimal
+    minimumFractionDigits: number % 1 !== 0 ? 2 : 0,
+  });
+};
+
 export const abbreviatePrice = (number: string) => {
   if (!number) return 0;
 

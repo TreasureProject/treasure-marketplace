@@ -27,6 +27,7 @@ import { useApproveMagic, useBuyItem, useChainId } from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
   formatNumber,
+  formatPercent,
   formatPrice,
   formattable,
   generateIpfsLink,
@@ -269,12 +270,8 @@ export default function Example() {
                                       {formattable(attribute.value)}
                                     </p>
                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
-                                      {Number(
-                                        attribute.percentage
-                                      ).toLocaleString("en-US", {
-                                        style: "percent",
-                                      })}{" "}
-                                      have this trait
+                                      {formatPercent(attribute.percentage)} have
+                                      this trait
                                     </p>
                                   </div>
                                 )
