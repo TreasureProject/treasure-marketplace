@@ -675,10 +675,10 @@ export default function Example() {
                                     Rank
                                   </dt>
                                   <dd className="mt-1 text-sm text-gray-900 dark:text-gray-300 space-x-1">
-                                    <span>{tokenInfo.rank}</span>
-                                    <span className="text-gray-400">
+                                    <span>Coming Soon!</span>
+                                    {/* <span className="text-gray-400">
                                       ({getRarity(tokenInfo.rank ?? 0)})
-                                    </span>
+                                    </span> */}
                                   </dd>
                                 </div>
                               )}
