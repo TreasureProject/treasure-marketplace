@@ -857,7 +857,7 @@ const timelineContent = (
         </p>
       );
     case Status.Hidden:
-      return <p>{shortenIfAddress(listing.user.id)} hidden this item</p>;
+      return <p>{shortenIfAddress(listing.user.id)} hid this item</p>;
   }
 };
 
