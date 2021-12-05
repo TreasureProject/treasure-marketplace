@@ -92,7 +92,6 @@ export const getCollectionListings = gql`
     $isERC1155: Boolean!
   ) {
     collection(id: $id) {
-      _listingIds
       name
       address
       standard
@@ -100,8 +99,9 @@ export const getCollectionListings = gql`
         id
         name
         tokenId
-        listings(first: 1, where: { status: Active }, orderBy: pricePerItem) {
+        listings(where: { status: Active }, orderBy: pricePerItem) {
           pricePerItem
+          quantity
         }
         metadata {
           image

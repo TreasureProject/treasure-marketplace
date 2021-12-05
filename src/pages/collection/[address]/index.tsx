@@ -19,6 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
 import {
+  GetCollectionListingsQuery,
   Listing_OrderBy,
   OrderDirection,
   TokenStandard,
@@ -73,6 +74,19 @@ const MapSortToEnum = (sort: string) => {
       return OrderDirection.Desc;
   }
   return assertUnreachable();
+};
+
+const getTotalQuantity = (
+  listings: NonNullable<
+    NonNullable<GetCollectionListingsQuery["collection"]>["tokens"]
+  >[number]["listings"]
+) => {
+  return listings && listings.length > 0
+    ? listings.reduce<number>(
+        (acc, listing) => acc + Number(listing.quantity),
+        0
+      )
+    : 0;
 };
 
 const Collection = () => {
@@ -434,18 +448,10 @@ const Collection = () => {
                                 </p>
                                 <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
                                   <span className="text-gray-500 dark:text-gray-400">
-                                    Listings:
+                                    Listed Items:
                                   </span>{" "}
                                   <span className="font-bold text-gray-700 dark:text-gray-300">
-                                    {group.collection?._listingIds
-                                      .filter((id) =>
-                                        id.endsWith(
-                                          `-0x${Number(token.tokenId).toString(
-                                            16
-                                          )}`
-                                        )
-                                      )
-                                      .length.toLocaleString()}
+                                    {getTotalQuantity(token.listings)}
                                   </span>
                                 </p>
                               </div>
