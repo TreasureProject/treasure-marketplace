@@ -117,11 +117,11 @@ export default async function handler(
           fields: [
             {
               name: "Name",
-              value: name,
+              value: `[${collection}](https://marketplace.treasure.lol/collection/${address}/${tokenId})`,
             },
             {
               name: "Collection",
-              value: `[${collection}](https://marketplace.treasure.lol/collection/${address}/${tokenId})`,
+              value: `[${collection}](https://marketplace.treasure.lol/collection/${address})`,
             },
             updates
               ? formatUpdate(
