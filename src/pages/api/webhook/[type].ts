@@ -62,6 +62,7 @@ export default async function handler(
     address,
     collection,
     expires,
+    tokenId,
     image,
     name,
     price,
@@ -72,6 +73,7 @@ export default async function handler(
     .object({
       address: z.string(),
       collection: z.string(),
+      tokenId: z.string(),
       expires: z.number().optional(),
       image: z.string(),
       name: z.string(),
@@ -119,7 +121,7 @@ export default async function handler(
             },
             {
               name: "Collection",
-              value: `[${collection}](https://marketplace.treasure.lol/collection/${address})`,
+              value: `[${collection}](https://marketplace.treasure.lol/collection/${address}/${tokenId})`,
             },
             updates
               ? formatUpdate(
@@ -166,7 +168,7 @@ export default async function handler(
   try {
     await got.post(type === "sold" ? soldWebhook : listWebhook, payload).json();
 
-    const lowerAddress = address.toLowerCase()
+    const lowerAddress = address.toLowerCase();
 
     if (collectionWebhooks[lowerAddress]) {
       console.log("Posting to collection webhook!");

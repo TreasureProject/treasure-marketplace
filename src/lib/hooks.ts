@@ -24,6 +24,7 @@ type WebhookBody = {
   collection: string;
   expires?: number;
   image: string;
+  tokenId: string;
   name: string;
   price: string;
   quantity: number;
@@ -179,6 +180,7 @@ export function useCreateListing() {
           address,
           collection,
           expires,
+          tokenId: nft.tokenId,
           image: source,
           name,
           price: price.toString(),
@@ -284,6 +286,7 @@ export function useBuyItem() {
             ? generateIpfsLink(metadata.image)
             : metadata?.image ?? "",
           name: metadata?.name ?? "",
+          tokenId: payload.tokenId,
           price: payload.pricePerItem.toString(),
           quantity,
           user: String(account),
@@ -358,11 +361,12 @@ export function useUpdateListing() {
       update.send(address, tokenId, quantity, price, expires);
 
       webhook.current = () => {
-        const { collection, listing, name, source } = nft;
+        const { collection, listing, name, source, tokenId } = nft;
 
         callWebhook("update", {
           address,
           collection,
+          tokenId,
           expires: Number(listing?.expires ?? 0),
           image: source,
           name,
