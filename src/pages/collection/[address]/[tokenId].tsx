@@ -271,8 +271,12 @@ export default function Example() {
                                       {formattable(attribute.value)}
                                     </p>
                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
-                                      {formatPercent(attribute.percentage)} have
-                                      this trait
+                                      {attribute.name === "IQ"
+                                        ? "100%"
+                                        : formatPercent(
+                                            attribute.percentage
+                                          )}{" "}
+                                      have this trait
                                     </p>
                                   </div>
                                 )
@@ -579,11 +583,16 @@ export default function Example() {
                                       {attribute.name}
                                     </p>
                                     <p className="mt-1 font-medium dark:text-gray-900">
-                                      {attribute.value} {formatEther}
+                                      {formattable(attribute.value)}
                                     </p>
                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
-                                      {formatPercent(attribute.percentage)} have
-                                      this trait
+                                      {/* TODO: remove when updated graph */}
+                                      {attribute.name === "IQ"
+                                        ? "100%"
+                                        : formatPercent(
+                                            attribute.percentage
+                                          )}{" "}
+                                      have this trait
                                     </p>
                                   </div>
                                 )
