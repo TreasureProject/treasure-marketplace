@@ -223,7 +223,7 @@ export default function Example() {
                   />
                 </div>
                 {/* hide for mobile */}
-                <div className="hidden lg:block">
+                <div className="hidden xl:block">
                   <Disclosure as="div" defaultOpen>
                     {({ open }) => (
                       <>
@@ -534,7 +534,7 @@ export default function Example() {
                   <Disclosure
                     as="div"
                     defaultOpen
-                    className="block lg:hidden border-t"
+                    className="block xl:hidden border-t"
                   >
                     {({ open }) => (
                       <>
@@ -582,12 +582,8 @@ export default function Example() {
                                       {attribute.value} {formatEther}
                                     </p>
                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-600">
-                                      {Number(
-                                        attribute.percentage
-                                      ).toLocaleString("en-US", {
-                                        style: "percent",
-                                      })}{" "}
-                                      have this trait
+                                      {formatPercent(attribute.percentage)} have
+                                      this trait
                                     </p>
                                   </div>
                                 )
