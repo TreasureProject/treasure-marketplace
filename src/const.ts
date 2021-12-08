@@ -67,12 +67,16 @@ export const collections = {
       address: "0xE83c0200E93Cb1496054e387BDdaE590C07f0194",
     },
     {
+      name: "Smol Brains",
+      address: "0x6325439389E0797Ab35752B4F43a14C004f22A9c",
+    },
+    {
       name: "Smol Brains Land",
       address: "0xd666d1CC3102cd03e07794A61E5F4333B4239F53",
     },
     {
-      name: "Smol Brains",
-      address: "0x6325439389E0797Ab35752B4F43a14C004f22A9c",
+      name: "Smol Cars",
+      address: "0xB16966daD2B5a5282b99846B23dcDF8C47b6132C",
     },
     {
       name: "Treasures",
@@ -81,10 +85,6 @@ export const collections = {
     {
       name: "Seed of Life",
       address: "0x3956C81A51FeAed98d7A678d53F44b9166c8ed66",
-    },
-    {
-      name: "Smol Cars",
-      address: "0xB16966daD2B5a5282b99846B23dcDF8C47b6132C",
     },
   ],
 };
