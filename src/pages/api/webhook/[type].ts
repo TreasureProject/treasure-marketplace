@@ -16,6 +16,11 @@ const collectionWebhooks = {
     listWebhook: process.env.SMOLBRAINS_LIST_WEBHOOK,
     soldWebhook: process.env.SMOLBRAINS_SOLD_WEBHOOK,
   },
+  // Smol Cars
+  "0xb16966dad2b5a5282b99846b23dcdf8c47b6132c": {
+    listWebhook: process.env.SMOLBRAINS_LIST_WEBHOOK,
+    soldWebhook: process.env.SMOLBRAINS_SOLD_WEBHOOK,
+  },
 };
 
 function formatUpdate<T>(
