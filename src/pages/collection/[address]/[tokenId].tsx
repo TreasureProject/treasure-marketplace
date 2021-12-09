@@ -1024,7 +1024,6 @@ const TransferNFTModal = ({
         loadingText="Transferring NFT..."
         disabled={!utils.isAddress(recipientAddress)}
         onClick={() => {
-          console.log({ account, recipientAddress, normalizedTokenId });
           if (account) {
             standard === TokenStandard.Erc721
               ? transfer(account, recipientAddress, normalizedTokenId)
