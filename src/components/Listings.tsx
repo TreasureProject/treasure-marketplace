@@ -14,6 +14,7 @@ import Image from "next/image";
 import QueryLink from "./QueryLink";
 import classNames from "clsx";
 import { Disclosure } from "@headlessui/react";
+import Link from "next/link";
 
 const sortOptions = [
   { name: "Highest Price", value: "price" },
@@ -164,9 +165,14 @@ const Listings = ({
                           <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
                             {listing.token.metadata?.description}
                           </p>
-                          <p className="text-xs text-gray-800 dark:text-gray-700 font-semibold truncate">
-                            {listing.token.name}
-                          </p>
+                          <Link
+                            href={`/collection/${listing.collection.id}/${listing.token.tokenId}`}
+                            passHref
+                          >
+                            <a className="text-xs text-gray-800 dark:text-gray-700 font-semibold truncate hover:underline">
+                              {listing.token.name}
+                            </a>
+                          </Link>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
