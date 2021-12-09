@@ -376,7 +376,7 @@ export default function Example() {
                     </div>
 
                     <div className="mt-6">
-                      {yourListingExists ||
+                      {yourListingExists &&
                       addressEqual(
                         tokenInfo.lowestPrice[0].user.id,
                         account ?? AddressZero
