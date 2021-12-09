@@ -6,6 +6,7 @@ import {
   ExternalLinkIcon,
   EyeOffIcon,
   ShoppingCartIcon,
+  SwitchHorizontalIcon,
 } from "@heroicons/react/solid";
 import { MinusSmIcon, PlusSmIcon } from "@heroicons/react/outline";
 import Image from "next/image";
@@ -23,7 +24,12 @@ import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { useRouter } from "next/router";
 import client from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
-import { useApproveMagic, useBuyItem, useChainId } from "../../../lib/hooks";
+import {
+  useApproveMagic,
+  useBuyItem,
+  useChainId,
+  useTransferNFT,
+} from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
   formatNumber,
@@ -47,28 +53,30 @@ import { Modal } from "../../../components/Modal";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contracts } from "../../../const";
 import { targetNftT } from "../../../types";
+import { Tooltip } from "../../../components/Tooltip";
+import { utils } from "ethers";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
-const getRarity = (rank: number) => {
-  if (rank >= 0 && rank <= 50) {
-    return "Rare AF";
-  }
+// const getRarity = (rank: number) => {
+//   if (rank >= 0 && rank <= 50) {
+//     return "Rare AF";
+//   }
 
-  if (rank >= 51 && rank <= 300) {
-    return "Super Rare";
-  }
+//   if (rank >= 51 && rank <= 300) {
+//     return "Super Rare";
+//   }
 
-  if (rank >= 301 && rank <= 3000) {
-    return "Looks Rare";
-  }
+//   if (rank >= 301 && rank <= 3000) {
+//     return "Looks Rare";
+//   }
 
-  if (rank >= 3001 && rank <= 4000) {
-    return "Uncommon";
-  }
+//   if (rank >= 3001 && rank <= 4000) {
+//     return "Uncommon";
+//   }
 
-  return "Common";
-};
+//   return "Common";
+// };
 
 export default function Example() {
   const router = useRouter();
@@ -83,6 +91,8 @@ export default function Example() {
     isOpen: false,
     targetNft: null,
   });
+  const [isTransferModalOpen, setTransferModalOpen] =
+    React.useState<boolean>(false);
   const { magicPrice } = useMagic();
 
   const formattedTokenId = Array.isArray(tokenId) ? tokenId[0] : tokenId;
@@ -178,10 +188,17 @@ export default function Example() {
 
   const loading = isLoading || isIdle;
 
-  const isYourListing = addressEqual(
-    account ?? AddressZero,
-    tokenInfo?.owner ? tokenInfo.owner.id : AddressZero
-  );
+  const yourListingExists =
+    data?.collection?.standard === TokenStandard.Erc721
+      ? addressEqual(
+          account ?? AddressZero,
+          tokenInfo?.owner ? tokenInfo.owner.id : AddressZero
+        )
+      : tokenInfo?.owners &&
+        tokenInfo.owners.length > 0 &&
+        tokenInfo.owners.some((owner) =>
+          addressEqual(owner.user.id, account ?? AddressZero)
+        );
 
   return (
     <div className="pt-12">
@@ -294,7 +311,27 @@ export default function Example() {
                 </div>
               </div>
 
-              <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0 lg:col-span-3">
+              <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0 lg:col-span-3 relative">
+                {yourListingExists && (
+                  <Tooltip content="Transfer NFT" sideOffset={5}>
+                    <div className="absolute right-0">
+                      <span className="relative z-0 inline-flex shadow-sm rounded-md">
+                        <button
+                          type="button"
+                          className="relative inline-flex items-center px-4 py-2 rounded-md border border-gray-300 bg-white dark:bg-transparent text-sm font-medium text-gray-500 dark:text-gray-200 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                          onClick={() => setTransferModalOpen(true)}
+                        >
+                          <span className="sr-only">Previous</span>
+                          <SwitchHorizontalIcon
+                            className="h-7 w-7"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </span>
+                    </div>
+                  </Tooltip>
+                )}
+
                 <h2 className="text-red-500 dark:text-gray-500 tracking-wide uppercase">
                   {data.collection.name}
                 </h2>
@@ -309,7 +346,7 @@ export default function Example() {
                     <div className="mt-2 text-xs text-gray-400">
                       Owned by:{" "}
                       <span>
-                        {isYourListing
+                        {yourListingExists
                           ? "You"
                           : shortenIfAddress(tokenInfo.owner.id)}
                       </span>
@@ -339,7 +376,7 @@ export default function Example() {
                     </div>
 
                     <div className="mt-6">
-                      {isYourListing ||
+                      {yourListingExists ||
                       addressEqual(
                         tokenInfo.lowestPrice[0].user.id,
                         account ?? AddressZero
@@ -822,6 +859,15 @@ export default function Example() {
           </>
         )}
       </div>
+      {tokenInfo && data?.collection?.standard && (
+        <TransferNFTModal
+          isOpen={isTransferModalOpen}
+          onClose={() => setTransferModalOpen(false)}
+          title={tokenInfo?.metadata?.name ?? ""}
+          token={tokenInfo}
+          standard={data.collection.standard}
+        />
+      )}
       {modalProps.isOpen && modalProps.targetNft && (
         <PurchaseItemModal
           isOpen={true}
@@ -870,6 +916,126 @@ const timelineContent = (
     case Status.Hidden:
       return <p>{shortenIfAddress(listing.user.id)} hid this item</p>;
   }
+};
+
+const TransferNFTModal = ({
+  isOpen,
+  onClose,
+  title,
+  token,
+  standard,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  token: Exclude<
+    GetTokenDetailsQuery["collection"],
+    null | undefined
+  >["tokens"][number];
+  standard: TokenStandard;
+}) => {
+  const [quantity, setQuantity] = React.useState(1);
+  const [recipientAddress, setRecipientAddress] = React.useState("");
+  const router = useRouter();
+
+  const { account } = useEthers();
+  const { address, tokenId } = router.query;
+
+  const normalizedAddress = Array.isArray(address)
+    ? address[0]
+    : address ?? AddressZero;
+
+  const normalizedTokenId = Array.isArray(tokenId)
+    ? tokenId[0]
+    : tokenId ?? "0";
+
+  const { send: transfer, state: transferState } = useTransferNFT(
+    normalizedAddress,
+    standard
+  );
+
+  React.useEffect(() => {
+    if (transferState.status === "Success") {
+      router.reload();
+    }
+  }, [router, transferState.status]);
+
+  const tokenQuantityLeft =
+    standard === TokenStandard.Erc1155 &&
+    token.owners &&
+    token.owners.length > 0
+      ? token.owners.find((owner) =>
+          addressEqual(owner.user.id, account ?? AddressZero)
+        )?.quantity ?? 0
+      : null;
+
+  return (
+    <Modal onClose={onClose} isOpen={isOpen} title={`Transfer ${title}`}>
+      {tokenQuantityLeft && (
+        <>
+          <div className="mt-6 text-xs text-gray-500">
+            <p>Quantity</p>
+          </div>
+          <div className="mt-2 text-sm">
+            <label htmlFor="quantity" className="sr-only">
+              Quantity
+            </label>
+            <select
+              id="quantity"
+              name="quantity"
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              className="form-select rounded-md border dark:text-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:focus:ring-gray-300 dark:focus:border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm w-full"
+            >
+              {Array.from({
+                length: Number(tokenQuantityLeft) || 0,
+              }).map((_, idx) => (
+                <option key={idx} value={idx + 1}>
+                  {idx + 1}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
+
+      <div className="mt-6 text-xs text-gray-500">
+        <p>Wallet Address to Transfer</p>
+      </div>
+      <div className="mt-2 sm:flex sm:items-center">
+        <div className="w-full">
+          <label htmlFor="address" className="sr-only">
+            Address
+          </label>
+          <input
+            type="address"
+            name="address"
+            id="address"
+            value={recipientAddress}
+            onChange={(e) => setRecipientAddress(e.target.value)}
+            className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md form-input"
+            placeholder="e.g. 0x00..."
+          />
+        </div>
+      </div>
+      <Button
+        className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm disabled:opacity-30 disabled:pointer-events-none"
+        isLoading={transferState.status === "Mining"}
+        loadingText="Transferring NFT..."
+        disabled={!utils.isAddress(recipientAddress)}
+        onClick={() => {
+          console.log({ account, recipientAddress, normalizedTokenId });
+          if (account) {
+            standard === TokenStandard.Erc721
+              ? transfer(account, recipientAddress, normalizedTokenId)
+              : transfer(account, recipientAddress, tokenId, quantity, 0x0);
+          }
+        }}
+      >
+        Transfer
+      </Button>
+    </Modal>
+  );
 };
 
 const PurchaseItemModal = ({

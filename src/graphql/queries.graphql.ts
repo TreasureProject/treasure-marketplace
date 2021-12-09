@@ -270,6 +270,12 @@ export const getTokenDetails = gql`
         owner {
           id
         }
+        owners {
+          quantity
+          user {
+            id
+          }
+        }
       }
     }
   }

@@ -18,7 +18,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       isLoading = false,
-      disabled = isLoading,
+      disabled,
       loadingText,
       onClick,
       variant,
@@ -39,7 +39,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className,
           "flex justify-center flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-gray-400 w-full disabled:opacity-50 disabled:cursor-not-allowed ease-linear duration-300"
         )}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         onClick={onClick}
       >
         {isLoading ? (

@@ -58,6 +58,29 @@ export function useChainId() {
   }
 }
 
+export function useTransferNFT(contract: string, standard: TokenStandard) {
+  const isERC721 = standard === TokenStandard.Erc721;
+
+  const transfer = useContractFunction(
+    new Contract(contract, isERC721 ? abis.erc721 : abis.erc1155),
+    isERC721 ? "safeTransferFrom(address,address,uint256)" : "safeTransferFrom"
+  );
+
+  useEffect(() => {
+    switch (transfer.state.status) {
+      case "Exception":
+      case "Fail":
+        toast.error(
+          `An error occurred while trying to transfer: ${contract}\n${transfer.state.errorMessage} `
+        );
+      case "Success":
+        toast.success(`Successfully transferred!`);
+    }
+  }, [transfer.state, contract]);
+
+  return transfer;
+}
+
 export function useApproveContract(contract: string, standard: TokenStandard) {
   const chainId = useChainId();
 
