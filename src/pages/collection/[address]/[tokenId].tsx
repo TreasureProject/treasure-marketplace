@@ -973,7 +973,7 @@ const TransferNFTModal = ({
     <Modal onClose={onClose} isOpen={isOpen} title={`Transfer ${title}`}>
       {tokenQuantityLeft && (
         <>
-          <div className="mt-6 text-xs text-gray-500">
+          <div className="mt-6 text-xs text-gray-700 dark:text-gray-300">
             <p>Quantity</p>
           </div>
           <div className="mt-2 text-sm">
@@ -999,7 +999,7 @@ const TransferNFTModal = ({
         </>
       )}
 
-      <div className="mt-6 text-xs text-gray-500">
+      <div className="mt-6 text-xs text-gray-700 dark:text-gray-300">
         <p>Wallet Address to Transfer</p>
       </div>
       <div className="mt-2 sm:flex sm:items-center">
@@ -1013,7 +1013,7 @@ const TransferNFTModal = ({
             id="address"
             value={recipientAddress}
             onChange={(e) => setRecipientAddress(e.target.value)}
-            className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md form-input"
+            className="form-input focus:ring-red-500 focus:border-red-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:placeholder-gray-400 rounded-md disabled:opacity-30 disabled:pointer-events-none"
             placeholder="e.g. 0x00..."
           />
         </div>
