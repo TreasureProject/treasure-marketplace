@@ -19,7 +19,6 @@ export const collections = {
       name: "Extra Life",
       address: "0x5e6ae51147d1eC18EdCCAe516A59fb0A26a0b48F",
     },
-    // { name: "Getting Bodied", address: "#" },
     {
       name: "Keys",
       address: "0x25EE208B4F8636B5cEaAfdee051bf0BFE514f5f6",
@@ -33,6 +32,10 @@ export const collections = {
     {
       name: "Seed of Life",
       address: "0x6A67fbf40142E3Db2e6a950A4D48B0EB41107cE8",
+    },
+    {
+      name: "Smol Bodies",
+      address: "0x9e638BFe78B372b8f5CC63Cf6b01B90F568496cB",
     },
     {
       name: "Smol Brains",
@@ -56,7 +59,6 @@ export const collections = {
       name: "Extra Life",
       address: "0x21e1969884D477afD2Afd4Ad668864a0EebD644c",
     },
-    // { name: "Getting Bodied", address: "#" },
     {
       name: "Keys",
       address: "0xf0a35bA261ECE4FC12870e5B7b9E7790202EF9B5",
@@ -65,6 +67,10 @@ export const collections = {
     {
       name: "Legions Genesis",
       address: "0xE83c0200E93Cb1496054e387BDdaE590C07f0194",
+    },
+    {
+      name: "Smol Bodies",
+      address: "0x17DaCAD7975960833f374622fad08b90Ed67D1B5",
     },
     {
       name: "Smol Brains",
