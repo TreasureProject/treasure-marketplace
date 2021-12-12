@@ -89,10 +89,6 @@ const Drawer = ({
   const removeListing = useRemoveListing();
   const updateListing = useUpdateListing();
 
-  const notWhitelisted =
-    nft.address.toLowerCase() ===
-    "0x17DaCAD7975960833f374622fad08b90Ed67D1B5".toLowerCase();
-
   const isFormDisabled =
     needsContractApproval ||
     [
@@ -182,17 +178,7 @@ const Drawer = ({
                         </div>
                       </div>
 
-                      {notWhitelisted ? (
-                        <Button
-                          disabled
-                          onClick={() => {
-                            // Do nothing
-                          }}
-                          variant="secondary"
-                        >
-                          Collection Not Available To List
-                        </Button>
-                      ) : needsContractApproval ? (
+                      {needsContractApproval ? (
                         <Button
                           isLoading={approveContract.state.status === "Mining"}
                           loadingText="Approving..."
