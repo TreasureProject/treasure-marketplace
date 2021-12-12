@@ -1,7 +1,6 @@
 import Image from "next/image";
 
 import logoImg from "../../public/img/logotransparent.png";
-import { collections } from "../const";
 import { useRouter } from "next/router";
 import { SearchAutocomplete } from "../components/SearchAutocomplete";
 import { Item } from "react-stately";
@@ -23,8 +22,9 @@ import SmolImg3 from "../../public/img/smolbrains2.png";
 import SmolImg4 from "../../public/img/smolbrains3.png";
 import SmolImg5 from "../../public/img/smolbrains4.png";
 import SmolImg6 from "../../public/img/smolbrains5.png";
-import { useChainId } from "../lib/hooks";
 import Link from "next/link";
+import { useQuery } from "react-query";
+import client from "../lib/client";
 
 const ImageWrapper = ({ image }: { image: StaticImageData }) => (
   <Image src={image.src} width={image.width} height={image.height} />
@@ -32,9 +32,7 @@ const ImageWrapper = ({ image }: { image: StaticImageData }) => (
 
 export default function Home() {
   const Router = useRouter();
-  const chainId = useChainId();
-
-  const targetCollections = collections[chainId];
+  const { data } = useQuery(["collections"], () => client.getCollections());
 
   return (
     <div className="relative">
@@ -66,7 +64,7 @@ export default function Home() {
                   label="Search Collection"
                   allowsCustomValue
                   onSelectionChange={(name) => {
-                    const targetCollection = targetCollections.find(
+                    const targetCollection = data?.collections.find(
                       (collection) => collection.name === name
                     );
 
@@ -75,9 +73,9 @@ export default function Home() {
                     }
                   }}
                 >
-                  {targetCollections.map((collection) => (
+                  {data?.collections?.map((collection) => (
                     <Item key={collection.name}>{collection.name}</Item>
-                  ))}
+                  )) ?? []}
                 </SearchAutocomplete>
               </div>
             </div>

@@ -81,6 +81,15 @@ export const getCollectionStats = gql`
   }
 `;
 
+export const getCollections = gql`
+  query getCollections {
+    collections(orderBy: name) {
+      address
+      name
+    }
+  }
+`;
+
 export const getCollectionListings = gql`
   query getCollectionListings(
     $id: ID!
