@@ -23,8 +23,7 @@ import MetaMaskSvg from "../../public/img/metamask.svg";
 import WalletConnectSvg from "../../public/img/walletconnect.svg";
 import Image from "next/image";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
-import { useQuery } from "react-query";
-import client from "../lib/client";
+import { useCollections } from "../lib/hooks";
 
 const walletconnect = new WalletConnectConnector({
   rpc: {
@@ -57,7 +56,7 @@ const Header = () => {
 
   const onClose = () => setIsOpenWalletModal(false);
 
-  const { data } = useQuery(["collections"], () => client.getCollections());
+  const data = useCollections();
 
   const switchToArbitrum = async () => {
     if (window.ethereum) {
@@ -134,7 +133,7 @@ const Header = () => {
                 </button>
               </div>
               <div className="py-6 px-4 space-y-6 flex-1">
-                {data?.collections?.map((page) => (
+                {data.map((page) => (
                   <div key={page.name} className="flow-root">
                     <Link href={`/collection/${page.address}`} passHref>
                       <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200">
@@ -181,8 +180,8 @@ const Header = () => {
                 <div className="h-16 flex items-center justify-between">
                   <div className="hidden h-full lg:flex lg:items-center">
                     <div className="h-full justify-center space-x-6 mr-6 hidden xl:flex">
-                      {data?.collections
-                        ?.filter((collection) =>
+                      {data
+                        .filter((collection) =>
                           coreCollections.includes(collection.name)
                         )
                         .map((collection) => {
@@ -213,7 +212,7 @@ const Header = () => {
                         label="Search Collection"
                         allowsCustomValue
                         onSelectionChange={(name) => {
-                          const targetCollection = data?.collections?.find(
+                          const targetCollection = data.find(
                             (collection) => collection.name === name
                           );
 
@@ -224,7 +223,7 @@ const Header = () => {
                           }
                         }}
                       >
-                        {data?.collections?.map((collection) => (
+                        {data.map((collection) => (
                           <Item key={collection.name}>{collection.name}</Item>
                         )) ?? []}
                       </SearchAutocomplete>

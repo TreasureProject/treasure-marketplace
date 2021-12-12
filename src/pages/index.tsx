@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import logoImg from "../../public/img/logotransparent.png";
 import { useRouter } from "next/router";
+import { useCollections } from "../lib/hooks";
 import { SearchAutocomplete } from "../components/SearchAutocomplete";
 import { Item } from "react-stately";
 import TreasureImg1 from "../../public/img/Beetle-wing.gif";
@@ -23,8 +24,6 @@ import SmolImg4 from "../../public/img/smolbrains3.png";
 import SmolImg5 from "../../public/img/smolbrains4.png";
 import SmolImg6 from "../../public/img/smolbrains5.png";
 import Link from "next/link";
-import { useQuery } from "react-query";
-import client from "../lib/client";
 
 const ImageWrapper = ({ image }: { image: StaticImageData }) => (
   <Image src={image.src} width={image.width} height={image.height} />
@@ -32,7 +31,7 @@ const ImageWrapper = ({ image }: { image: StaticImageData }) => (
 
 export default function Home() {
   const Router = useRouter();
-  const { data } = useQuery(["collections"], () => client.getCollections());
+  const data = useCollections()
 
   return (
     <div className="relative">
@@ -64,7 +63,7 @@ export default function Home() {
                   label="Search Collection"
                   allowsCustomValue
                   onSelectionChange={(name) => {
-                    const targetCollection = data?.collections.find(
+                    const targetCollection = data.find(
                       (collection) => collection.name === name
                     );
 
@@ -73,7 +72,7 @@ export default function Home() {
                     }
                   }}
                 >
-                  {data?.collections?.map((collection) => (
+                  {data.map((collection) => (
                     <Item key={collection.name}>{collection.name}</Item>
                   )) ?? []}
                 </SearchAutocomplete>

@@ -6,6 +6,11 @@ import { z } from "zod";
 import got from "got";
 
 const collectionWebhooks = {
+  // Smol Bodies
+  "0x9e638BFe78B372b8f5CC63Cf6b01B90F568496cB": {
+    listWebhook: process.env.SMOLBODIES_LIST_WEBHOOK,
+    soldWebhook: process.env.SMOLBODIES_SOLD_WEBHOOK,
+  },
   // Smol Brains
   "0x6325439389e0797ab35752b4f43a14c004f22a9c": {
     listWebhook: process.env.SMOLBRAINS_LIST_WEBHOOK,
