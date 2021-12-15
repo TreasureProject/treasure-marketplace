@@ -1,7 +1,13 @@
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import React, { Fragment, useEffect, useState } from "react";
-import { Menu, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/solid";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import {
+  ChevronDownIcon,
+  FilterIcon,
+  MinusSmIcon,
+  PlusSmIcon,
+  XIcon,
+} from "@heroicons/react/solid";
 
 import { useInfiniteQuery, useQuery } from "react-query";
 import client from "../../../lib/client";
@@ -19,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
 import {
+  GetCollectionInfoQuery,
   GetCollectionListingsQuery,
   Listing_OrderBy,
   OrderDirection,
@@ -89,13 +96,101 @@ const getTotalQuantity = (
     : 0;
 };
 
+const reduceAttributes = (
+  attributes: NonNullable<GetCollectionInfoQuery["collection"]>["attributes"]
+) => {
+  return attributes && attributes.length > 0
+    ? attributes.reduce<{ [key: string]: string[] }>((acc, attribute) => {
+        if (!acc[attribute.name]) {
+          acc[attribute.name] = [attribute.value];
+          return acc;
+        }
+        acc[attribute.name] = [...acc[attribute.name], attribute.value];
+        return acc;
+      }, {})
+    : null;
+};
+
+const formatSearchFilter = (search: string | undefined) => {
+  if (!search) return [];
+
+  const searchParams = Array.from(new URLSearchParams(search).entries());
+
+  /*
+    if searchParams is like this: [["Background", "red,blue"], ["Color", "green"]]
+    return an array like this: ["Background,red", "Background,blue"]
+  */
+  return searchParams.reduce<string[]>((acc, [key, value]) => {
+    const values = value.split(",");
+    return [...acc, ...values.map((v) => `${key},${v}`)];
+  }, []);
+};
+
+const getInititalFilters = (search: string | undefined) => {
+  if (!search) return {};
+  const searchParams = Array.from(new URLSearchParams(search).entries());
+
+  /*
+    if searchParams is like this: Background=alley
+    return an object like this: {
+      Background: ["alley"]
+    }
+    if searchParams is undefined, return an empty object
+  */
+  return searchParams.reduce<{ [key: string]: string[] }>(
+    (acc, [key, value]) => {
+      if (!acc[key]) {
+        acc[key] = [value];
+        return acc;
+      }
+      acc[key] = [...acc[key], value];
+      return acc;
+    },
+    {}
+  );
+};
+/* 
+
+*/
+
 const Collection = () => {
   const router = useRouter();
-  const { address, sort, tab, activitySort } = router.query;
+  const { address, sort, tab, activitySort, search } = router.query;
+  const formattedSearch = Array.isArray(search) ? search[0] : search;
   const { account } = useEthers();
   const [searchParams, setSearchParams] = useState("");
   const [isDetailedFloorPriceModalOpen, setDetailedFloorPriceModalOpen] =
     useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [generateQueryParams, setGenerateQueryParams] = useState<{
+    [key: string]: string[];
+  }>({});
+
+  React.useEffect(() => {
+    formattedSearch &&
+      setGenerateQueryParams(getInititalFilters(formattedSearch));
+  }, [formattedSearch]);
+
+  const addQueryParams = (key: string, value: string) => {
+    setGenerateQueryParams((prevState) => ({
+      ...prevState,
+      [key]: [...(prevState[key] ?? []), value],
+    }));
+  };
+
+  const removeQueryParams = (key: string, value: string) => {
+    setGenerateQueryParams((prevState) => {
+      const prev = { ...prevState };
+      const values = prev[key] ?? [];
+      const filteredValues = values[0]?.split(",").filter((v) => v !== value);
+      if (!filteredValues || filteredValues.length === 0) {
+        delete prev[key];
+      } else {
+        prev[key] = [filteredValues.join(",")];
+      }
+      return prev;
+    });
+  };
 
   const sortParam = sort ?? OrderDirection.Asc;
   const activitySortParam = activitySort ?? "time";
@@ -132,6 +227,10 @@ const Collection = () => {
     }
   );
 
+  const attributeFilterList = reduceAttributes(
+    collectionData?.collection?.attributes
+  );
+
   const { data: statData } = useQuery(
     ["stats", address],
     () =>
@@ -143,6 +242,36 @@ const Collection = () => {
     }
   );
 
+  React.useEffect(() => {
+    const scrollToTop = () => {
+      window.scroll({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    };
+    Router.events.on("routeChangeComplete", scrollToTop);
+
+    return () => Router.events.off("routeChangeComplete", scrollToTop);
+  }, []);
+
+  React.useEffect(() => {
+    if (formattedAddress !== AddressZero) {
+      Router.push(
+        {
+          pathname: `/collection/${formattedAddress}`,
+          query: {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            search: new URLSearchParams(generateQueryParams).toString(),
+          },
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [formattedAddress, generateQueryParams]);
+
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.Erc1155;
 
@@ -151,7 +280,7 @@ const Collection = () => {
     isLoading: isListingLoading,
     fetchNextPage,
   } = useInfiniteQuery(
-    ["listings", { address, sortParam, searchParams }],
+    ["listings", { address, sortParam, searchParams, search }],
     ({ queryKey, pageParam = 0 }) =>
       client.getCollectionListings({
         id: formattedAddress,
@@ -161,6 +290,7 @@ const Collection = () => {
         tokenName: queryKey[1].searchParams,
         skipBy: pageParam,
         first: MAX_ITEMS_PER_PAGE,
+        filter: formatSearchFilter(formattedSearch),
         orderBy: sort
           ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
           : Listing_OrderBy.PricePerItem,
@@ -177,6 +307,7 @@ const Collection = () => {
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
+    setGenerateQueryParams({});
   }, [address]);
 
   const collection =
@@ -208,7 +339,138 @@ const Collection = () => {
 
   return (
     <main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8 pt-24">
+      <Transition.Root show={mobileFiltersOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 flex z-40 lg:hidden"
+          onClose={setMobileFiltersOpen}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-linear duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-linear duration-300"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <Transition.Child
+            as={Fragment}
+            enter="transition ease-in-out duration-300 transform"
+            enterFrom="translate-x-full"
+            enterTo="translate-x-0"
+            leave="transition ease-in-out duration-300 transform"
+            leaveFrom="translate-x-0"
+            leaveTo="translate-x-full"
+          >
+            <div className="ml-auto relative max-w-xs w-full h-full bg-white dark:bg-gray-900 shadow-xl py-4 pb-12 flex flex-col overflow-y-auto">
+              <div className="px-4 flex items-center justify-between">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-200">
+                  Filters
+                </h2>
+                <button
+                  type="button"
+                  className="-mr-2 w-10 h-10 bg-white dark:bg-gray-900 p-2 rounded-md flex items-center justify-center text-gray-400"
+                  onClick={() => setMobileFiltersOpen(false)}
+                >
+                  <span className="sr-only">Close menu</span>
+                  <XIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="mt-4 border-t border-gray-200 dark:border-gray-500">
+                <h3 className="sr-only">Filter</h3>
+
+                {attributeFilterList &&
+                  Object.keys(attributeFilterList).map((attribute) => {
+                    const attributes = attributeFilterList[attribute];
+
+                    return (
+                      <Disclosure
+                        as="div"
+                        key={attribute}
+                        className="border-t border-gray-200 dark:border-gray-500 px-4 py-6"
+                        defaultOpen={generateQueryParams[attribute]?.length > 0}
+                      >
+                        {({ open }) => (
+                          <>
+                            <h3 className="-mx-2 -my-3 flow-root">
+                              <Disclosure.Button className="px-2 py-3 w-full flex items-center justify-between text-gray-400 hover:text-gray-500">
+                                <span
+                                  className={classNames(
+                                    "font-medium",
+                                    open
+                                      ? "text-red-700 dark:text-gray-300"
+                                      : "text-gray-900 dark:text-gray-400"
+                                  )}
+                                >
+                                  {attribute}
+                                </span>
+                                <span className="ml-6 flex items-center">
+                                  {open ? (
+                                    <MinusSmIcon
+                                      className="block h-6 w-6 text-red-400 dark:text-gray-400 group-hover:text-gray-500"
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <PlusSmIcon
+                                      className="block h-6 w-6 text-gray-400 dark:text-gray-400 group-hover:text-gray-200"
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                </span>
+                              </Disclosure.Button>
+                            </h3>
+                            <Disclosure.Panel className="pt-6">
+                              <div className="space-y-6">
+                                {attributes.map((value, optionIdx) => (
+                                  <div
+                                    key={value}
+                                    className="flex items-center"
+                                  >
+                                    <input
+                                      id={`filter-mobile-${value}-${optionIdx}`}
+                                      name={value}
+                                      // checked={}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          addQueryParams(attribute, value);
+                                        } else {
+                                          removeQueryParams(attribute, value);
+                                        }
+                                      }}
+                                      defaultChecked={generateQueryParams[
+                                        attribute
+                                      ]?.[0]
+                                        .split(",")
+                                        .includes(value)}
+                                      type="checkbox"
+                                      className="h-4 w-4 border-gray-300 rounded accent-red-500"
+                                    />
+                                    <label
+                                      htmlFor={`filter-mobile-${value}-${optionIdx}`}
+                                      className="ml-3 min-w-0 flex-1 text-gray-500"
+                                    >
+                                      {value}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </Disclosure.Panel>
+                          </>
+                        )}
+                      </Disclosure>
+                    );
+                  })}
+              </div>
+            </div>
+          </Transition.Child>
+        </Dialog>
+      </Transition.Root>
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         <div className="py-24 flex flex-col items-center">
           {collectionData?.collection && statData?.collection ? (
             <>
@@ -296,134 +558,300 @@ const Collection = () => {
           </div>
         </div>
         {formattedTab === "collection" ? (
-          <>
-            <section aria-labelledby="filter-heading" className="pt-6">
-              <h2 id="filter-heading" className="sr-only">
-                Product filters
-              </h2>
-
-              {statData?.collection && (
-                <div className="flex items-center">
-                  <div className="mr-2 w-full">
-                    <SearchAutocomplete
-                      label="Search Item"
-                      placeholder="Search Name..."
-                      onSelectionChange={(name) =>
-                        setSearchParams((name as string | null) ?? "")
-                      }
-                    >
-                      {Object.keys(listingsWithoutDuplicates)
-                        .sort()
-                        .map((listing) => (
-                          <Item key={listing}>{listing}</Item>
-                        ))}
-                    </SearchAutocomplete>
-                  </div>
-                  <Menu
-                    as="div"
-                    className="relative z-20 inline-block text-left"
-                  >
-                    <div>
-                      <Menu.Button className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-200">
-                        Sort
-                        <ChevronDownIcon
-                          className="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-100"
-                          aria-hidden="true"
-                        />
-                      </Menu.Button>
-                    </div>
-
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-100"
-                      enterFrom="transform opacity-0 scale-95"
-                      enterTo="transform opacity-100 scale-100"
-                      leave="transition ease-in duration-75"
-                      leaveFrom="transform opacity-100 scale-100"
-                      leaveTo="transform opacity-0 scale-95"
-                    >
-                      <Menu.Items className="origin-top-left absolute right-0 z-10 mt-2 w-48 rounded-md shadow-2xl bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="py-1">
-                          {sortOptions
-                            .slice(0, isERC1155 ? -1 : sortOptions.length)
-                            .map((option) => {
-                              const active = option.value === sortParam;
-                              return (
-                                <Menu.Item key={option.name}>
-                                  <QueryLink
-                                    href={{
-                                      pathname: router.pathname,
-                                      query: {
-                                        ...router.query,
-                                        sort: option.value,
-                                      },
-                                    }}
-                                    passHref
-                                    className={classNames(
-                                      "block px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-500",
-                                      {
-                                        "text-red-500 dark:text-gray-100":
-                                          active,
-                                      }
-                                    )}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-8 gap-y-10">
+            {attributeFilterList && (
+              <div className="hidden lg:block sticky top-6">
+                <h3 className="sr-only">Filter</h3>
+                <div className="sticky top-16">
+                  {Object.keys(attributeFilterList).map((attribute) => {
+                    const attributes = attributeFilterList[attribute];
+                    return (
+                      <Disclosure
+                        as="div"
+                        key={attribute}
+                        className="border-b border-gray-200 dark:border-gray-500 py-6"
+                        defaultOpen={generateQueryParams[attribute]?.length > 0}
+                      >
+                        {({ open }) => (
+                          <>
+                            <h3 className="-my-3 flow-root">
+                              <Disclosure.Button className="py-3 w-full flex items-center justify-between text-sm text-gray-400 hover:text-gray-500">
+                                <span
+                                  className={classNames(
+                                    "font-medium",
+                                    open
+                                      ? "text-red-700 dark:text-gray-300"
+                                      : "text-gray-900 dark:text-gray-400"
+                                  )}
+                                >
+                                  {attribute}
+                                </span>
+                                <span className="ml-6 flex items-center">
+                                  <span className="mr-2 text-gray-500">
+                                    {attributes.length}
+                                  </span>
+                                  {open ? (
+                                    <MinusSmIcon
+                                      className="block h-6 w-6 text-red-400 dark:text-gray-400 group-hover:text-gray-500"
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <PlusSmIcon
+                                      className="block h-6 w-6 text-gray-400 dark:text-gray-400 group-hover:text-gray-200"
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                </span>
+                              </Disclosure.Button>
+                            </h3>
+                            <Disclosure.Panel className="pt-6 overflow-auto max-h-72">
+                              <div className="space-y-4">
+                                {attributes.map((value, optionIdx) => (
+                                  <div
+                                    key={value}
+                                    className="flex items-center"
                                   >
-                                    <span>{option.name}</span>
-                                  </QueryLink>
-                                </Menu.Item>
-                              );
-                            })}
-                        </div>
-                      </Menu.Items>
-                    </Transition>
-                  </Menu>
+                                    <input
+                                      id={`filter-${value}-${optionIdx}`}
+                                      name={value}
+                                      // checked={}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          addQueryParams(attribute, value);
+                                        } else {
+                                          removeQueryParams(attribute, value);
+                                        }
+                                      }}
+                                      defaultChecked={generateQueryParams[
+                                        attribute
+                                      ]?.[0]
+                                        .split(",")
+                                        .includes(value)}
+                                      type="checkbox"
+                                      className="h-4 w-4 border-gray-300 rounded accent-red-500"
+                                    />
+                                    <label
+                                      htmlFor={`filter-${value}-${optionIdx}`}
+                                      className="ml-3 text-sm text-gray-600 dark:text-gray-400"
+                                    >
+                                      {value}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </Disclosure.Panel>
+                          </>
+                        )}
+                      </Disclosure>
+                    );
+                  })}
                 </div>
-              )}
-            </section>
-            {isListingLoading && <CenterLoadingDots className="h-60" />}
-            {data?.length === 0 && !isListingLoading && (
-              <div className="flex flex-col justify-center items-center h-36">
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
-                  No NFTs listed 😞
-                </h3>
               </div>
             )}
-            {listingData && collectionData && (
-              <section aria-labelledby="products-heading" className="my-8">
-                <h2 id="products-heading" className="sr-only">
-                  {collectionData.collection?.name}
+            <div
+              className={classNames(
+                attributeFilterList ? "lg:col-span-3" : "lg:col-span-4"
+              )}
+            >
+              <section aria-labelledby="filter-heading" className="pt-6">
+                <h2 id="filter-heading" className="sr-only">
+                  Product filters
                 </h2>
-                <ul
-                  role="list"
-                  className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8"
-                >
-                  {listingData.pages.map((group, i) => (
-                    <React.Fragment key={i}>
-                      {/* ERC1155 */}
-                      {group.collection?.tokens
-                        ?.filter((token) => Boolean(token?.listings?.length))
-                        .map((token) => {
+
+                {statData?.collection && (
+                  <div className="flex items-center">
+                    <div className="mr-2 w-full">
+                      <SearchAutocomplete
+                        label="Search Item"
+                        placeholder="Search Name..."
+                        onSelectionChange={(name) =>
+                          setSearchParams((name as string | null) ?? "")
+                        }
+                      >
+                        {Object.keys(listingsWithoutDuplicates)
+                          .sort()
+                          .map((listing) => (
+                            <Item key={listing}>{listing}</Item>
+                          ))}
+                      </SearchAutocomplete>
+                    </div>
+                    <Menu
+                      as="div"
+                      className="relative z-20 inline-block text-left"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Menu.Button className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-200">
+                          Sort
+                          <ChevronDownIcon
+                            className="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-100"
+                            aria-hidden="true"
+                          />
+                        </Menu.Button>
+                        <button
+                          type="button"
+                          className="p-2 -m-2 text-gray-400 hover:text-gray-500 lg:hidden"
+                          onClick={() => setMobileFiltersOpen(true)}
+                        >
+                          <span className="sr-only">Filters</span>
+                          <FilterIcon className="w-5 h-5" aria-hidden="true" />
+                        </button>
+                      </div>
+
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="origin-top-left absolute right-0 z-10 mt-2 w-48 rounded-md shadow-2xl bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <div className="py-1">
+                            {sortOptions
+                              .slice(0, isERC1155 ? -1 : sortOptions.length)
+                              .map((option) => {
+                                const active = option.value === sortParam;
+                                return (
+                                  <Menu.Item key={option.name}>
+                                    <QueryLink
+                                      href={{
+                                        pathname: router.pathname,
+                                        query: {
+                                          ...router.query,
+                                          sort: option.value,
+                                        },
+                                      }}
+                                      passHref
+                                      className={classNames(
+                                        "block px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-500",
+                                        {
+                                          "text-red-500 dark:text-gray-100":
+                                            active,
+                                        }
+                                      )}
+                                    >
+                                      <span>{option.name}</span>
+                                    </QueryLink>
+                                  </Menu.Item>
+                                );
+                              })}
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </div>
+                )}
+              </section>
+              {isListingLoading && <CenterLoadingDots className="h-60" />}
+              {data?.length === 0 && !isListingLoading && (
+                <div className="flex flex-col justify-center items-center h-36">
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
+                    No NFTs listed 😞
+                  </h3>
+                </div>
+              )}
+              {listingData && collectionData && (
+                <section aria-labelledby="products-heading" className="my-8">
+                  <h2 id="products-heading" className="sr-only">
+                    {collectionData.collection?.name}
+                  </h2>
+                  <ul
+                    role="list"
+                    className="grid grid-cols-2 gap-y-10 sm:grid-cols-4 gap-x-6 lg:grid-cols-6 xl:gap-x-8"
+                  >
+                    {listingData.pages.map((group, i) => (
+                      <React.Fragment key={i}>
+                        {/* ERC1155 */}
+                        {group.collection?.tokens
+                          ?.filter((token) => Boolean(token?.listings?.length))
+                          .map((token) => {
+                            return (
+                              <li key={token.id} className="group">
+                                <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
+                                  <Image
+                                    src={
+                                      token.metadata?.image?.includes("ipfs")
+                                        ? generateIpfsLink(token.metadata.image)
+                                        : token.metadata?.image ?? ""
+                                    }
+                                    alt={token.name ?? ""}
+                                    layout="fill"
+                                    className={
+                                      "w-full h-full object-center object-fill group-hover:opacity-75"
+                                    }
+                                  />
+                                  <Link
+                                    href={`/collection/${formattedAddress}/${token.tokenId}`}
+                                    passHref
+                                  >
+                                    <a className="absolute inset-0 focus:outline-none">
+                                      <span className="sr-only">
+                                        View details for {token.name}
+                                      </span>
+                                    </a>
+                                  </Link>
+                                </div>
+                                <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
+                                  <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
+                                    {collectionData.collection?.name}
+                                  </p>
+                                  <p className="dark:text-gray-100">
+                                    {formatNumber(
+                                      parseFloat(
+                                        formatEther(
+                                          token?.listings?.[0]?.pricePerItem
+                                        )
+                                      )
+                                    )}{" "}
+                                    <span className="text-xs font-light">
+                                      $MAGIC
+                                    </span>
+                                  </p>
+                                </div>
+                                <div className="flex items-baseline mt-1">
+                                  <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
+                                    {token.name}
+                                  </p>
+                                  <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Listed Items:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {getTotalQuantity(token.listings)}
+                                    </span>
+                                  </p>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        {/* ERC721 */}
+                        {group.collection?.listings?.map((listing) => {
+                          const yourItem =
+                            account?.toLowerCase() === listing.user.id;
                           return (
-                            <li key={token.id} className="group">
-                              <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
+                            <li key={listing.id} className="group">
+                              <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
                                 <Image
                                   src={
-                                    token.metadata?.image?.includes("ipfs")
-                                      ? generateIpfsLink(token.metadata.image)
-                                      : token.metadata?.image ?? ""
+                                    listing.token.metadata?.image?.includes(
+                                      "ipfs"
+                                    )
+                                      ? generateIpfsLink(
+                                          listing.token.metadata.image
+                                        )
+                                      : listing.token.metadata?.image ?? ""
                                   }
-                                  alt={token.name ?? ""}
+                                  alt={listing.token.name ?? ""}
                                   layout="fill"
-                                  className={
-                                    "w-full h-full object-center object-fill group-hover:opacity-75"
-                                  }
+                                  className="w-full h-full object-center object-fill group-hover:opacity-75"
                                 />
                                 <Link
-                                  href={`/collection/${formattedAddress}/${token.tokenId}`}
-                                  passHref
+                                  href={`/collection/${formattedAddress}/${listing.token.tokenId}`}
                                 >
                                   <a className="absolute inset-0 focus:outline-none">
                                     <span className="sr-only">
-                                      View details for {token.name}
+                                      View details for {listing.token.name}
                                     </span>
                                   </a>
                                 </Link>
@@ -435,9 +863,7 @@ const Collection = () => {
                                 <p className="dark:text-gray-100">
                                   {formatNumber(
                                     parseFloat(
-                                      formatEther(
-                                        token?.listings?.[0]?.pricePerItem
-                                      )
+                                      formatEther(listing.pricePerItem)
                                     )
                                   )}{" "}
                                   <span className="text-xs font-light">
@@ -447,125 +873,66 @@ const Collection = () => {
                               </div>
                               <div className="flex items-baseline mt-1">
                                 <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                                  {token.name}
+                                  {listing.token.name}
                                 </p>
                                 <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
                                   <span className="text-gray-500 dark:text-gray-400">
-                                    Listed Items:
+                                    Expires in:
                                   </span>{" "}
                                   <span className="font-bold text-gray-700 dark:text-gray-300">
-                                    {getTotalQuantity(token.listings)}
+                                    {formatDistanceToNow(
+                                      new Date(Number(listing.expires))
+                                    )}
                                   </span>
                                 </p>
+                              </div>
+                              {isERC1155 && (
+                                <div className="flex mt-1 justify-end">
+                                  <span className="text-gray-600 text-xs text-[0.6rem]">
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Quantity:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {listing.quantity}
+                                    </span>
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex mt-1 justify-end">
+                                <span className="text-gray-600 text-xs text-[0.6rem]">
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    Owner:
+                                  </span>{" "}
+                                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                                    {yourItem
+                                      ? "You"
+                                      : shortenAddress(listing.user.id)}
+                                  </span>
+                                </span>
                               </div>
                             </li>
                           );
                         })}
-                      {/* ERC721 */}
-                      {group.collection?.listings?.map((listing) => {
-                        const yourItem =
-                          account?.toLowerCase() === listing.user.id;
-                        return (
-                          <li key={listing.id} className="group">
-                            <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                              <Image
-                                src={
-                                  listing.token.metadata?.image?.includes(
-                                    "ipfs"
-                                  )
-                                    ? generateIpfsLink(
-                                        listing.token.metadata.image
-                                      )
-                                    : listing.token.metadata?.image ?? ""
-                                }
-                                alt={listing.token.name ?? ""}
-                                layout="fill"
-                                className="w-full h-full object-center object-fill group-hover:opacity-75"
-                              />
-                              <Link
-                                href={`/collection/${formattedAddress}/${listing.token.tokenId}`}
-                              >
-                                <a className="absolute inset-0 focus:outline-none">
-                                  <span className="sr-only">
-                                    View details for {listing.token.name}
-                                  </span>
-                                </a>
-                              </Link>
-                            </div>
-                            <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
-                              <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
-                                {collectionData.collection?.name}
-                              </p>
-                              <p className="dark:text-gray-100">
-                                {formatNumber(
-                                  parseFloat(formatEther(listing.pricePerItem))
-                                )}{" "}
-                                <span className="text-xs font-light">
-                                  $MAGIC
-                                </span>
-                              </p>
-                            </div>
-                            <div className="flex items-baseline mt-1">
-                              <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                                {listing.token.name}
-                              </p>
-                              <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Expires in:
-                                </span>{" "}
-                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                  {formatDistanceToNow(
-                                    new Date(Number(listing.expires))
-                                  )}
-                                </span>
-                              </p>
-                            </div>
-                            {isERC1155 && (
-                              <div className="flex mt-1 justify-end">
-                                <span className="text-gray-600 text-xs text-[0.6rem]">
-                                  <span className="text-gray-500 dark:text-gray-400">
-                                    Quantity:
-                                  </span>{" "}
-                                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                                    {listing.quantity}
-                                  </span>
-                                </span>
-                              </div>
-                            )}
-                            <div className="flex mt-1 justify-end">
-                              <span className="text-gray-600 text-xs text-[0.6rem]">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Owner:
-                                </span>{" "}
-                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                  {yourItem
-                                    ? "You"
-                                    : shortenAddress(listing.user.id)}
-                                </span>
-                              </span>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </React.Fragment>
-                  ))}
-                </ul>
-                {hasNextPage && (
-                  <ul
-                    role="list"
-                    ref={ref}
-                    className="mt-10 grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8"
-                  >
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <li key={i}>
-                        <div className="animate-pulse w-full bg-gray-300 h-64 rounded-md m-auto" />
-                      </li>
+                      </React.Fragment>
                     ))}
                   </ul>
-                )}
-              </section>
-            )}
-          </>
+                  {hasNextPage && (
+                    <ul
+                      role="list"
+                      ref={ref}
+                      className="mt-10 grid grid-cols-2 gap-y-10 sm:grid-cols-4 gap-x-6 lg:grid-cols-6 xl:gap-x-8"
+                    >
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <li key={i}>
+                          <div className="animate-pulse w-full bg-gray-300 h-64 rounded-md m-auto" />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )}
+            </div>
+          </div>
         ) : (
           <>
             {isActivityLoading && <CenterLoadingDots className="h-60" />}

@@ -169,7 +169,7 @@ const Main = ({ pageProps, Component }) => {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen relative flex flex-col overflow-hidden dark:bg-gray-900">
+    <div className="min-h-screen relative flex flex-col dark:bg-gray-900">
       {Component.disableHeader ? null : <Header />}
       <Component {...pageProps} />
       <Footer />

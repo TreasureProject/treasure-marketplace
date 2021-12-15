@@ -65,6 +65,10 @@ export const getCollectionInfo = gql`
       id
       name
       standard
+      attributes {
+        name
+        value
+      }
     }
   }
 `;
@@ -103,6 +107,7 @@ export const getCollectionListings = gql`
     $first: Int!
     $orderBy: Listing_orderBy!
     $isERC1155: Boolean!
+    $filter: [String!]
   ) {
     collection(id: $id) {
       name
@@ -131,7 +136,11 @@ export const getCollectionListings = gql`
         skip: $skipBy
         orderBy: $orderBy
         orderDirection: $orderDirection
-        where: { status: Active, tokenName_contains: $tokenName }
+        where: {
+          status: Active
+          tokenName_contains: $tokenName
+          filters_contains: $filter
+        }
       ) @skip(if: $isERC1155) {
         user {
           id
