@@ -157,7 +157,6 @@ const Collection = () => {
   const router = useRouter();
   const { address, sort, tab, activitySort, search } = router.query;
   const formattedSearch = Array.isArray(search) ? search[0] : search;
-  const { account } = useEthers();
   const [searchParams, setSearchParams] = useState("");
   const [isDetailedFloorPriceModalOpen, setDetailedFloorPriceModalOpen] =
     useState(false);
@@ -244,6 +243,7 @@ const Collection = () => {
     }
   );
 
+  // reset query params when collection changes
   React.useEffect(() => {
     if (formattedAddress !== previousRef.current) {
       setGenerateQueryParams(null);
