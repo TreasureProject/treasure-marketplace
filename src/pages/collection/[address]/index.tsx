@@ -305,7 +305,6 @@ const Collection = () => {
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
-    setGenerateQueryParams({});
   }, [address]);
 
   const collection =
@@ -560,7 +559,7 @@ const Collection = () => {
             {attributeFilterList && (
               <div className="hidden lg:block sticky top-6">
                 <h3 className="sr-only">Filter</h3>
-                <div className="sticky top-16">
+                <div className="sticky top-16 overflow-auto h-[calc(100vh-72px)]">
                   {Object.keys(attributeFilterList).map((attribute) => {
                     const attributes = attributeFilterList[attribute];
                     return (
