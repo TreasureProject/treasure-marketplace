@@ -914,16 +914,16 @@ const Collection = () => {
                                 </Link>
                               </div>
                               <div className="mt-4 font-medium text-gray-900 space-y-2">
-                                <p className="text-xs text-gray-500 dark:text-gray-300  font-semibold">
+                                <p className="text-xs text-gray-500 dark:text-gray-300 truncate font-semibold">
                                   {listing.token.name}
                                 </p>
-                                <p className="dark:text-gray-100 capsize">
+                                <p className="dark:text-gray-100 text-sm xl:text-base capsize">
                                   {formatNumber(
                                     parseFloat(
                                       formatEther(listing.pricePerItem)
                                     )
                                   )}{" "}
-                                  <span className="text-xs font-light">
+                                  <span className="text-[0.5rem] xl:text-xs font-light">
                                     $MAGIC
                                   </span>
                                 </p>
