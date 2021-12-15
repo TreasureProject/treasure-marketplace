@@ -154,6 +154,66 @@ const getInititalFilters = (search: string | undefined) => {
 
 */
 
+const createFilter = (
+  base: string | undefined,
+  search: {
+    key: string;
+    value: string;
+  }
+) => {
+  const searchParams = Array.from(new URLSearchParams(base).entries());
+
+  const combined = searchParams.reduce<{ [key: string]: string[] }>(
+    (acc, [key, value]) => {
+      if (!acc[key]) {
+        acc[key] = [value];
+        return acc;
+      }
+      acc[key] = [...acc[key], value];
+      return acc;
+    },
+    {}
+  );
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return new URLSearchParams({
+    ...combined,
+    [search.key]: [...(combined?.[search.key] ?? []), search.value],
+  }).toString();
+};
+
+const removeFilter = (
+  base: string | undefined,
+  search: { key: string; value: string }
+) => {
+  const searchParams = Array.from(new URLSearchParams(base).entries());
+
+  const combined = searchParams.reduce<{ [key: string]: string[] }>(
+    (acc, [key, value]) => {
+      if (!acc[key]) {
+        acc[key] = [value];
+        return acc;
+      }
+      acc[key] = [...acc[key], value];
+      return acc;
+    },
+    {}
+  );
+
+  const values = combined[search.key] ?? [];
+  const filteredValues = values[0]
+    ?.split(",")
+    .filter((v) => v !== search.value);
+  if (!filteredValues || filteredValues.length === 0) {
+    delete combined[search.key];
+  } else {
+    combined[search.key] = [filteredValues.join(",")];
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return new URLSearchParams(combined).toString();
+};
+
 const Collection = () => {
   const router = useRouter();
   const { address, sort, tab, activitySort, search } = router.query;
@@ -162,37 +222,8 @@ const Collection = () => {
   const [isDetailedFloorPriceModalOpen, setDetailedFloorPriceModalOpen] =
     useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [generateQueryParams, setGenerateQueryParams] = useState<{
-    [key: string]: string[];
-  } | null>(null);
 
-  const previousRef = React.useRef<string | null>(null);
-
-  React.useEffect(() => {
-    formattedSearch &&
-      setGenerateQueryParams(getInititalFilters(formattedSearch));
-  }, [formattedSearch]);
-
-  const addQueryParams = (key: string, value: string) => {
-    setGenerateQueryParams((prevState) => ({
-      ...prevState,
-      [key]: [...(prevState?.[key] ?? []), value],
-    }));
-  };
-
-  const removeQueryParams = (key: string, value: string) => {
-    setGenerateQueryParams((prevState) => {
-      const prev = { ...prevState };
-      const values = prev[key] ?? [];
-      const filteredValues = values[0]?.split(",").filter((v) => v !== value);
-      if (!filteredValues || filteredValues.length === 0) {
-        delete prev[key];
-      } else {
-        prev[key] = [filteredValues.join(",")];
-      }
-      return prev;
-    });
-  };
+  const filters = getInititalFilters(formattedSearch);
 
   const sortParam = sort ?? OrderDirection.Asc;
   const activitySortParam = activitySort ?? "time";
@@ -244,48 +275,14 @@ const Collection = () => {
     }
   );
 
-  // reset query params when collection changes
-  React.useEffect(() => {
-    if (
-      previousRef.current &&
-      previousRef.current !== AddressZero &&
-      formattedAddress !== previousRef.current
-    ) {
-      setGenerateQueryParams(null);
-    }
-  }, [formattedAddress]);
-
-  React.useEffect(() => {
-    previousRef.current = formattedAddress;
-  }, [formattedAddress]);
-
   React.useEffect(() => {
     const scrollToTop = () => {
-      document.getElementById("filter-heading")?.scrollIntoView({
-        behavior: "smooth",
-      });
+      document.getElementById("filter-heading")?.scrollIntoView();
     };
     Router.events.on("routeChangeComplete", scrollToTop);
 
     return () => Router.events.off("routeChangeComplete", scrollToTop);
   }, []);
-
-  React.useEffect(() => {
-    if (formattedAddress !== AddressZero && generateQueryParams) {
-      Router.push(
-        {
-          pathname: `/collection/${formattedAddress}`,
-          query: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            search: new URLSearchParams(generateQueryParams).toString(),
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [formattedAddress, generateQueryParams]);
 
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.Erc1155;
@@ -351,7 +348,6 @@ const Collection = () => {
       return acc;
     }, {}) ?? {};
 
-  console.log(generateQueryParams, formattedSearch, previousRef.current);
   return (
     <main>
       <Transition.Root show={mobileFiltersOpen} as={Fragment}>
@@ -409,9 +405,7 @@ const Collection = () => {
                         key={attribute}
                         className="border-t border-gray-200 dark:border-gray-500 px-4 py-6"
                         defaultOpen={
-                          (generateQueryParams &&
-                            generateQueryParams[attribute]?.length > 0) ??
-                          false
+                          filters[attribute] && filters[attribute].length > 0
                         }
                       >
                         {({ open }) => (
@@ -453,20 +447,26 @@ const Collection = () => {
                                     <input
                                       id={`filter-mobile-${value}-${optionIdx}`}
                                       name={value}
-                                      // checked={}
                                       onChange={(e) => {
-                                        if (e.target.checked) {
-                                          addQueryParams(attribute, value);
-                                        } else {
-                                          removeQueryParams(attribute, value);
-                                        }
+                                        router.replace({
+                                          pathname: `/collection/${formattedAddress}`,
+                                          query: {
+                                            search: e.target.checked
+                                              ? createFilter(formattedSearch, {
+                                                  key: attribute,
+                                                  value,
+                                                })
+                                              : removeFilter(formattedSearch, {
+                                                  key: attribute,
+                                                  value,
+                                                }),
+                                          },
+                                        });
                                       }}
-                                      defaultChecked={
-                                        (generateQueryParams &&
-                                          generateQueryParams[attribute]?.[0]
-                                            .split(",")
-                                            .includes(value)) ??
-                                        false
+                                      checked={
+                                        filters[attribute]?.[0]
+                                          .split(",")
+                                          .includes(value) ?? false
                                       }
                                       type="checkbox"
                                       className="h-4 w-4 border-gray-300 rounded accent-red-500"
@@ -487,7 +487,16 @@ const Collection = () => {
                     );
                   })}
                 <div className="mt-4 mx-4">
-                  <Button onClick={() => setGenerateQueryParams({})}>
+                  <Button
+                    onClick={() =>
+                      router.replace({
+                        pathname: `/collection/${formattedAddress}`,
+                        query: {
+                          search: "",
+                        },
+                      })
+                    }
+                  >
                     Clear all
                   </Button>
                 </div>
@@ -597,9 +606,7 @@ const Collection = () => {
                         key={attribute}
                         className="border-b border-gray-200 dark:border-gray-500 py-6"
                         defaultOpen={
-                          (generateQueryParams &&
-                            generateQueryParams[attribute]?.length > 0) ??
-                          false
+                          filters[attribute] && filters[attribute].length > 0
                         }
                       >
                         {({ open }) => (
@@ -644,20 +651,26 @@ const Collection = () => {
                                     <input
                                       id={`filter-${value}-${optionIdx}`}
                                       name={value}
-                                      // checked={}
                                       onChange={(e) => {
-                                        if (e.target.checked) {
-                                          addQueryParams(attribute, value);
-                                        } else {
-                                          removeQueryParams(attribute, value);
-                                        }
+                                        router.replace({
+                                          pathname: `/collection/${formattedAddress}`,
+                                          query: {
+                                            search: e.target.checked
+                                              ? createFilter(formattedSearch, {
+                                                  key: attribute,
+                                                  value,
+                                                })
+                                              : removeFilter(formattedSearch, {
+                                                  key: attribute,
+                                                  value,
+                                                }),
+                                          },
+                                        });
                                       }}
                                       checked={
-                                        (generateQueryParams &&
-                                          generateQueryParams[attribute]?.[0]
-                                            .split(",")
-                                            .includes(value)) ??
-                                        false
+                                        filters[attribute]?.[0]
+                                          .split(",")
+                                          .includes(value) ?? false
                                       }
                                       type="checkbox"
                                       className="h-4 w-4 border-gray-300 rounded accent-red-500"
@@ -677,8 +690,17 @@ const Collection = () => {
                       </Disclosure>
                     );
                   })}
-                  <div className="mt-4">
-                    <Button onClick={() => setGenerateQueryParams({})}>
+                  <div className="mt-4 mx-1">
+                    <Button
+                      onClick={() =>
+                        router.replace({
+                          pathname: `/collection/${formattedAddress}`,
+                          query: {
+                            search: "",
+                          },
+                        })
+                      }
+                    >
                       Clear all
                     </Button>
                   </div>
