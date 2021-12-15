@@ -164,7 +164,7 @@ const Collection = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [generateQueryParams, setGenerateQueryParams] = useState<{
     [key: string]: string[];
-  }>({});
+  } | null>(null);
 
   React.useEffect(() => {
     formattedSearch &&
@@ -174,7 +174,7 @@ const Collection = () => {
   const addQueryParams = (key: string, value: string) => {
     setGenerateQueryParams((prevState) => ({
       ...prevState,
-      [key]: [...(prevState[key] ?? []), value],
+      [key]: [...(prevState?.[key] ?? []), value],
     }));
   };
 
@@ -254,7 +254,7 @@ const Collection = () => {
   }, []);
 
   React.useEffect(() => {
-    if (formattedAddress !== AddressZero) {
+    if (formattedAddress !== AddressZero && generateQueryParams) {
       Router.push(
         {
           pathname: `/collection/${formattedAddress}`,
@@ -390,7 +390,11 @@ const Collection = () => {
                         as="div"
                         key={attribute}
                         className="border-t border-gray-200 dark:border-gray-500 px-4 py-6"
-                        defaultOpen={generateQueryParams[attribute]?.length > 0}
+                        defaultOpen={
+                          (generateQueryParams &&
+                            generateQueryParams[attribute]?.length > 0) ??
+                          false
+                        }
                       >
                         {({ open }) => (
                           <>
@@ -439,11 +443,13 @@ const Collection = () => {
                                           removeQueryParams(attribute, value);
                                         }
                                       }}
-                                      defaultChecked={generateQueryParams[
-                                        attribute
-                                      ]?.[0]
-                                        .split(",")
-                                        .includes(value)}
+                                      defaultChecked={
+                                        (generateQueryParams &&
+                                          generateQueryParams[attribute]?.[0]
+                                            .split(",")
+                                            .includes(value)) ??
+                                        false
+                                      }
                                       type="checkbox"
                                       className="h-4 w-4 border-gray-300 rounded accent-red-500"
                                     />
@@ -567,7 +573,11 @@ const Collection = () => {
                         as="div"
                         key={attribute}
                         className="border-b border-gray-200 dark:border-gray-500 py-6"
-                        defaultOpen={generateQueryParams[attribute]?.length > 0}
+                        defaultOpen={
+                          (generateQueryParams &&
+                            generateQueryParams[attribute]?.length > 0) ??
+                          false
+                        }
                       >
                         {({ open }) => (
                           <>
@@ -619,11 +629,13 @@ const Collection = () => {
                                           removeQueryParams(attribute, value);
                                         }
                                       }}
-                                      defaultChecked={generateQueryParams[
-                                        attribute
-                                      ]?.[0]
-                                        .split(",")
-                                        .includes(value)}
+                                      defaultChecked={
+                                        (generateQueryParams &&
+                                          generateQueryParams[attribute]?.[0]
+                                            .split(",")
+                                            .includes(value)) ??
+                                        false
+                                      }
                                       type="checkbox"
                                       className="h-4 w-4 border-gray-300 rounded accent-red-500"
                                     />
