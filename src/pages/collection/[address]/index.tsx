@@ -37,6 +37,7 @@ import { useInView } from "react-intersection-observer";
 import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
 import { Item } from "react-stately";
 import Listings from "../../../components/Listings";
+import Button from "../../../components/Button";
 
 const MAX_ITEMS_PER_PAGE = 42;
 
@@ -245,7 +246,11 @@ const Collection = () => {
 
   // reset query params when collection changes
   React.useEffect(() => {
-    if (formattedAddress !== previousRef.current) {
+    if (
+      previousRef.current &&
+      previousRef.current !== AddressZero &&
+      formattedAddress !== previousRef.current
+    ) {
       setGenerateQueryParams(null);
     }
   }, [formattedAddress]);
@@ -346,6 +351,7 @@ const Collection = () => {
       return acc;
     }, {}) ?? {};
 
+  console.log(generateQueryParams, formattedSearch, previousRef.current);
   return (
     <main>
       <Transition.Root show={mobileFiltersOpen} as={Fragment}>
@@ -480,6 +486,11 @@ const Collection = () => {
                       </Disclosure>
                     );
                   })}
+                <div className="mt-4 mx-4">
+                  <Button onClick={() => setGenerateQueryParams({})}>
+                    Clear all
+                  </Button>
+                </div>
               </div>
             </div>
           </Transition.Child>
@@ -641,7 +652,7 @@ const Collection = () => {
                                           removeQueryParams(attribute, value);
                                         }
                                       }}
-                                      defaultChecked={
+                                      checked={
                                         (generateQueryParams &&
                                           generateQueryParams[attribute]?.[0]
                                             .split(",")
@@ -666,6 +677,11 @@ const Collection = () => {
                       </Disclosure>
                     );
                   })}
+                  <div className="mt-4">
+                    <Button onClick={() => setGenerateQueryParams({})}>
+                      Clear all
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
