@@ -244,9 +244,7 @@ const Collection = () => {
 
   React.useEffect(() => {
     const scrollToTop = () => {
-      window.scroll({
-        top: 0,
-        left: 0,
+      document.getElementById("filter-heading")?.scrollIntoView({
         behavior: "smooth",
       });
     };
@@ -519,7 +517,7 @@ const Collection = () => {
           )}
         </div>
         <div>
-          <div className="block">
+          <div className="block" id="filter-heading">
             <div className="border-b border-gray-200 dark:border-gray-500">
               <nav
                 className="-mb-px flex justify-center space-x-8"
