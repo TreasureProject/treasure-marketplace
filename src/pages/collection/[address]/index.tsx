@@ -166,6 +166,8 @@ const Collection = () => {
     [key: string]: string[];
   } | null>(null);
 
+  const previousRef = React.useRef<string | null>(null);
+
   React.useEffect(() => {
     formattedSearch &&
       setGenerateQueryParams(getInititalFilters(formattedSearch));
@@ -241,6 +243,16 @@ const Collection = () => {
       enabled: !!address,
     }
   );
+
+  React.useEffect(() => {
+    if (formattedAddress !== previousRef.current) {
+      setGenerateQueryParams(null);
+    }
+  }, [formattedAddress]);
+
+  React.useEffect(() => {
+    previousRef.current = formattedAddress;
+  }, [formattedAddress]);
 
   React.useEffect(() => {
     const scrollToTop = () => {
