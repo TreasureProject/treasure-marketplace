@@ -827,8 +827,6 @@ const Collection = () => {
                           })}
                         {/* ERC721 */}
                         {group.collection?.listings?.map((listing) => {
-                          const yourItem =
-                            account?.toLowerCase() === listing.user.id;
                           return (
                             <li key={listing.id} className="group">
                               <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
@@ -856,11 +854,11 @@ const Collection = () => {
                                   </a>
                                 </Link>
                               </div>
-                              <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
-                                <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
-                                  {collectionData.collection?.name}
+                              <div className="mt-4 font-medium text-gray-900 space-y-2">
+                                <p className="text-xs text-gray-500 dark:text-gray-300  font-semibold">
+                                  {listing.token.name}
                                 </p>
-                                <p className="dark:text-gray-100">
+                                <p className="dark:text-gray-100 capsize">
                                   {formatNumber(
                                     parseFloat(
                                       formatEther(listing.pricePerItem)
@@ -870,45 +868,6 @@ const Collection = () => {
                                     $MAGIC
                                   </span>
                                 </p>
-                              </div>
-                              <div className="flex items-baseline mt-1">
-                                <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                                  {listing.token.name}
-                                </p>
-                                <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
-                                  <span className="text-gray-500 dark:text-gray-400">
-                                    Expires in:
-                                  </span>{" "}
-                                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                                    {formatDistanceToNow(
-                                      new Date(Number(listing.expires))
-                                    )}
-                                  </span>
-                                </p>
-                              </div>
-                              {isERC1155 && (
-                                <div className="flex mt-1 justify-end">
-                                  <span className="text-gray-600 text-xs text-[0.6rem]">
-                                    <span className="text-gray-500 dark:text-gray-400">
-                                      Quantity:
-                                    </span>{" "}
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">
-                                      {listing.quantity}
-                                    </span>
-                                  </span>
-                                </div>
-                              )}
-                              <div className="flex mt-1 justify-end">
-                                <span className="text-gray-600 text-xs text-[0.6rem]">
-                                  <span className="text-gray-500 dark:text-gray-400">
-                                    Owner:
-                                  </span>{" "}
-                                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                                    {yourItem
-                                      ? "You"
-                                      : shortenAddress(listing.user.id)}
-                                  </span>
-                                </span>
                               </div>
                             </li>
                           );
