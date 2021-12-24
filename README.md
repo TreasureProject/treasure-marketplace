@@ -18,7 +18,7 @@ This repo uses yarn to manage dependencies.
 
 to get the dev environment running on localhost:3000
 
-We also use `graphql-codegen` to read the graphql endpoint defined in `codegen.yml` and automatically generate type-safe gql queries to be consumed by `react-query`
+We also use `graphql-codegen` to read the graphql endpoint defined in `codegen.yml` and automatically generate type-safe graphql queries to be consumed by `react-query`
 
 On a separate window, run:
 
