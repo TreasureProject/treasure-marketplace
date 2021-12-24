@@ -10,7 +10,7 @@ Tech stack:
 
 ## Development
 
-This repo uses yarn to manange dependencies.
+This repo uses yarn to manage dependencies.
 
 1. `yarn install`
 
