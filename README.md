@@ -16,19 +16,24 @@ Tech stack:
 
 This repo uses yarn to manage dependencies.
 
-1. `yarn install`
+To get the dev environment running on `localhost:3000`, run the following commands:
 
+1. `yarn install`
 2. `yarn dev`
 
-to get the dev environment running on `localhost:3000`
+We also use `graphql-codegen` to read the graphql endpoint defined in `codegen.yml` to generate type-safe graphql queries to be consumed by `react-query`.
 
-We also use `graphql-codegen` to read the graphql endpoint defined in `codegen.yml` and automatically generate type-safe graphql queries to be consumed by `react-query`
+**Important:** Before you attempt to run the dev environment for the first time, please run:
 
-On a separate window, run:
+`yarn generate`
+
+to generate type-safe graphql queries.
+
+After that, in order to automatically generate type-safe graphql queries, run this command in a separate window:
 
 `yarn watch:codegen`
 
-and everytime you make changes to `queries.graphql.ts`, the watcher will check if that query exists in the endpoint, and if it does, spits out appropriate typesafe query for you.
+Every time you make changes to `queries.graphql.ts`, the watcher will check if that query exists in the endpoint, and if it does, spits out appropriate typesafe query for you.
 
 ## Contributing
 
