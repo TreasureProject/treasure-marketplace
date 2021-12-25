@@ -25,6 +25,15 @@
         "code",
         "design"
       ]
+    },
+    {
+      "login": "0xkarel",
+      "name": "0xkarel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/95452264?v=4",
+      "profile": "http://treasure.tools",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
