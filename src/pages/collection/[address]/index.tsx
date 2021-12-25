@@ -37,6 +37,7 @@ import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
 import { Item } from "react-stately";
 import Listings from "../../../components/Listings";
 import Button from "../../../components/Button";
+import { userFriendlyRouteToAddress, useChainId, } from "../../../lib/hooks";
 
 const MAX_ITEMS_PER_PAGE = 42;
 
@@ -164,7 +165,7 @@ const getInititalFilters = (search: string | undefined) => {
     {}
   );
 };
-/* 
+/*
 
 */
 
@@ -239,12 +240,13 @@ const Collection = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filters = getInititalFilters(formattedSearch);
+  const chainId = useChainId()
 
   const sortParam = sort ?? OrderDirection.Asc;
   const activitySortParam = activitySort ?? "time";
   const formattedAddress = Array.isArray(address)
-    ? address[0]
-    : address?.toLowerCase() ?? AddressZero;
+    ? userFriendlyRouteToAddress(address[0], chainId)
+    : userFriendlyRouteToAddress(address ?? AddressZero, chainId);
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
 
@@ -264,13 +266,13 @@ const Collection = () => {
   );
 
   const { data: collectionData } = useQuery(
-    ["collection", address],
+    ["collection", formattedAddress],
     () =>
       client.getCollectionInfo({
         id: formattedAddress,
       }),
     {
-      enabled: !!address,
+      enabled: !!formattedAddress,
       refetchInterval: false,
     }
   );
@@ -280,13 +282,13 @@ const Collection = () => {
   );
 
   const { data: statData } = useQuery(
-    ["stats", address],
+    ["stats", formattedAddress],
     () =>
       client.getCollectionStats({
         id: formattedAddress,
       }),
     {
-      enabled: !!address,
+      enabled: !!formattedAddress,
     }
   );
 
@@ -326,7 +328,7 @@ const Collection = () => {
           : OrderDirection.Asc,
       }),
     {
-      enabled: !!address && !!collectionData,
+      enabled: !!formattedAddress && !!collectionData,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
     }
   );
@@ -334,7 +336,7 @@ const Collection = () => {
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
-  }, [address]);
+  }, [formattedAddress]);
 
   const collection =
     listingData?.pages[listingData.pages.length - 1]?.collection;

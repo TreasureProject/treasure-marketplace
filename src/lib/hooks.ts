@@ -59,83 +59,143 @@ export function useChainId() {
   }
 }
 
-const collections = {
+export function userFriendlyRouteToAddress(
+  formattedAddress: string,
+  chainId: ChainId,
+) {
+
+  if (formattedAddress?.match(/0x/)) {
+    return formattedAddress
+  }
+
+  if (!collections?.[chainId]) {
+    return formattedAddress
+  } else {
+
+    let tokenAddress = collections?.[chainId]?.find(t => formattedAddress === t.route)
+    return !!tokenAddress?.address
+      ? tokenAddress.address
+      : formattedAddress
+  }
+}
+
+export interface CollectionItem {
+  name: string
+  route?: string
+  address: string
+}
+
+export interface Collections {
+  [key: number]: CollectionItem[]
+}
+
+export const collections: Collections = {
   [ChainId.Rinkeby]: [
     {
       name: "Extra Life",
+      route: "extra-life",
       address: "0x5e6ae51147d1ec18edccae516a59fb0a26a0b48f",
     },
     {
       name: "Keys",
+      route: "keys",
       address: "0x25ee208b4f8636b5ceaafdee051bf0bfe514f5f6",
     },
-    { name: "Legions", address: "0x6fd12312f70fa5b04d66584600f39abe31a99708" },
+    {
+      name: "Legions",
+      route: "legions",
+      address: "0x6fd12312f70fa5b04d66584600f39abe31a99708"
+    },
     {
       name: "Legions Genesis",
+      route: "legions-genesis",
       address: "0xac2f8732a67c15bf81f8a6181364ce753e915037",
     },
-    // { name: "Life", address: "#" },
+    // {
+    //   name: "Life",
+    //   route: "life",
+    //   address: "#"
+    // },
     {
       name: "Seed of Life",
+      route: "seed-of-life",
       address: "0x6a67fbf40142e3db2e6a950a4d48b0eb41107ce8",
     },
     {
       name: "Smol Bodies",
+      route: "smol-bodies",
       address: "0x9e638bfe78b372b8f5cc63cf6b01b90f568496cb",
     },
     {
       name: "Smol Brains",
+      route: "smol-brains",
       address: "0x4feea06250d9f315a6a454c9c8a7fcbcf8701210",
     },
     {
       name: "Smol Brains Land",
+      route: "smol-brains-land",
       address: "0xe42c57ab8e093d21e52cb07b5f32b1b106cdbfe4",
     },
     {
       name: "Treasures",
+      route: "treasures",
       address: "0x61b468f85b2e50baa0b1729ffc99efe9ef0428f0",
     },
     {
       name: "Smol Cars",
+      route: "smol-cars",
       address: "0x16bdf0b2d8bb8e98aecb32e004febf9653da5f43",
     },
   ],
   [ChainId.Arbitrum]: [
     {
       name: "Extra Life",
+      route: "extra-life",
       address: "0x21e1969884d477afd2afd4ad668864a0eebd644c",
     },
     {
       name: "Keys",
+      route: "keys",
       address: "0xf0a35ba261ece4fc12870e5b7b9e7790202ef9b5",
     },
-    { name: "Legions", address: "0x658365026d06f00965b5bb570727100e821e6508" },
+    {
+      name: "Legions",
+      route: "legions",
+      address: "0x658365026d06f00965b5bb570727100e821e6508"
+    },
     {
       name: "Legions Genesis",
+      route: "legions-genesis",
       address: "0xe83c0200e93cb1496054e387bddae590c07f0194",
     },
     {
       name: "Smol Bodies",
+      route: "smol-bodies",
       address: "0x17dacad7975960833f374622fad08b90ed67d1b5",
     },
     {
       name: "Smol Brains",
+      route: "smol-brains",
       address: "0x6325439389e0797ab35752b4f43a14c004f22a9c",
     },
     {
       name: "Smol Brains Land",
+      route: "smol-brains-land",
       address: "0xd666d1cc3102cd03e07794a61e5f4333b4239f53",
     },
     {
       name: "Smol Cars",
+      route: "smol-cars",
       address: "0xb16966dad2b5a5282b99846b23dcdf8c47b6132c",
     },
     {
       name: "Treasures",
+      route: "treasures",
       address: "0xebba467ecb6b21239178033189ceae27ca12eadf",
     },
     {
       name: "Seed of Life",
+      route: "seed-of-life",
       address: "0x3956c81a51feaed98d7a678d53f44b9166c8ed66",
     },
   ],
@@ -174,6 +234,7 @@ export function useTransferNFT(contract: string, standard: TokenStandard) {
 
   return transfer;
 }
+
 
 export function useApproveContract(contract: string, standard: TokenStandard) {
   const chainId = useChainId();
