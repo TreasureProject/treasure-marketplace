@@ -23,7 +23,7 @@ import MetaMaskSvg from "../../public/img/metamask.svg";
 import WalletConnectSvg from "../../public/img/walletconnect.svg";
 import Image from "next/image";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
-import { useCollections } from "../lib/hooks";
+import { useCollections, getUserFriendlyRoute } from "../lib/hooks";
 
 const walletconnect = new WalletConnectConnector({
   rpc: {
@@ -184,10 +184,15 @@ const Header = () => {
                           coreCollections.includes(collection.name)
                         )
                         .map((collection) => {
+
                           const active = collection.address === address;
+                          const collectionRoute = getUserFriendlyRoute(collection.address, currentChainId as ChainId)
+                            ?? collection.address
+                            // chainId may be undefined, fallback to address
+
                           return (
                             <Link
-                              href={`/collection/${collection.address}`}
+                              href={`/collection/${collectionRoute}`}
                               passHref
                               key={collection.name}
                             >

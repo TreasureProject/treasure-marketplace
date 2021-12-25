@@ -59,6 +59,8 @@ export function useChainId() {
   }
 }
 
+
+// converts a user-friendly route slug to a token address
 export function userFriendlyRouteToAddress(
   formattedAddress: string,
   chainId: ChainId,
@@ -77,6 +79,17 @@ export function userFriendlyRouteToAddress(
     ? tokenAddress.address
     : formattedAddress
 }
+
+// takes a token address and tries to return a user-friendly slug for routes
+export function getUserFriendlyRoute(
+  address: string,
+  chainId: ChainId,
+): string|undefined {
+  const collection = collections?.[chainId]
+  const matchedCollection = collection?.find(c => c.address === address)
+  return matchedCollection?.route
+}
+
 
 export type CollectionItem = {
   name: string
