@@ -70,22 +70,21 @@ export function userFriendlyRouteToAddress(
 
   if (!collections?.[chainId]) {
     return formattedAddress
-  } else {
-
-    const tokenAddress = collections?.[chainId]?.find(t => formattedAddress === t.route)
-    return !!tokenAddress?.address
-      ? tokenAddress.address
-      : formattedAddress
   }
+
+  const tokenAddress = collections?.[chainId]?.find(t => formattedAddress === t.route)
+  return !!tokenAddress?.address
+    ? tokenAddress.address
+    : formattedAddress
 }
 
-export interface CollectionItem {
+export type CollectionItem = {
   name: string
   route: string
   address: string
 }
 
-export interface Collections {
+export type Collections = {
   [key: number]: CollectionItem[]
 }
 
