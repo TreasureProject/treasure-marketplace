@@ -62,21 +62,20 @@ export function useChainId() {
 // converts a user-friendly route slug to a token address
 export function userFriendlyRouteToAddress(
   formattedAddress: string,
-  chainId: ChainId,
+  chainId: ChainId
 ) {
-
   if (formattedAddress?.match(/^0x/)) {
-    return formattedAddress
+    return formattedAddress;
   }
 
   if (!collections?.[chainId]) {
-    return formattedAddress
+    return formattedAddress;
   }
 
-  const tokenAddress = collections?.[chainId]?.find(t => formattedAddress === t.route)
-  return !!tokenAddress?.address
-    ? tokenAddress.address
-    : formattedAddress
+  const tokenAddress = collections?.[chainId]?.find(
+    (t) => formattedAddress === t.route
+  );
+  return !!tokenAddress?.address ? tokenAddress.address : formattedAddress;
 }
 
 // takes a token address and tries to return a user-friendly slug for routes
@@ -97,14 +96,14 @@ export function getUserFriendlyRoute(
 }
 
 export type CollectionItem = {
-  name: string
-  route: string
-  address: string
-}
+  name: string;
+  route: string;
+  address: string;
+};
 
 export type Collections = {
-  [key: number]: CollectionItem[]
-}
+  [key: number]: CollectionItem[];
+};
 
 export const collections: Collections = {
   [ChainId.Rinkeby]: [
@@ -121,7 +120,7 @@ export const collections: Collections = {
     {
       name: "Legions",
       route: "legions",
-      address: "0x6fd12312f70fa5b04d66584600f39abe31a99708"
+      address: "0x6fd12312f70fa5b04d66584600f39abe31a99708",
     },
     {
       name: "Legions Genesis",
@@ -178,7 +177,7 @@ export const collections: Collections = {
     {
       name: "Legions",
       route: "legions",
-      address: "0x658365026d06f00965b5bb570727100e821e6508"
+      address: "0x658365026d06f00965b5bb570727100e821e6508",
     },
     {
       name: "Legions Genesis",
@@ -251,7 +250,6 @@ export function useTransferNFT(contract: string, standard: TokenStandard) {
 
   return transfer;
 }
-
 
 export function useApproveContract(contract: string, standard: TokenStandard) {
   const chainId = useChainId();

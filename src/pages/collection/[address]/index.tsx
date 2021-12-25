@@ -37,7 +37,7 @@ import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
 import { Item } from "react-stately";
 import Listings from "../../../components/Listings";
 import Button from "../../../components/Button";
-import { userFriendlyRouteToAddress, useChainId, } from "../../../lib/hooks";
+import { userFriendlyRouteToAddress, useChainId } from "../../../lib/hooks";
 
 const MAX_ITEMS_PER_PAGE = 42;
 
@@ -240,13 +240,16 @@ const Collection = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filters = getInititalFilters(formattedSearch);
-  const chainId = useChainId()
+  const chainId = useChainId();
 
   const sortParam = sort ?? OrderDirection.Asc;
   const activitySortParam = activitySort ?? "time";
   const formattedAddress = Array.isArray(address)
     ? userFriendlyRouteToAddress(address[0], chainId)
-    : userFriendlyRouteToAddress(address?.toLowerCase() ?? AddressZero, chainId);
+    : userFriendlyRouteToAddress(
+        address?.toLowerCase() ?? AddressZero,
+        chainId
+      );
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
 
