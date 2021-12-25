@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "jcheese1",
+      "name": "jc",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15570714?v=4",
+      "profile": "https://github.com/jcheese1",
+      "contributions": [
+        "ideas",
+        "code",
+        "design"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "treasure-marketplace",
+  "projectOwner": "TreasureProject",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
