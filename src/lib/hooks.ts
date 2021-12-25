@@ -61,7 +61,7 @@ export function useChainId() {
 
 export function userFriendlyRouteToAddress(
   formattedAddress: string,
-  chainId: ChainId | string,
+  chainId: ChainId,
 ) {
 
   if (formattedAddress?.match(/^0x/)) {
@@ -81,7 +81,7 @@ export function userFriendlyRouteToAddress(
 
 export interface CollectionItem {
   name: string
-  route?: string
+  route: string
   address: string
 }
 
