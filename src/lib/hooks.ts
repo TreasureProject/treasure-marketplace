@@ -104,7 +104,7 @@ export const collections: Collections = {
     {
       name: "Legions",
       route: "legions",
-      address: "0x6fd12312f70fa5b04d66584600f39abe31a99708"
+      address: "0x6fd12312f70fa5b04d66584600f39abe31a99708",
     },
     {
       name: "Legions Genesis",
@@ -161,7 +161,7 @@ export const collections: Collections = {
     {
       name: "Legions",
       route: "legions",
-      address: "0x658365026d06f00965b5bb570727100e821e6508"
+      address: "0x658365026d06f00965b5bb570727100e821e6508",
     },
     {
       name: "Legions Genesis",

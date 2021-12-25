@@ -11,7 +11,6 @@ export const Contracts = {
   },
 };
 
-
 // TODO: Put this data in the graph
 export const coreCollections = ["Legions", "Treasures", "Smol Brains"];
 

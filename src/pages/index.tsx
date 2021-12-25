@@ -31,7 +31,7 @@ const ImageWrapper = ({ image }: { image: StaticImageData }) => (
 
 export default function Home() {
   const Router = useRouter();
-  const data = useCollections()
+  const data = useCollections();
 
   return (
     <div className="relative">
