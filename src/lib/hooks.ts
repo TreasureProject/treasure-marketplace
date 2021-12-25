@@ -72,7 +72,7 @@ export function userFriendlyRouteToAddress(
     return formattedAddress
   } else {
 
-    let tokenAddress = collections?.[chainId]?.find(t => formattedAddress === t.route)
+    const tokenAddress = collections?.[chainId]?.find(t => formattedAddress === t.route)
     return !!tokenAddress?.address
       ? tokenAddress.address
       : formattedAddress
