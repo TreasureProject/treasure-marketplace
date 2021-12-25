@@ -34,6 +34,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "peitalin",
+      "name": "Peita Lin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4037878?v=4",
+      "profile": "https://www.linkedin.com/in/peitalin",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
