@@ -37,7 +37,12 @@ Every time you make changes to `queries.graphql.ts`, the watcher will check if t
 
 ## Contributing
 
-Make an issue first, then fork the repo, create a PR and tag `wyze` or `jcheese1` and we will review!
+Feature Request:
+
+- Please make an discussion under Discussions, and we will move it to issues if we think its necessary.
+
+PR/Issues (Bug):
+- Make an issue first, then fork the repo, create a PR and tag `wyze` or `jcheese1` and we will review!
 
 ## Contributors ✨
 
