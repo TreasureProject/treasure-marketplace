@@ -29,6 +29,7 @@ import {
   useBuyItem,
   useChainId,
   useTransferNFT,
+  userFriendlyRouteToAddress,
 } from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
@@ -97,10 +98,11 @@ export default function Example() {
   const { magicPrice } = useMagic();
 
   const formattedTokenId = Array.isArray(tokenId) ? tokenId[0] : tokenId;
+  const chainId = useChainId();
 
   const formattedAddress = Array.isArray(address)
-    ? address[0]
-    : address?.toLowerCase() ?? AddressZero;
+    ? userFriendlyRouteToAddress(address[0], chainId)
+    : userFriendlyRouteToAddress(address?.toLowerCase() ?? AddressZero, chainId);
 
   const { data, isLoading, isIdle } = useQuery(
     "details",
@@ -110,7 +112,7 @@ export default function Example() {
         tokenId: formattedTokenId,
       }),
     {
-      enabled: !!address || !!tokenId,
+      enabled: !!formattedAddress || !!tokenId,
       refetchInterval: false,
     }
   );
@@ -145,7 +147,7 @@ export default function Example() {
       }),
     {
       enabled:
-        !!address &&
+        !!formattedAddress &&
         !!tokenId &&
         data?.collection?.standard === TokenStandard.Erc1155,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
@@ -189,7 +191,6 @@ export default function Example() {
 
   const { send, state } = useBuyItem();
 
-  const chainId = useChainId();
 
   React.useEffect(() => {
     if (state.status === "Success") {

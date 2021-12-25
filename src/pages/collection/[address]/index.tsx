@@ -246,7 +246,7 @@ const Collection = () => {
   const activitySortParam = activitySort ?? "time";
   const formattedAddress = Array.isArray(address)
     ? userFriendlyRouteToAddress(address[0], chainId)
-    : userFriendlyRouteToAddress(address ?? AddressZero, chainId);
+    : userFriendlyRouteToAddress(address?.toLowerCase() ?? AddressZero, chainId);
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
 
