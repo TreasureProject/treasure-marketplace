@@ -7,6 +7,7 @@ Tech stack:
 - Next.js
 - tailwindcss
 - react-query
+- TypeScript
 
 ## Development
 
@@ -28,6 +29,6 @@ and everytime you make changes to `queries.graphql.ts`, the watcher will check i
 
 ## Contributing
 
-Create a new branch from main, and create a PR and tag @wyze or @jcheese1 and we will review!
+Create a new branch from main, and create a PR and tag `wyze` or `jcheese1` and we will review!
 
 We will have roadmaps/todos on the Projects tab, but feel free to create issues!
