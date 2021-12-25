@@ -102,7 +102,10 @@ export default function Example() {
 
   const formattedAddress = Array.isArray(address)
     ? userFriendlyRouteToAddress(address[0], chainId)
-    : userFriendlyRouteToAddress(address?.toLowerCase() ?? AddressZero, chainId);
+    : userFriendlyRouteToAddress(
+        address?.toLowerCase() ?? AddressZero,
+        chainId
+      );
 
   const { data, isLoading, isIdle } = useQuery(
     "details",
@@ -190,7 +193,6 @@ export default function Example() {
     listingData?.pages[0].collection.tokens[0].listings.length > 0;
 
   const { send, state } = useBuyItem();
-
 
   React.useEffect(() => {
     if (state.status === "Success") {
@@ -898,7 +900,9 @@ export default function Example() {
                                                       listing.blockTimestamp
                                                     ) * 1000
                                                   ),
-                                                  { addSuffix: true }
+                                                  {
+                                                    addSuffix: true,
+                                                  }
                                                 )}
                                               </div>
                                             </div>

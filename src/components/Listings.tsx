@@ -290,7 +290,9 @@ const Listings = ({
                             >
                               {formatDistanceToNow(
                                 new Date(Number(listing.blockTimestamp) * 1000),
-                                { addSuffix: true }
+                                {
+                                  addSuffix: true,
+                                }
                               )}
                               <ExternalLinkIcon className="h-4 m-[0.125rem] pl-1" />
                             </a>

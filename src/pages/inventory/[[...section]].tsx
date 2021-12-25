@@ -668,7 +668,9 @@ const Inventory = () => {
                             alt={token.name ?? ""}
                             className={classNames(
                               "object-fill object-center pointer-events-none",
-                              { "group-hover:opacity-80": section !== "sold" }
+                              {
+                                "group-hover:opacity-80": section !== "sold",
+                              }
                             )}
                             layout="fill"
                             src={
