@@ -186,7 +186,7 @@ const Header = () => {
                         .map((collection) => {
 
                           const active = collection.address === address;
-                          const collectionRoute = getUserFriendlyRoute(collection.address, currentChainId as ChainId)
+                          const collectionRoute = getUserFriendlyRoute(collection.address, currentChainId)
                             ?? collection.address
                             // chainId may be undefined, fallback to address
 

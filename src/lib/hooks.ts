@@ -81,12 +81,19 @@ export function userFriendlyRouteToAddress(
 }
 
 // takes a token address and tries to return a user-friendly slug for routes
+// can return undefined if chainId is missing, or address lookup fails
 export function getUserFriendlyRoute(
   address: string,
-  chainId: ChainId,
+  chainId: ChainId|undefined, // chainId may be undefined from useEthers()
 ): string|undefined {
+
+  if (!chainId) {
+    return undefined
+  }
+
   const collection = collections?.[chainId]
   const matchedCollection = collection?.find(c => c.address === address)
+
   return matchedCollection?.route
 }
 
