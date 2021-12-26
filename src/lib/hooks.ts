@@ -59,7 +59,6 @@ export function useChainId() {
   }
 }
 
-
 // converts a user-friendly route slug to a token address
 export function userFriendlyRouteToAddress(
   formattedAddress: string,
@@ -96,7 +95,6 @@ export function getUserFriendlyRoute(
 
   return matchedCollection?.route
 }
-
 
 export type CollectionItem = {
   name: string
