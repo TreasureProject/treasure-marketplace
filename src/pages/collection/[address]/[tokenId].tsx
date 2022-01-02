@@ -37,7 +37,7 @@ import {
   formatPrice,
   formattable,
   generateIpfsLink,
-  userFriendlyRouteToAddress,
+  slugToAddress,
 } from "../../../utils";
 import {
   GetTokenDetailsQuery,
@@ -127,11 +127,8 @@ export default function Example() {
   const chainId = useChainId();
 
   const formattedAddress = Array.isArray(slugOrAddress)
-    ? userFriendlyRouteToAddress(slugOrAddress[0], chainId)
-    : userFriendlyRouteToAddress(
-        slugOrAddress?.toLowerCase() ?? AddressZero,
-        chainId
-      );
+    ? slugToAddress(slugOrAddress[0], chainId)
+    : slugToAddress(slugOrAddress?.toLowerCase() ?? AddressZero, chainId);
 
   const { data, isLoading, isIdle } = useQuery(
     "details",
@@ -1040,8 +1037,8 @@ const TransferNFTModal = ({
 
   const chainId = useChainId();
   const normalizedAddress = Array.isArray(slugOrAddress)
-    ? userFriendlyRouteToAddress(slugOrAddress[0], chainId)
-    : userFriendlyRouteToAddress(slugOrAddress ?? AddressZero, chainId);
+    ? slugToAddress(slugOrAddress[0], chainId)
+    : slugToAddress(slugOrAddress ?? AddressZero, chainId);
 
   const normalizedTokenId = Array.isArray(tokenId)
     ? tokenId[0]

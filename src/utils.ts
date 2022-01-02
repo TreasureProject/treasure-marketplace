@@ -63,20 +63,17 @@ export const abbreviatePrice = (number: string) => {
   return formatted_number.toFixed(1).replace(/\.0+$/, "") + unit;
 };
 
-export function userFriendlyRouteToAddress(
-  formattedAddress: string,
-  chainId: ChainId
-) {
-  if (utils.isAddress(formattedAddress)) {
-    return formattedAddress;
+export function slugToAddress(slugOrAddress: string, chainId: ChainId) {
+  if (utils.isAddress(slugOrAddress)) {
+    return slugOrAddress;
   }
   if (!collections?.[chainId]) {
-    return formattedAddress;
+    return slugOrAddress;
   }
   const tokenAddress = collections?.[chainId]?.find(
-    (t) => formattedAddress === t.route
+    (t) => slugOrAddress === t.slug
   );
-  return !!tokenAddress?.address ? tokenAddress.address : formattedAddress;
+  return !!tokenAddress?.address ? tokenAddress.address : slugOrAddress;
 }
 // takes a Collection Name and tries to return a user-friendly slug for routes
 // can return undefined if chainId is missing, or address lookup fails

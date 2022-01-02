@@ -19,7 +19,7 @@ import {
   formatPercent,
   formatPrice,
   generateIpfsLink,
-  userFriendlyRouteToAddress,
+  slugToAddress,
 } from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
 import Image from "next/image";
@@ -255,11 +255,8 @@ const Collection = () => {
   const sortParam = sort ?? OrderDirection.Asc;
   const activitySortParam = activitySort ?? "time";
   const formattedAddress = Array.isArray(slugOrAddress)
-    ? userFriendlyRouteToAddress(slugOrAddress[0], chainId)
-    : userFriendlyRouteToAddress(
-        slugOrAddress?.toLowerCase() ?? AddressZero,
-        chainId
-      );
+    ? slugToAddress(slugOrAddress[0], chainId)
+    : slugToAddress(slugOrAddress?.toLowerCase() ?? AddressZero, chainId);
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
 
