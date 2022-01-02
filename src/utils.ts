@@ -1,5 +1,8 @@
 import { formatEther } from "ethers/lib/utils";
 import { BigNumberish } from "ethers";
+import { ChainId } from "@yuyao17/corefork";
+import { collections } from "./lib/hooks";
+import { utils } from "ethers";
 
 const UNITS = ["", "K", "M", "B", "T", "Q"];
 
@@ -59,3 +62,33 @@ export const abbreviatePrice = (number: string) => {
 
   return formatted_number.toFixed(1).replace(/\.0+$/, "") + unit;
 };
+
+export function userFriendlyRouteToAddress(
+  formattedAddress: string,
+  chainId: ChainId
+) {
+  if (utils.isAddress(formattedAddress)) {
+    return formattedAddress;
+  }
+  if (!collections?.[chainId]) {
+    return formattedAddress;
+  }
+  const tokenAddress = collections?.[chainId]?.find(
+    (t) => formattedAddress === t.route
+  );
+  return !!tokenAddress?.address ? tokenAddress.address : formattedAddress;
+}
+// takes a Collection Name and tries to return a user-friendly slug for routes
+// can return undefined if chainId is missing, or address lookup fails
+export function getCollectionSlugFromName(
+  collectionName: string | null | undefined
+): string | undefined {
+  return collectionName?.replace(/\s+/g, "-")?.toLowerCase();
+}
+
+export function getCollectionNameFromAddress(
+  tokenAddress: string,
+  chainId: ChainId
+): string | undefined {
+  return collections?.[chainId]?.find((c) => c.address === tokenAddress)?.name;
+}

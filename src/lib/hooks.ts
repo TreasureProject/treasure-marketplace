@@ -59,24 +59,6 @@ export function useChainId() {
   }
 }
 
-export function userFriendlyRouteToAddress(
-  formattedAddress: string,
-  chainId: ChainId
-) {
-  if (formattedAddress?.match(/^0x/)) {
-    return formattedAddress;
-  }
-
-  if (!collections?.[chainId]) {
-    return formattedAddress;
-  }
-
-  const tokenAddress = collections?.[chainId]?.find(
-    (t) => formattedAddress === t.route
-  );
-  return !!tokenAddress?.address ? tokenAddress.address : formattedAddress;
-}
-
 export type CollectionItem = {
   name: string;
   route: string;
