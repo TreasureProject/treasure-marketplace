@@ -7,7 +7,13 @@ import { Fragment } from "react";
 import { ListingFieldsFragment } from "../../generated/graphql";
 import { Menu, Transition } from "@headlessui/react";
 import { formatDistanceToNow } from "date-fns";
-import { formatPrice, generateIpfsLink } from "../utils";
+import {
+  formatPrice,
+  generateIpfsLink,
+  getCollectionSlugFromName,
+  getCollectionNameFromAddress,
+} from "../utils";
+import { useChainId } from "../lib/hooks";
 import { shortenAddress } from "@yuyao17/corefork";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -29,6 +35,7 @@ const Listings = ({
   sort: string | string[];
 }) => {
   const router = useRouter();
+  const chainId = useChainId();
 
   return (
     <div className="flex-1 flex items-stretch overflow-hidden">
@@ -141,6 +148,14 @@ const Listings = ({
               </thead>
               <tbody>
                 {listings.map((listing, index) => {
+                  const collectionName = getCollectionNameFromAddress(
+                    listing?.collection?.id,
+                    chainId
+                  );
+                  const slugOrAddress =
+                    getCollectionSlugFromName(collectionName) ??
+                    listing.collection.id;
+
                   return (
                     <tr
                       key={listing.id}
@@ -166,7 +181,7 @@ const Listings = ({
                             {listing.token.metadata?.description}
                           </p>
                           <Link
-                            href={`/collection/${listing.collection.id}/${listing.token.tokenId}`}
+                            href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
                             passHref
                           >
                             <a className="text-xs text-gray-800 dark:text-gray-700 font-semibold truncate hover:underline">

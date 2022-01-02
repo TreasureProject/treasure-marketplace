@@ -25,7 +25,11 @@ import {
 } from "../../lib/hooks";
 import { useEthers } from "@yuyao17/corefork";
 import { AddressZero } from "@ethersproject/constants";
-import { formatNumber, generateIpfsLink } from "../../utils";
+import {
+  formatNumber,
+  generateIpfsLink,
+  getCollectionSlugFromName,
+} from "../../utils";
 import { useRouter } from "next/router";
 import Button from "../../components/Button";
 import Image from "next/image";
@@ -661,139 +665,151 @@ const Inventory = () => {
                   className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8"
                 >
                   {data.map(
-                    ({ id, expires, pricePerItem, quantity, token }) => (
-                      <li key={id}>
-                        <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                          <Image
-                            alt={token.name ?? ""}
-                            className={classNames(
-                              "object-fill object-center pointer-events-none",
-                              {
-                                "group-hover:opacity-80": section !== "sold",
+                    ({ id, expires, pricePerItem, quantity, token }) => {
+                      const slugOrAddress =
+                        getCollectionSlugFromName(token.collection.name) ??
+                        token.collection.id;
+
+                      return (
+                        <li key={id}>
+                          <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
+                            <Image
+                              alt={token.name ?? ""}
+                              className={classNames(
+                                "object-fill object-center pointer-events-none",
+                                {
+                                  "group-hover:opacity-80": section !== "sold",
+                                }
+                              )}
+                              layout="fill"
+                              src={
+                                token.metadata?.image.includes("ipfs")
+                                  ? generateIpfsLink(token.metadata.image)
+                                  : token.metadata?.image ?? ""
                               }
-                            )}
-                            layout="fill"
-                            src={
-                              token.metadata?.image.includes("ipfs")
-                                ? generateIpfsLink(token.metadata.image)
-                                : token.metadata?.image ?? ""
-                            }
-                          />
-                          {section !== "sold" ? (
-                            <button
-                              type="button"
-                              className="absolute inset-0 focus:outline-none"
-                              onClick={() =>
-                                setNft({
-                                  address: token.collection.address,
-                                  collection: token.collection.name,
-                                  name: token.name ?? "",
-                                  listing: pricePerItem
-                                    ? { expires, pricePerItem, quantity }
-                                    : updates[
+                            />
+                            {section !== "sold" ? (
+                              <button
+                                type="button"
+                                className="absolute inset-0 focus:outline-none"
+                                onClick={() =>
+                                  setNft({
+                                    address: token.collection.address,
+                                    collection: token.collection.name,
+                                    name: token.name ?? "",
+                                    listing: pricePerItem
+                                      ? { expires, pricePerItem, quantity }
+                                      : updates[
+                                          `${token.collection.address}-${token.tokenId}`
+                                        ],
+                                    source: token.metadata?.image.includes(
+                                      "ipfs"
+                                    )
+                                      ? generateIpfsLink(token.metadata.image)
+                                      : token.metadata?.image ?? "",
+                                    standard: token.collection.standard,
+                                    tokenId: token.tokenId,
+                                    total:
+                                      totals[
                                         `${token.collection.address}-${token.tokenId}`
                                       ],
-                                  source: token.metadata?.image.includes("ipfs")
-                                    ? generateIpfsLink(token.metadata.image)
-                                    : token.metadata?.image ?? "",
-                                  standard: token.collection.standard,
-                                  tokenId: token.tokenId,
-                                  total:
-                                    totals[
-                                      `${token.collection.address}-${token.tokenId}`
-                                    ],
-                                })
-                              }
+                                  })
+                                }
+                              >
+                                <span className="sr-only">
+                                  View details for {token.name}
+                                </span>
+                              </button>
+                            ) : null}
+                          </div>
+                          <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
+                            <Link
+                              href={`/collection/${slugOrAddress}`}
+                              passHref
                             >
-                              <span className="sr-only">
-                                View details for {token.name}
-                              </span>
-                            </button>
-                          ) : null}
-                        </div>
-                        <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
-                          <Link
-                            href={`/collection/${token.collection.address}`}
-                            passHref
-                          >
-                            <a className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem] hover:underline">
-                              {token.metadata?.description}
-                            </a>
-                          </Link>
-                          {pricePerItem && (
-                            <p className="dark:text-gray-100">
-                              {formatNumber(
-                                parseFloat(formatEther(pricePerItem))
-                              )}{" "}
-                              <span className="text-xs font-light">$MAGIC</span>
-                            </p>
-                          )}
-                          {!expires &&
-                            !pricePerItem &&
+                              <a className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem] hover:underline">
+                                {token.metadata?.description}
+                              </a>
+                            </Link>
+                            {pricePerItem && (
+                              <p className="dark:text-gray-100">
+                                {formatNumber(
+                                  parseFloat(formatEther(pricePerItem))
+                                )}{" "}
+                                <span className="text-xs font-light">
+                                  $MAGIC
+                                </span>
+                              </p>
+                            )}
+                            {!expires &&
+                              !pricePerItem &&
+                              quantity &&
+                              token.collection.standard ===
+                                TokenStandard.Erc1155 && (
+                                <span className="text-gray-600 text-xs text-[0.6rem]">
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    Quantity:
+                                  </span>{" "}
+                                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                                    {quantity}
+                                  </span>
+                                </span>
+                              )}
+                          </div>
+                          <div className="flex items-baseline justify-between mt-1">
+                            <Link
+                              href={`/collection/${slugOrAddress}/${token.tokenId}`}
+                              passHref
+                            >
+                              <a className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate hover:underline">
+                                {token.name}
+                              </a>
+                            </Link>
+                            {expires && (
+                              <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
+                                <span className="text-gray-500 dark:text-gray-400">
+                                  Expires in:
+                                </span>{" "}
+                                <span className="font-bold text-gray-700 dark:text-gray-300">
+                                  {formatDistanceToNow(
+                                    new Date(Number(expires))
+                                  )}
+                                </span>
+                              </p>
+                            )}
+                            {!expires &&
+                              pricePerItem &&
+                              quantity &&
+                              token.collection.standard ===
+                                TokenStandard.Erc1155 && (
+                                <span className="text-gray-600 text-xs text-[0.6rem]">
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    Quantity:
+                                  </span>{" "}
+                                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                                    {quantity}
+                                  </span>
+                                </span>
+                              )}
+                          </div>
+                          {expires &&
                             quantity &&
                             token.collection.standard ===
                               TokenStandard.Erc1155 && (
-                              <span className="text-gray-600 text-xs text-[0.6rem]">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Quantity:
-                                </span>{" "}
-                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                  {quantity}
+                              <div className="flex mt-1 justify-end">
+                                <span className="text-gray-600 text-xs text-[0.6rem]">
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    Quantity:
+                                  </span>{" "}
+                                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                                    {quantity}
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             )}
-                        </div>
-                        <div className="flex items-baseline justify-between mt-1">
-                          <Link
-                            href={`/collection/${token.collection.address}/${token.tokenId}`}
-                            passHref
-                          >
-                            <a className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate hover:underline">
-                              {token.name}
-                            </a>
-                          </Link>
-                          {expires && (
-                            <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
-                              <span className="text-gray-500 dark:text-gray-400">
-                                Expires in:
-                              </span>{" "}
-                              <span className="font-bold text-gray-700 dark:text-gray-300">
-                                {formatDistanceToNow(new Date(Number(expires)))}
-                              </span>
-                            </p>
-                          )}
-                          {!expires &&
-                            pricePerItem &&
-                            quantity &&
-                            token.collection.standard ===
-                              TokenStandard.Erc1155 && (
-                              <span className="text-gray-600 text-xs text-[0.6rem]">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Quantity:
-                                </span>{" "}
-                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                  {quantity}
-                                </span>
-                              </span>
-                            )}
-                        </div>
-                        {expires &&
-                          quantity &&
-                          token.collection.standard ===
-                            TokenStandard.Erc1155 && (
-                            <div className="flex mt-1 justify-end">
-                              <span className="text-gray-600 text-xs text-[0.6rem]">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Quantity:
-                                </span>{" "}
-                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                  {quantity}
-                                </span>
-                              </span>
-                            </div>
-                          )}
-                      </li>
-                    )
+                        </li>
+                      );
+                    }
                   )}
                 </ul>
               )}
