@@ -71,7 +71,7 @@ export function slugToAddress(slugOrAddress: string, chainId: ChainId) {
     return slugOrAddress;
   }
   const tokenAddress = collections?.[chainId]?.find(
-    (t) => slugOrAddress === t.slug
+    (t) => slugOrAddress === getCollectionSlugFromName(t.name)
   );
   return !!tokenAddress?.address ? tokenAddress.address : slugOrAddress;
 }
