@@ -24,6 +24,7 @@ import SmolImg4 from "../../public/img/smolbrains3.png";
 import SmolImg5 from "../../public/img/smolbrains4.png";
 import SmolImg6 from "../../public/img/smolbrains5.png";
 import Link from "next/link";
+import { getCollectionSlugFromName } from "../utils";
 
 const ImageWrapper = ({ image }: { image: StaticImageData }) => (
   <Image src={image.src} width={image.width} height={image.height} />
@@ -68,7 +69,11 @@ export default function Home() {
                     );
 
                     if (targetCollection) {
-                      Router.push(`/collection/${targetCollection.address}`);
+                      const slugOrAddress =
+                        getCollectionSlugFromName(targetCollection.name) ??
+                        targetCollection.address;
+
+                      Router.push(`/collection/${slugOrAddress}`);
                     }
                   }}
                 >
