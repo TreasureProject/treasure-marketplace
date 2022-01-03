@@ -14,7 +14,7 @@
     "@headlessui/react": "^1.4.1",
     "@heroicons/react": "^1.0.4",
     "@radix-ui/react-tooltip": "^0.1.0",
-    "@react-aria/listbox": "^3.3.1",
+    "@react-aria/listbox": "^3.4.0",
     "@usedapp/coingecko": "^0.3.26",
     "@web3-react/walletconnect-connector": "^6.2.8",
     "@yuyao17/corefork": "^0.5.8",
