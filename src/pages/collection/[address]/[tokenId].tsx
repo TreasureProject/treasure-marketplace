@@ -9,7 +9,7 @@ import {
   SwitchHorizontalIcon,
 } from "@heroicons/react/solid";
 import { MinusSmIcon, PlusSmIcon } from "@heroicons/react/outline";
-import Image from "next/image";
+import ImageWrapper from "../../../components/ImageWrapper";
 import {
   getExplorerAddressLink,
   shortenAddress,
@@ -276,15 +276,7 @@ export default function Example() {
             <div className="lg:grid lg:grid-cols-5 lg:gap-x-8 lg:items-start mt-8">
               <div className="lg:col-span-2">
                 <div className="w-full aspect-w-1 aspect-h-1">
-                  <Image
-                    src={
-                      tokenInfo.metadata?.image?.includes("ipfs")
-                        ? generateIpfsLink(tokenInfo.metadata.image)
-                        : tokenInfo.metadata?.image ?? ""
-                    }
-                    layout="fill"
-                    alt={tokenInfo.metadata?.name ?? ""}
-                  />
+                  <ImageWrapper token={tokenInfo} />
                 </div>
                 {/* hide for mobile */}
                 <div className="hidden xl:block">
@@ -1193,16 +1185,7 @@ const PurchaseItemModal = ({
               className="flex flex-col sm:flex-row py-6 px-4 sm:px-6"
             >
               <div className="flex-shrink-0">
-                <Image
-                  src={
-                    metadata?.image?.includes("ipfs")
-                      ? generateIpfsLink(metadata.image)
-                      : metadata?.image ?? ""
-                  }
-                  alt={metadata?.name ?? ""}
-                  width="50%"
-                  height="50%"
-                />
+                <ImageWrapper height="50%" token={targetNft} width="50%" />
               </div>
 
               <div className="sm:ml-6 sm:space-y-0 mt-2 sm:mt-0 space-y-2 flex-1 flex flex-col">

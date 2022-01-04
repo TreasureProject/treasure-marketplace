@@ -16,14 +16,8 @@ function toFixed(num: number, fixed: number) {
 
 export const generateIpfsLink = (hash: string) => {
   const removedIpfs = hash.substring(7);
-  const hotfixSmolSize6 = [
-    "QmR87K1oY8dXL4op91A9zcz4hPmCd8JbMVDTTuUnpXyQcr",
-    "QmY71ban6QoWg9nbNwikk6wVWknj8NFBG8nMGHEuzwfAwf",
-  ].some((hash) => removedIpfs.includes(hash))
-    ? removedIpfs.replace("/6.png", "/5.png")
-    : removedIpfs;
 
-  return `https://treasure-marketplace.mypinata.cloud/ipfs/${hotfixSmolSize6}`;
+  return `https://treasure-marketplace.mypinata.cloud/ipfs/${removedIpfs}`;
 };
 
 export const formatNumber = (number: number) =>

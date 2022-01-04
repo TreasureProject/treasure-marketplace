@@ -18,11 +18,10 @@ import {
   formatNumber,
   formatPercent,
   formatPrice,
-  generateIpfsLink,
   slugToAddress,
 } from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
-import Image from "next/image";
+import ImageWrapper from "../../../components/ImageWrapper";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
 import {
@@ -920,17 +919,9 @@ const Collection = () => {
                             return (
                               <li key={token.id} className="group">
                                 <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                                  <Image
-                                    src={
-                                      token.metadata?.image?.includes("ipfs")
-                                        ? generateIpfsLink(token.metadata.image)
-                                        : token.metadata?.image ?? ""
-                                    }
-                                    alt={token.name ?? ""}
-                                    layout="fill"
-                                    className={
-                                      "w-full h-full object-center object-fill group-hover:opacity-75"
-                                    }
+                                  <ImageWrapper
+                                    className="w-full h-full object-center object-fill group-hover:opacity-75"
+                                    token={token}
                                   />
                                   <Link
                                     href={`/collection/${slugOrAddress}/${token.tokenId}`}
@@ -976,19 +967,9 @@ const Collection = () => {
                           return (
                             <li key={listing.id} className="group">
                               <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                                <Image
-                                  src={
-                                    listing.token.metadata?.image?.includes(
-                                      "ipfs"
-                                    )
-                                      ? generateIpfsLink(
-                                          listing.token.metadata.image
-                                        )
-                                      : listing.token.metadata?.image ?? ""
-                                  }
-                                  alt={listing.token.name ?? ""}
-                                  layout="fill"
+                                <ImageWrapper
                                   className="w-full h-full object-center object-fill group-hover:opacity-75"
+                                  token={listing.token}
                                 />
                                 <Link
                                   href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}

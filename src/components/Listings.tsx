@@ -16,7 +16,7 @@ import {
 import { useChainId } from "../lib/hooks";
 import { shortenAddress } from "@yuyao17/corefork";
 import { useRouter } from "next/router";
-import Image from "next/image";
+import ImageWrapper from "./ImageWrapper";
 import QueryLink from "./QueryLink";
 import classNames from "clsx";
 import { Disclosure } from "@headlessui/react";
@@ -166,14 +166,9 @@ const Listings = ({
                       }
                     >
                       <td className="flex items-center px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
-                        <Image
-                          alt={listing.token.name ?? ""}
+                        <ImageWrapper
                           height={48}
-                          src={
-                            listing.token.metadata?.image?.includes("ipfs")
-                              ? generateIpfsLink(listing.token.metadata.image)
-                              : listing.token.metadata?.image ?? ""
-                          }
+                          token={listing.token}
                           width={48}
                         />
                         <div className="pl-2">
@@ -236,18 +231,11 @@ const Listings = ({
                       <div className="block px-4 py-4 hover:bg-gray-50 dark:bg-gray-200">
                         <span className="flex items-center">
                           <span className="flex-1 flex space-x-4 truncate">
-                            <Image
-                              alt={listing.token.name ?? ""}
-                              height="50%"
-                              src={
-                                listing.token.metadata?.image?.includes("ipfs")
-                                  ? generateIpfsLink(
-                                      listing.token.metadata.image
-                                    )
-                                  : listing.token.metadata?.image ?? ""
-                              }
-                              width="60%"
+                            <ImageWrapper
                               aria-hidden="true"
+                              height="50%"
+                              token={listing.token}
+                              width="60%"
                             />
                             <span className="flex flex-col text-gray-500 space-y-1 text-sm truncate">
                               <span className="truncate text-xs text-gray-400 uppercase">

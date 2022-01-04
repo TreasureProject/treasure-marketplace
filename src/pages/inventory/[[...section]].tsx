@@ -32,7 +32,7 @@ import {
 } from "../../utils";
 import { useRouter } from "next/router";
 import Button from "../../components/Button";
-import Image from "next/image";
+import ImageWrapper from "../../components/ImageWrapper";
 import Link from "next/link";
 import { CenterLoadingDots } from "../../components/CenterLoadingDots";
 import { formatEther } from "ethers/lib/utils";
@@ -162,11 +162,10 @@ const Drawer = ({
                     <div className="space-y-6">
                       <div>
                         <div className="block w-full aspect-w-1 aspect-h-1 sm:aspect-w-5 sm:aspect-h-5 rounded-lg overflow-hidden">
-                          <Image
-                            src={nft.source}
-                            alt={nft.name}
-                            layout="fill"
+                          <ImageWrapper
                             className="object-fill object-center"
+                            src={nft.source}
+                            token={nft}
                           />
                         </div>
                         <div className="mt-4 flex items-start justify-between">
@@ -673,20 +672,14 @@ const Inventory = () => {
                       return (
                         <li key={id}>
                           <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                            <Image
-                              alt={token.name ?? ""}
+                            <ImageWrapper
                               className={classNames(
                                 "object-fill object-center pointer-events-none",
                                 {
                                   "group-hover:opacity-80": section !== "sold",
                                 }
                               )}
-                              layout="fill"
-                              src={
-                                token.metadata?.image.includes("ipfs")
-                                  ? generateIpfsLink(token.metadata.image)
-                                  : token.metadata?.image ?? ""
-                              }
+                              token={token}
                             />
                             {section !== "sold" ? (
                               <button
