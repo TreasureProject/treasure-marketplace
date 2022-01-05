@@ -82,7 +82,7 @@ const Drawer = ({
           closestIndexTo(
             new Date(Number(nft.listing.expires)),
             dates.map(({ value }) => value)
-          )
+          ) ?? 3
         ]
       : dates[3]
   );
