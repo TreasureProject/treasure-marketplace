@@ -5,13 +5,14 @@ import {
 } from "@heroicons/react/solid";
 import { Fragment } from "react";
 import { ListingFieldsFragment } from "../../generated/graphql";
-import { Menu, Transition } from "@headlessui/react";
+import { Menu, Transition, Disclosure } from "@headlessui/react";
 import { formatDistanceToNow } from "date-fns";
 import {
   formatPrice,
   generateIpfsLink,
   getCollectionSlugFromName,
   getCollectionNameFromAddress,
+  formatPriceUsd,
 } from "../utils";
 import { useChainId } from "../lib/hooks";
 import { shortenAddress } from "@yuyao17/corefork";
@@ -19,8 +20,9 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import QueryLink from "./QueryLink";
 import classNames from "clsx";
-import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
+import { useMagic } from "../context/magicContext";
+import { formatEther } from "ethers/lib/utils";
 
 const sortOptions = [
   { name: "Highest Price", value: "price" },
@@ -36,6 +38,7 @@ const Listings = ({
 }) => {
   const router = useRouter();
   const chainId = useChainId();
+  const { ethPrice, usdPrice } = useMagic();
 
   return (
     <div className="flex-1 flex items-stretch overflow-hidden">
@@ -118,7 +121,7 @@ const Listings = ({
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                   >
-                    Price ($MAGIC)
+                    Price
                   </th>
                   <th
                     scope="col"
@@ -191,7 +194,19 @@ const Listings = ({
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
-                        {formatPrice(listing.pricePerItem)}
+                        <div className="flex items-center">
+                          {formatPrice(listing.pricePerItem)}
+                          <div className="text-xs px-1 text-gray-800 dark:text-gray-700">
+                            MAGIC
+                          </div>
+                        </div>
+                        <div className="text-gray-500 text-xs">
+                          $
+                          {formatPriceUsd(
+                            parseFloat(formatEther(listing.pricePerItem)) *
+                              parseFloat(usdPrice)
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
                         {listing.quantity}
