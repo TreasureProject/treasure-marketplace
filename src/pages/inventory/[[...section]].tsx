@@ -547,7 +547,7 @@ const Inventory = () => {
   const [data, totals, updates, emptyMessage] = useMemo(() => {
     const empty: Record<string, NonNullable<Nft["listing"]>> = {};
     const {
-      staked = [],
+      hidden = [],
       listings = [],
       sold = [],
       tokens = [],
