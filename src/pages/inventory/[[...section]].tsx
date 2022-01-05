@@ -587,7 +587,7 @@ const Inventory = () => {
 
     switch (section) {
       case "staked":
-        return [staked, totals, updates, "No staked listings 🙂"] as const;
+        return [hidden, totals, updates, "No staked listings 🙂"] as const;
       case "listed":
         return [listings, totals, empty, "No NFTs listed 🙂"] as const;
       case "sold":
