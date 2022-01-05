@@ -57,7 +57,7 @@ const dates = [
 const tabs = [
   { name: "Collected", href: "/inventory" },
   { name: "Listed", href: "/inventory/listed" },
-  { name: "Hidden", href: "/inventory/hidden" },
+  { name: "Staked", href: "/inventory/staked" },
   { name: "Sold", href: "/inventory/sold" },
 ];
 
