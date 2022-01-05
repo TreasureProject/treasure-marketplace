@@ -57,7 +57,7 @@ const dates = [
 const tabs = [
   { name: "Collected", href: "/inventory" },
   { name: "Listed", href: "/inventory/listed" },
-  { name: "Hidden", href: "/inventory/hidden" },
+  { name: "Staked", href: "/inventory/staked" },
   { name: "Sold", href: "/inventory/sold" },
 ];
 
@@ -547,7 +547,7 @@ const Inventory = () => {
   const [data, totals, updates, emptyMessage] = useMemo(() => {
     const empty: Record<string, NonNullable<Nft["listing"]>> = {};
     const {
-      hidden = [],
+      staked = [],
       listings = [],
       sold = [],
       tokens = [],
@@ -586,8 +586,8 @@ const Inventory = () => {
     );
 
     switch (section) {
-      case "hidden":
-        return [hidden, totals, updates, "No hidden listings 🙂"] as const;
+      case "staked":
+        return [staked, totals, updates, "No staked listings 🙂"] as const;
       case "listed":
         return [listings, totals, empty, "No NFTs listed 🙂"] as const;
       case "sold":
