@@ -23,8 +23,12 @@ export const generateIpfsLink = (hash: string) => {
 export const formatNumber = (number: number) =>
   new Intl.NumberFormat().format(number);
 
-export const formatPriceUsd = (number: number) =>
-  new Intl.NumberFormat("en", { minimumFractionDigits: 2 }).format(number);
+export const formatNumberUsd = (number: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(number);
 
 export const formatPrice = (price: BigNumberish) =>
   formatNumber(parseFloat(formatEther(price)));

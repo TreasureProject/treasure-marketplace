@@ -9,10 +9,9 @@ import { Menu, Transition, Disclosure } from "@headlessui/react";
 import { formatDistanceToNow } from "date-fns";
 import {
   formatPrice,
-  generateIpfsLink,
+  formatNumberUsd,
   getCollectionSlugFromName,
   getCollectionNameFromAddress,
-  formatPriceUsd,
 } from "../utils";
 import { useChainId } from "../lib/hooks";
 import { shortenAddress } from "@yuyao17/corefork";
@@ -38,7 +37,7 @@ const Listings = ({
 }) => {
   const router = useRouter();
   const chainId = useChainId();
-  const { ethPrice, usdPrice } = useMagic();
+  const { usdPrice } = useMagic();
 
   return (
     <div className="flex-1 flex items-stretch overflow-hidden">
@@ -191,13 +190,10 @@ const Listings = ({
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
                         <div className="flex items-center">
                           {formatPrice(listing.pricePerItem)}
-                          <div className="text-xs px-1 text-gray-800 dark:text-gray-700">
-                            MAGIC
-                          </div>
+                          <div className="text-xs px-1">MAGIC</div>
                         </div>
                         <div className="text-gray-500 text-xs">
-                          $
-                          {formatPriceUsd(
+                          {formatNumberUsd(
                             parseFloat(formatEther(listing.pricePerItem)) *
                               parseFloat(usdPrice)
                           )}
