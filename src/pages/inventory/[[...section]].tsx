@@ -54,10 +54,9 @@ const dates = [
   { id: 4, label: "3 Months", value: addMonths(new Date(), 3) },
 ];
 
-const tabs = [
+const defaultTabs = [
   { name: "Collected", href: "/inventory" },
   { name: "Listed", href: "/inventory/listed" },
-  { name: "Staked", href: "/inventory/staked" },
   { name: "Sold", href: "/inventory/sold" },
 ];
 
@@ -596,6 +595,14 @@ const Inventory = () => {
         return [tokens, totals, updates, null] as const;
     }
   }, [inventory.data?.user, section]);
+
+  const tabs = useMemo(() => {
+    if (inventory.data?.user?.hidden.length) {
+      return [...defaultTabs, { name: "Staked", href: "/inventory/staked" }];
+    }
+
+    return defaultTabs;
+  }, [inventory.data?.user]);
 
   const collections = data.map(({ token: { collection } }) => collection);
   const approvals = useContractApprovals(
