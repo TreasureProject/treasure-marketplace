@@ -1,6 +1,6 @@
 # Treasure Marketplace
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This is the source code for Treasure Marketplace frontend. Check out the [subgraph repo](https://github.com/TreasureProject/treasure-marketplace-subgraph) for the API integration part.
@@ -59,6 +59,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.linkedin.com/in/peitalin"><img src="https://avatars.githubusercontent.com/u/4037878?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peita Lin</b></sub></a><br /><a href="https://github.com/TreasureProject/treasure-marketplace/commits?author=peitalin" title="Code">💻</a></td>
     <td align="center"><a href="http://malcosaurus.com"><img src="https://avatars.githubusercontent.com/u/3385743?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Malcolm</b></sub></a><br /><a href="https://github.com/TreasureProject/treasure-marketplace/commits?author=mmnavarr" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/Caranell"><img src="https://avatars.githubusercontent.com/u/9637757?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Anton Lyachek</b></sub></a><br /><a href="https://github.com/TreasureProject/treasure-marketplace/commits?author=Caranell" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/magiclars-off"><img src="https://avatars.githubusercontent.com/u/62888804?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lars</b></sub></a><br /><a href="https://github.com/TreasureProject/treasure-marketplace/commits?author=magiclars-off" title="Code">💻</a></td>
   </tr>
 </table>
 
