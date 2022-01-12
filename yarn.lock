@@ -3217,17 +3217,17 @@
   resolved "https://registry.yarnpkg.com/@uniswap/token-lists/-/token-lists-1.0.0-beta.27.tgz#8b02a979b0b0024cc96f60e694a3f6db6b2ccab2"
   integrity sha512-x5hmIniQ9TGqOBCRqfWcmZi/U5kB0qrHMDQ9igs3nMbK0wwmYLraL4owbIwXFGR/co6/lJYJC4K/Gjn4wZY5mQ==
 
-"@usedapp/coingecko@^0.3.26":
-  version "0.3.26"
-  resolved "https://registry.yarnpkg.com/@usedapp/coingecko/-/coingecko-0.3.26.tgz#2f90173818cfc4675e058ac3752337631b108e6b"
-  integrity sha512-HxO5J+16CVT6dK7E4BrL2HK750j/hiZrDLr5N/BiMdxlUxczomEtr2Ceq5hbPF38nZdaHQ9ALF5jg2h1n4IZdQ==
+"@usedapp/coingecko@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@usedapp/coingecko/-/coingecko-0.4.0.tgz#2156174e0df157984272e440a47ee8668adc24df"
+  integrity sha512-06Zehpa0lhy4KkhGJrhbnBlHtfpqLjFbW249aHRklITY4KqporXERQpU65EsWcHd0ZmDfz9wVpnUunnJ/BW4qA==
   dependencies:
-    "@usedapp/core" "^0.7.0"
+    "@usedapp/core" "^0.8.0"
 
-"@usedapp/core@^0.7.0":
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/@usedapp/core/-/core-0.7.3.tgz#867cc57a9ad95ebc00377d80fc28beb4b2174687"
-  integrity sha512-0Jaidc5E62YdkH4GUKio6Z9cP9ZK81OTgra7UAREMGHhqYuT18EVtvUbDezHqf1jDnYB5E+hZ/J2o17XLOo63w==
+"@usedapp/core@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@usedapp/core/-/core-0.8.0.tgz#a7062a9cf03ace2f9e1c5e5b3a4e1d3c0de8f0b4"
+  integrity sha512-N3PU3fKw2OhyY8U/xJ3JPJ/ZXZ3VUhtYalhLBYLInDiXFtPcL3RO8hSJt/hj07G8Cb7Qxp/Y5cATqTpd/qxLPg==
   dependencies:
     "@types/react" "17.0.1"
     "@uniswap/token-lists" "^1.0.0-beta.27"
