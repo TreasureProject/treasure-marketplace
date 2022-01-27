@@ -71,6 +71,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "alecananian",
+      "name": "Alec Ananian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1013230?v=4",
+      "profile": "https://www.linkedin.com/in/ananian",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
