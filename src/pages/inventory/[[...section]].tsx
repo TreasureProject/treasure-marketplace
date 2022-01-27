@@ -85,6 +85,7 @@ const Drawer = ({
         ]
       : dates[3]
   );
+  const [floorDifference, setFloorDifference] = useState(0);
   const [show, toggle] = useReducer((value) => !value, true);
 
   const approveContract = useApproveContract(nft.address, nft.standard);
@@ -99,6 +100,17 @@ const Drawer = ({
       removeListing.state.status,
       updateListing.state.status,
     ].includes("Mining");
+
+  const { data: statData } = useQuery(
+    ["stats", nft.address],
+    () =>
+      client.getCollectionStats({
+        id: nft.address,
+      }),
+    {
+      enabled: !!nft.address,
+    }
+  );
 
   useEffect(() => {
     if (
@@ -211,12 +223,28 @@ const Drawer = ({
                                   placeholder="0.00"
                                   maxLength={10}
                                   min="0"
+                                  autoComplete="off"
                                   aria-describedby="price-currency"
+                                  onBlur={() => {
+                                    const floor =
+                                      statData?.collection?.floorPrice /
+                                      10 ** 18;
+                                    setFloorDifference(
+                                      Math.floor(
+                                        100 *
+                                          Math.abs(
+                                            (Number(price) - floor) / floor
+                                          )
+                                      )
+                                    );
+                                  }}
                                   onChange={(event) => {
                                     const { value, maxLength } = event.target;
                                     const price = value.slice(0, maxLength);
                                     setPrice(
-                                      String(Math.abs(parseFloat(price)))
+                                      price !== ""
+                                        ? String(Math.abs(parseFloat(price)))
+                                        : ""
                                     );
                                   }}
                                   value={price}
@@ -430,11 +458,12 @@ const Drawer = ({
                           </div>
 
                           <div>
-                            {actions.map((action) => {
+                            {actions.map((action, idx) => {
                               switch (action) {
                                 case "create":
                                   return (
                                     <Button
+                                      key={idx}
                                       disabled={
                                         price.trim() === "" || isFormDisabled
                                       }
@@ -516,6 +545,9 @@ const Drawer = ({
                               }
                             })}
                           </div>
+                          {floorDifference > 10 && (
+                            <p className="flex justify-center text-red-700 font-bold">{`WARNING: ${floorDifference}% below floorpice`}</p>
+                          )}
                         </>
                       )}
                     </div>
