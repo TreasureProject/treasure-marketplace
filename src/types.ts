@@ -2,7 +2,7 @@ import {
   GetTokenDetailsQuery,
   ListingFieldsWithTokenFragment,
   TokenStandard,
-} from "../generated/graphql";
+} from "../generated/queries.graphql";
 
 export type targetNftT = {
   metadata: Exclude<
