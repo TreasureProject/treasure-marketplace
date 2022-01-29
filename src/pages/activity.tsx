@@ -1,4 +1,4 @@
-import { Listing_OrderBy } from "../../generated/graphql";
+import { Listing_OrderBy } from "../../generated/queries.graphql";
 
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";

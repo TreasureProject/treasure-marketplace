@@ -1,5 +1,18 @@
 import gql from "graphql-tag";
 
+export const getMetadata = gql`
+  query getMetadata($id: String!) {
+    tokens(first: 200, where: { collection: $id }) {
+      metadata {
+        image
+        name
+        description
+      }
+      tokenId
+    }
+  }
+`;
+
 export const getUserInventory = gql`
   query getUserInventory($id: ID!) {
     user(id: $id) {

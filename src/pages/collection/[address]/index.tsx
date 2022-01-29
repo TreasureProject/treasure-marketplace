@@ -11,6 +11,7 @@ import {
 
 import { useInfiniteQuery, useQuery } from "react-query";
 import client from "../../../lib/client";
+import { marketplace } from "../../../lib/client";
 import { AddressZero, Zero } from "@ethersproject/constants";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
@@ -30,7 +31,7 @@ import {
   Listing_OrderBy,
   OrderDirection,
   TokenStandard,
-} from "../../../../generated/graphql";
+} from "../../../../generated/queries.graphql";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
 import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
@@ -313,6 +314,43 @@ const Collection = () => {
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.ERC1155;
 
+  // const {
+  //   data: listingData,
+  //   isLoading: isListingLoading,
+  //   fetchNextPage,
+  // } = useInfiniteQuery(
+  //   ["listings", { formattedAddress, sortParam, searchParams, search }],
+  //   ({ queryKey, pageParam = 0 }) =>
+  //     client.getCollectionListings({
+  //       id: formattedAddress,
+  //       isERC1155,
+  //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //       // @ts-ignore
+  //       tokenName: queryKey[1].searchParams,
+  //       skipBy: pageParam,
+  //       first: MAX_ITEMS_PER_PAGE,
+  //       filter: formatSearchFilter(formattedSearch),
+  //       orderBy: sort
+  //         ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
+  //         : Listing_OrderBy.pricePerItem,
+  //       orderDirection: sort
+  //         ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
+  //         : OrderDirection.asc,
+  //     }),
+  //   {
+  //     enabled: !!formattedAddress && !!collectionData,
+  //     getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
+  //   }
+  // );
+  const { data: metadataData, isLoading: isMetadataLoading } = useQuery(
+    ["metadata", formattedAddress],
+    () => client.getMetadata({ id: formattedAddress }),
+    {
+      enabled: !!formattedAddress,
+      refetchInterval: false,
+    }
+  );
+
   const {
     data: listingData,
     isLoading: isListingLoading,
@@ -320,24 +358,24 @@ const Collection = () => {
   } = useInfiniteQuery(
     ["listings", { formattedAddress, sortParam, searchParams, search }],
     ({ queryKey, pageParam = 0 }) =>
-      client.getCollectionListings({
+      marketplace.getCollectionListings({
         id: formattedAddress,
-        isERC1155,
+        // isERC1155,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        tokenName: queryKey[1].searchParams,
+        // tokenName: queryKey[1].searchParams,
         skipBy: pageParam,
         first: MAX_ITEMS_PER_PAGE,
-        filter: formatSearchFilter(formattedSearch),
-        orderBy: sort
-          ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
-          : Listing_OrderBy.pricePerItem,
-        orderDirection: sort
-          ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
-          : OrderDirection.asc,
+        // filter: formatSearchFilter(formattedSearch),
+        // orderBy: sort
+        //   ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
+        //   : Listing_OrderBy.pricePerItem,
+        // orderDirection: sort
+        //   ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
+        //   : OrderDirection.asc,
       }),
     {
-      enabled: !!formattedAddress && !!collectionData,
+      enabled: !!formattedAddress && !!collectionData && !isMetadataLoading,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
     }
   );
@@ -347,9 +385,10 @@ const Collection = () => {
     setSearchParams("");
   }, [formattedAddress]);
 
-  const collection =
-    listingData?.pages[listingData.pages.length - 1]?.collection;
-  const data = isERC1155 ? collection?.tokens : collection?.listings;
+  // const collection =
+  //   listingData?.pages[listingData.pages.length - 1]?.collection;
+  // const data = isERC1155 ? collection?.tokens : collection?.listings;
+  const data = listingData?.pages[listingData.pages.length - 1]?.tokens;
 
   const hasNextPage = data?.length === MAX_ITEMS_PER_PAGE;
 
@@ -918,30 +957,40 @@ const Collection = () => {
                     {listingData.pages.map((group, i) => (
                       <React.Fragment key={i}>
                         {/* ERC1155 */}
-                        {group.collection?.tokens
+                        {group.tokens
                           ?.filter((token) => Boolean(token?.listings?.length))
                           .map((token) => {
+                            const metadata = metadataData?.tokens.find(
+                              (metadata) => metadata.tokenId === token.tokenId
+                            );
+
                             return (
                               <li key={token.id} className="group">
                                 <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                                  <ImageWrapper
-                                    className="w-full h-full object-center object-fill group-hover:opacity-75"
-                                    token={token}
-                                  />
+                                  {metadata?.metadata ? (
+                                    <ImageWrapper
+                                      className="w-full h-full object-center object-fill group-hover:opacity-75"
+                                      token={{
+                                        name: metadata.metadata.name,
+                                        metadata: metadata.metadata,
+                                      }}
+                                    />
+                                  ) : null}
                                   <Link
                                     href={`/collection/${slugOrAddress}/${token.tokenId}`}
                                     passHref
                                   >
                                     <a className="absolute inset-0 focus:outline-none">
                                       <span className="sr-only">
-                                        View details for {token.name}
+                                        View details for{" "}
+                                        {metadata?.metadata?.name}
                                       </span>
                                     </a>
                                   </Link>
                                 </div>
                                 <div className="mt-4 text-base font-medium text-gray-900 space-y-2">
                                   <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                                    {token.name}
+                                    {metadata?.metadata?.name}
                                   </p>
                                   <p className="dark:text-gray-100 text-sm xl:text-base capsize">
                                     {formatNumber(
@@ -968,7 +1017,7 @@ const Collection = () => {
                             );
                           })}
                         {/* ERC721 */}
-                        {group.collection?.listings?.map((listing) => {
+                        {/* {group.collection?.listings?.map((listing) => {
                           return (
                             <li key={listing.id} className="group">
                               <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
@@ -1003,7 +1052,7 @@ const Collection = () => {
                               </div>
                             </li>
                           );
-                        })}
+                        })} */}
                       </React.Fragment>
                     ))}
                   </ul>

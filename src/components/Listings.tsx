@@ -4,7 +4,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/solid";
 import { Fragment } from "react";
-import { ListingFieldsFragment } from "../../generated/graphql";
+import { ListingFieldsFragment } from "../../generated/queries.graphql";
 import { Menu, Transition } from "@headlessui/react";
 import { formatDistanceToNow } from "date-fns";
 import {

@@ -44,7 +44,7 @@ import {
   GetTokenExistsInWalletQuery,
   Status,
   TokenStandard,
-} from "../../../../generated/graphql";
+} from "../../../../generated/queries.graphql";
 import { formatDistanceToNow } from "date-fns";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";

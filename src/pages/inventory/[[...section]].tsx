@@ -38,7 +38,7 @@ import { CenterLoadingDots } from "../../components/CenterLoadingDots";
 import { formatEther } from "ethers/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { FEE, USER_SHARE } from "../../const";
-import { TokenStandard } from "../../../generated/graphql";
+import { TokenStandard } from "../../../generated/queries.graphql";
 
 type DrawerProps = {
   actions: Array<"create" | "remove" | "update">;

@@ -17,7 +17,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
-import { TokenStandard } from "../../generated/graphql";
+import { TokenStandard } from "../../generated/queries.graphql";
 import client from "./client";
 
 type WebhookBody = {

@@ -2,8 +2,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "watch:codegen": "graphql-codegen --watch",
-    "generate": "graphql-codegen",
+    "watch:codegen": "yarn generate --watch",
+    "generate": "graphql-codegen -r dotenv/config",
     "build": "yarn generate && next build",
     "lint": "next lint",
     "start": "next start",
