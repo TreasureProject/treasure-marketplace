@@ -1,13 +1,43 @@
 import gql from "graphql-tag";
 
-export const getMetadata = gql`
-  query getMetadata($id: String!) {
+export const getCollectionMetadata = gql`
+  query getCollectionMetadata($id: String!) {
     tokens(first: 200, where: { collection: $id }) {
       metadata {
         image
         name
         description
       }
+      name
+      tokenId
+    }
+  }
+`;
+
+export const getTokenMetadata = gql`
+  query getTokenMetadata($id: ID!) {
+    token(id: $id) {
+      metadata {
+        image
+        name
+        description
+      }
+      name
+      tokenId
+    }
+  }
+`;
+
+export const getTokensMetadata = gql`
+  query getTokensMetadata($ids: [ID!]!) {
+    tokens(first: 1000, where: { id_in: $ids }) {
+      id
+      metadata {
+        image
+        name
+        description
+      }
+      name
       tokenId
     }
   }
@@ -93,6 +123,7 @@ export const getCollectionStats = gql`
         token {
           floorPrice
           name
+          tokenId
         }
       }
     }

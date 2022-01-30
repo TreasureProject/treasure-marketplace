@@ -2,7 +2,7 @@ import { GraphQLClient } from "graphql-request";
 import { getSdk as getMarketplaceSdk } from "../../generated/marketplace.graphql";
 import { getSdk as getQueriesSdk } from "../../generated/queries.graphql";
 
-const client = getQueriesSdk(
+export const client = getQueriesSdk(
   new GraphQLClient(process.env.NEXT_PUBLIC_GRAPHQL_URL as string)
 );
 

@@ -12,23 +12,23 @@ export const getUserInventory = gql`
           ...TokenFields
         }
       }
-      # hidden: listings(where: { status: Hidden }) {
-      #   id
-      #   expires
-      #   quantity
-      #   pricePerItem
-      #   token {
-      #     ...TokenFields
-      #   }
-      # }
-      # sold: listings(where: { status: Sold }) {
-      #   id
-      #   quantity
-      #   pricePerItem
-      #   token {
-      #     ...TokenFields
-      #   }
-      # }
+      inactive: listings(where: { status: Inactive }) {
+        id
+        expires
+        quantity
+        pricePerItem
+        token {
+          ...TokenFields
+        }
+      }
+      sold: listings(where: { status: Sold }) {
+        id
+        quantity
+        pricePerItem
+        token {
+          ...TokenFields
+        }
+      }
       tokens(first: 1000) {
         id
         quantity
@@ -40,18 +40,19 @@ export const getUserInventory = gql`
   }
 
   fragment TokenFields on Token {
-    # collection {
-    #   address
-    #   name
-    #   standard
-    # }
+    id
+    collection {
+      contract
+      name
+      standard
+    }
     # metadata {
     #   image
     #   name
     #   description
     # }
     # name
-    contract
+    # contract
     tokenId
   }
 `;
@@ -71,21 +72,23 @@ export const getUserInventory = gql`
 //   }
 // `;
 
-// export const getCollectionStats = gql`
-//   query getCollectionStats($id: ID!) {
-//     collection(id: $id) {
-//       floorPrice
-//       totalListings
-//       totalVolume
-//       listings(where: { status: Active }) {
-//         token {
-//           floorPrice
-//           name
-//         }
-//       }
-//     }
-//   }
-// `;
+export const getCollectionStats = gql`
+  query getCollectionStats($id: ID!) {
+    collection(id: $id) {
+      name
+      floorPrice
+      totalListings
+      totalVolume
+      listings(where: { status: Active }) {
+        token {
+          floorPrice
+          tokenId
+          name
+        }
+      }
+    }
+  }
+`;
 
 // export const getCollections = gql`
 //   query getCollections {
@@ -98,21 +101,22 @@ export const getUserInventory = gql`
 
 export const getCollectionListings = gql`
   query getCollectionListings(
-    $id: Bytes!
-    # $orderDirection: OrderDirection!
+    $id: String!
+    $orderDirection: OrderDirection!
     # $tokenName: String
     $skipBy: Int!
     $first: Int! # $isERC1155: Boolean!
-  ) # $orderBy: Listing_orderBy!
-  # $filter: [String!]
-  {
+    $orderBy: Listing_orderBy! # $filter: [String!]
+  ) {
     tokens(
-      # orderBy: floorPrice
-      # orderDirection: $orderDirection
-      where: { contract: $id }
+      first: 200
+      orderBy: floorPrice
+      orderDirection: $orderDirection
+      where: { collection: $id }
     ) {
       id
       # name
+      floorPrice
       tokenId
       listings(where: { status: Active }, orderBy: pricePerItem) {
         pricePerItem
@@ -197,9 +201,9 @@ const LISTING_FRAGMENT_WITH_TOKEN = gql`
 
 export const getActivity = gql`
   ${LISTING_FRAGMENT}
-  query getActivity($id: Bytes!, $orderBy: Listing_orderBy!) {
+  query getActivity($id: String!, $orderBy: Listing_orderBy!) {
     listings(
-      where: { contract: $id, status: Sold }
+      where: { collection: $id, status: Sold }
       orderBy: $orderBy
       orderDirection: desc
     ) {
@@ -260,12 +264,12 @@ export const getAllActivities = gql`
 export const getERC1155Listings = gql`
   ${LISTING_FRAGMENT_WITH_TOKEN}
   query getERC1155Listings(
-    $collectionId: Bytes!
+    $collectionId: String!
     $tokenId: BigInt!
     $skipBy: Int!
     $first: Int!
   ) {
-    tokens(where: { contract: $collectionId, tokenId: $tokenId }) {
+    tokens(where: { collection: $collectionId, tokenId: $tokenId }) {
       tokenId
       listings(
         where: { status: Active }
@@ -300,17 +304,26 @@ export const getERC1155Listings = gql`
 // `;
 export const getTokenExistsInWallet = gql`
   query getTokenExistsInWallet(
-    $collectionId: Bytes!
+    $collectionId: String!
     $tokenId: BigInt!
     $address: String!
   ) {
-    tokens(where: { contract: $collectionId, tokenId: $tokenId }) {
+    tokens(where: { collection: $collectionId, tokenId: $tokenId }) {
       owners(where: { user: $address }) {
         user {
           id
         }
         quantity
       }
+    }
+  }
+`;
+
+export const getCollections = gql`
+  query getCollections {
+    collections(orderBy: name) {
+      contract
+      name
     }
   }
 `;

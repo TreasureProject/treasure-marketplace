@@ -1,4 +1,7 @@
 overwrite: true
+config:
+  namingConvention:
+    enumValues: keep
 generates:
   generated/queries.graphql.ts:
     schema: ${NEXT_PUBLIC_GRAPHQL_URL}
@@ -7,9 +10,6 @@ generates:
       - "typescript"
       - "typescript-operations"
       - "typescript-graphql-request"
-    config:
-      namingConvention:
-        enumValues: keep
   generated/marketplace.graphql.ts:
     schema: ${NEXT_PUBLIC_MARKETPLACE_SUBGRAPH}
     documents: "src/graphql/marketplace.graphql.ts"

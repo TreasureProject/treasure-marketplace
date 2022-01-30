@@ -12,7 +12,7 @@ import { Dialog, Transition, Listbox } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import classNames from "clsx";
-import client from "../../lib/client";
+import { client, marketplace } from "../../lib/client";
 import { useQuery } from "react-query";
 import { addMonths, addWeeks, closestIndexTo } from "date-fns";
 import { ethers } from "ethers";
@@ -566,14 +566,16 @@ const Inventory = () => {
   const inventory = useQuery(
     "inventory",
     () =>
-      client.getUserInventory({ id: account?.toLowerCase() ?? AddressZero }),
-    { enabled: !!account }
+      marketplace.getUserInventory({
+        id: account?.toLowerCase() ?? AddressZero,
+      }),
+    { enabled: !!account, refetchInterval: 30_000 }
   );
 
   const [data, totals, updates, emptyMessage] = useMemo(() => {
     const empty: Record<string, NonNullable<Nft["listing"]>> = {};
     const {
-      hidden = [],
+      inactive = [],
       listings = [],
       sold = [],
       tokens = [],
@@ -581,7 +583,7 @@ const Inventory = () => {
     const totals = [...listings, ...tokens].reduce<Record<string, number>>(
       (acc, value) => {
         const { collection, tokenId } = value.token;
-        const key = `${collection.address}-${tokenId}`;
+        const key = `${collection.contract}-${tokenId}`;
 
         acc[key] ??= 0;
         acc[key] += Number(value.quantity);
@@ -593,10 +595,10 @@ const Inventory = () => {
     const updates = tokens.reduce<Record<string, NonNullable<Nft["listing"]>>>(
       (acc, value) => {
         const { collection, tokenId } = value.token;
-        const key = `${collection.address}-${tokenId}`;
+        const key = `${collection.contract}-${tokenId}`;
         const listing = listings.find(
           ({ token }) =>
-            token.collection.address === collection.address &&
+            token.collection.contract === collection.contract &&
             token.tokenId === tokenId
         );
 
@@ -613,7 +615,7 @@ const Inventory = () => {
 
     switch (section) {
       case "staked":
-        return [hidden, totals, updates, "No staked listings 🙂"] as const;
+        return [inactive, totals, updates, "No staked listings 🙂"] as const;
       case "listed":
         return [listings, totals, empty, "No NFTs listed 🙂"] as const;
       case "sold":
@@ -623,8 +625,19 @@ const Inventory = () => {
     }
   }, [inventory.data?.user, section]);
 
+  const tokens: string[] = data.map((item) => item?.token?.id).filter(Boolean);
+
+  const { data: metadataData } = useQuery(
+    ["inventory-metadata", tokens],
+    () => client.getTokensMetadata({ ids: tokens }),
+    {
+      enabled: tokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
   const tabs = useMemo(() => {
-    if (inventory.data?.user?.hidden.length) {
+    if (inventory.data?.user?.inactive.length) {
       return [...defaultTabs, { name: "Staked", href: "/inventory/staked" }];
     }
 
@@ -633,8 +646,8 @@ const Inventory = () => {
 
   const collections = data.map(({ token: { collection } }) => collection);
   const approvals = useContractApprovals(
-    [...new Set(collections.map(({ address }) => address))]
-      .map((address) => collections.find((item) => address === item.address))
+    [...new Set(collections.map(({ contract }) => contract))]
+      .map((address) => collections.find((item) => address === item.contract))
       .filter(Boolean)
   );
 
@@ -702,19 +715,25 @@ const Inventory = () => {
                       const slugOrAddress =
                         getCollectionSlugFromName(token.collection.name) ??
                         token.collection.id;
+                      const metadata = metadataData?.tokens.find(
+                        (item) => item?.id === token.id
+                      );
 
                       return (
                         <li key={id}>
                           <div className="group block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden sm:aspect-w-3 sm:aspect-h-3 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                            <ImageWrapper
-                              className={classNames(
-                                "object-fill object-center pointer-events-none",
-                                {
-                                  "group-hover:opacity-80": section !== "sold",
-                                }
-                              )}
-                              token={token}
-                            />
+                            {metadata ? (
+                              <ImageWrapper
+                                className={classNames(
+                                  "object-fill object-center pointer-events-none",
+                                  {
+                                    "group-hover:opacity-80":
+                                      section !== "sold",
+                                  }
+                                )}
+                                token={metadata}
+                              />
+                            ) : null}
                             {section !== "sold" ? (
                               <button
                                 type="button"
@@ -755,7 +774,7 @@ const Inventory = () => {
                               passHref
                             >
                               <a className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem] hover:underline">
-                                {token.metadata?.description}
+                                {metadata?.metadata?.description}
                               </a>
                             </Link>
                             {pricePerItem && (
@@ -789,7 +808,7 @@ const Inventory = () => {
                               passHref
                             >
                               <a className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate hover:underline">
-                                {token.name}
+                                {metadata?.name}
                               </a>
                             </Link>
                             {expires && (

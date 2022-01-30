@@ -18,7 +18,7 @@ import { useQuery, useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
 import { TokenStandard } from "../../generated/queries.graphql";
-import client from "./client";
+import { marketplace } from "./client";
 
 type WebhookBody = {
   address: string;
@@ -78,12 +78,17 @@ export const collections: Collections = {
       name: "Keys",
       address: "0x25ee208b4f8636b5ceaafdee051bf0bfe514f5f6",
     },
+    // Note: List contract doesn't exist on Rinkeby currently
     {
       name: "Legions",
+      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1",
+    },
+    {
+      name: "Legacy Legions",
       address: "0x6fd12312f70fa5b04d66584600f39abe31a99708",
     },
     {
-      name: "Legions Genesis",
+      name: "Legacy Legions Genesis",
       address: "0xac2f8732a67c15bf81f8a6181364ce753e915037",
     },
     // {
@@ -126,10 +131,14 @@ export const collections: Collections = {
     },
     {
       name: "Legions",
+      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1",
+    },
+    {
+      name: "Legacy Legions",
       address: "0x658365026d06f00965b5bb570727100e821e6508",
     },
     {
-      name: "Legions Genesis",
+      name: "Legacy Legion Genesis",
       address: "0xe83c0200e93cb1496054e387bddae590c07f0194",
     },
     {
@@ -161,13 +170,18 @@ export const collections: Collections = {
 
 export function useCollections(): Array<{ address: string; name: string }> {
   const chainId = useChainId();
-  const { data, isError } = useQuery(["collections"], () =>
-    client.getCollections()
+  const { data, isError } = useQuery(
+    ["collections"],
+    () => marketplace.getCollections(),
+    { refetchInterval: false }
   );
 
   return isError
     ? collections[chainId]
-    : data?.collections ?? collections[chainId];
+    : data?.collections.map((item) => ({
+        address: item.contract,
+        name: item.name,
+      })) ?? collections[chainId];
 }
 
 export function useTransferNFT(contract: string, standard: TokenStandard) {

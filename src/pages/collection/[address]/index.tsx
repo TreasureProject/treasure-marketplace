@@ -10,8 +10,7 @@ import {
 } from "@heroicons/react/solid";
 
 import { useInfiniteQuery, useQuery } from "react-query";
-import client from "../../../lib/client";
-import { marketplace } from "../../../lib/client";
+import { client, marketplace } from "../../../lib/client";
 import { AddressZero, Zero } from "@ethersproject/constants";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
@@ -28,10 +27,12 @@ import { Modal } from "../../../components/Modal";
 import {
   GetCollectionInfoQuery,
   GetCollectionListingsQuery,
-  Listing_OrderBy,
-  OrderDirection,
   TokenStandard,
 } from "../../../../generated/queries.graphql";
+import {
+  Listing_OrderBy,
+  OrderDirection,
+} from "../../../../generated/marketplace.graphql";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
 import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
@@ -294,7 +295,7 @@ const Collection = () => {
   const { data: statData } = useQuery(
     ["stats", formattedAddress],
     () =>
-      client.getCollectionStats({
+      marketplace.getCollectionStats({
         id: formattedAddress,
       }),
     {
@@ -344,7 +345,7 @@ const Collection = () => {
   // );
   const { data: metadataData, isLoading: isMetadataLoading } = useQuery(
     ["metadata", formattedAddress],
-    () => client.getMetadata({ id: formattedAddress }),
+    () => client.getCollectionMetadata({ id: formattedAddress }),
     {
       enabled: !!formattedAddress,
       refetchInterval: false,
@@ -367,12 +368,12 @@ const Collection = () => {
         skipBy: pageParam,
         first: MAX_ITEMS_PER_PAGE,
         // filter: formatSearchFilter(formattedSearch),
-        // orderBy: sort
-        //   ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
-        //   : Listing_OrderBy.pricePerItem,
-        // orderDirection: sort
-        //   ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
-        //   : OrderDirection.asc,
+        orderBy: sort
+          ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
+          : Listing_OrderBy.pricePerItem,
+        orderDirection: sort
+          ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
+          : OrderDirection.asc,
       }),
     {
       enabled: !!formattedAddress && !!collectionData && !isMetadataLoading,
@@ -594,7 +595,7 @@ const Collection = () => {
           {collectionData?.collection && statData?.collection ? (
             <>
               <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-                {collectionData.collection.name}
+                {statData.collection.name}
               </h1>
               <div className="mt-12 overflow-hidden flex flex-col">
                 <dl className="sm:-mx-8 -mt-8 flex divide-x-2">
@@ -970,10 +971,7 @@ const Collection = () => {
                                   {metadata?.metadata ? (
                                     <ImageWrapper
                                       className="w-full h-full object-center object-fill group-hover:opacity-75"
-                                      token={{
-                                        name: metadata.metadata.name,
-                                        metadata: metadata.metadata,
-                                      }}
+                                      token={metadata}
                                     />
                                   ) : null}
                                   <Link
@@ -982,15 +980,14 @@ const Collection = () => {
                                   >
                                     <a className="absolute inset-0 focus:outline-none">
                                       <span className="sr-only">
-                                        View details for{" "}
-                                        {metadata?.metadata?.name}
+                                        View details for {metadata?.name}
                                       </span>
                                     </a>
                                   </Link>
                                 </div>
                                 <div className="mt-4 text-base font-medium text-gray-900 space-y-2">
                                   <p className="text-xs text-gray-800 dark:text-gray-50 font-semibold truncate">
-                                    {metadata?.metadata?.name}
+                                    {metadata?.name}
                                   </p>
                                   <p className="dark:text-gray-100 text-sm xl:text-base capsize">
                                     {formatNumber(
