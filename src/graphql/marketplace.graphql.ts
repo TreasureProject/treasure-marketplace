@@ -57,20 +57,15 @@ export const getUserInventory = gql`
   }
 `;
 
-// export const getCollectionInfo = gql`
-//   query getCollectionInfo($id: ID!) {
-//     collection(id: $id) {
-//       id
-//       name
-//       standard
-//       attributes {
-//         name
-//         percentage
-//         value
-//       }
-//     }
-//   }
-// `;
+export const getCollectionInfo = gql`
+  query getCollectionInfo($id: ID!) {
+    collection(id: $id) {
+      id
+      name
+      standard
+    }
+  }
+`;
 
 export const getCollectionStats = gql`
   query getCollectionStats($id: ID!) {
@@ -90,30 +85,25 @@ export const getCollectionStats = gql`
   }
 `;
 
-// export const getCollections = gql`
-//   query getCollections {
-//     collections(orderBy: name) {
-//       address
-//       name
-//     }
-//   }
-// `;
-
 export const getCollectionListings = gql`
   query getCollectionListings(
     $id: String!
     $orderDirection: OrderDirection!
-    # $tokenName: String
+    $tokenName: String
     $skipBy: Int!
-    $first: Int! # $isERC1155: Boolean!
-    $orderBy: Listing_orderBy! # $filter: [String!]
+    $first: Int!
+    $orderBy: Listing_orderBy!
+    $isERC1155: Boolean!
+    $filter: [String!]
   ) {
     tokens(
-      first: 200
+      first: 1000
       orderBy: floorPrice
       orderDirection: $orderDirection
       where: { collection: $id }
-    ) {
+    )
+      # where: { name_contains: $tokenName }
+      @include(if: $isERC1155) {
       id
       # name
       floorPrice
@@ -127,38 +117,99 @@ export const getCollectionListings = gql`
       #   name
       #   description
       # }
-      # }
-      # listings(
-      #   first: $first
-      #   skip: $skipBy
-      #   orderBy: $orderBy
-      #   orderDirection: $orderDirection
-      #   where: {
-      #     status: Active
-      #     tokenName_contains: $tokenName
-      #     filters_contains: $filter
-      #   }
-      # ) @skip(if: $isERC1155) {
-      #   user {
-      #     id
-      #   }
-      #   expires
-      #   id
-      #   pricePerItem
-      #   token {
-      #     tokenId
-      #     metadata {
-      #       image
-      #       name
-      #       description
-      #     }
-      #     name
-      #   }
-      #   quantity
-      # }
+    }
+    listings(
+      first: $first
+      skip: $skipBy
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: {
+        status: Active
+        collection: $id
+        # tokenName_contains: $tokenName
+        # filters_contains: $filter
+      }
+    ) @skip(if: $isERC1155) {
+      seller {
+        id
+      }
+      expires
+      id
+      pricePerItem
+      token {
+        tokenId
+        # metadata {
+        #   image
+        #   name
+        #   description
+        # }
+        name
+      }
+      quantity
     }
   }
 `;
+
+// export const getCollectionListings = gql`
+//   query getCollectionListings(
+//     $id: String!
+//     $orderDirection: OrderDirection!
+//     # $tokenName: String
+//     $skipBy: Int!
+//     $first: Int! # $isERC1155: Boolean!
+//     $orderBy: Listing_orderBy! # $filter: [String!]
+//   ) {
+//     tokens(
+//       first: 200
+//       orderBy: floorPrice
+//       orderDirection: $orderDirection
+//       where: { collection: $id }
+//     ) {
+//       id
+//       # name
+//       floorPrice
+//       tokenId
+//       listings(where: { status: Active }, orderBy: pricePerItem) {
+//         pricePerItem
+//         quantity
+//       }
+//       # metadata {
+//       #   image
+//       #   name
+//       #   description
+//       # }
+//       }
+//       listings(
+//         first: $first
+//         skip: $skipBy
+//         orderBy: $orderBy
+//         orderDirection: $orderDirection
+//         where: {
+//           status: Active
+//           tokenName_contains: $tokenName
+//           filters_contains: $filter
+//         }
+//       ) @skip(if: $isERC1155) {
+//         user {
+//           id
+//         }
+//         expires
+//         id
+//         pricePerItem
+//         token {
+//           tokenId
+//           # metadata {
+//           #   image
+//           #   name
+//           #   description
+//           # }
+//           name
+//         }
+//         quantity
+//       }
+//     }
+//   }
+// `;
 
 const LISTING_FRAGMENT = gql`
   fragment ListingFields on Listing {
@@ -180,9 +231,9 @@ const LISTING_FRAGMENT = gql`
       # }
       # name
     }
-    # collection {
-    #   id
-    # }
+    collection {
+      id
+    }
     transactionLink
   }
 `;
@@ -199,33 +250,33 @@ const LISTING_FRAGMENT_WITH_TOKEN = gql`
   }
 `;
 
-export const getActivity = gql`
-  ${LISTING_FRAGMENT}
-  query getActivity($id: String!, $orderBy: Listing_orderBy!) {
-    listings(
-      where: { collection: $id, status: Sold }
-      orderBy: $orderBy
-      orderDirection: desc
-    ) {
-      ...ListingFields
-    }
-  }
-`;
-
 // export const getActivity = gql`
 //   ${LISTING_FRAGMENT}
-//   query getActivity($id: ID!, $orderBy: Listing_orderBy!) {
-//     collection(id: $id) {
-//       listings(
-//         where: { status: Sold }
-//         orderBy: $orderBy
-//         orderDirection: desc
-//       ) {
-//         ...ListingFields
-//       }
+//   query getActivity($id: String!, $orderBy: Listing_orderBy!) {
+//     listings(
+//       where: { collection: $id, status: Sold }
+//       orderBy: $orderBy
+//       orderDirection: desc
+//     ) {
+//       ...ListingFields
 //     }
 //   }
 // `;
+
+export const getActivity = gql`
+  ${LISTING_FRAGMENT}
+  query getActivity($id: ID!, $orderBy: Listing_orderBy!) {
+    collection(id: $id) {
+      listings(
+        where: { status: Sold }
+        orderBy: $orderBy
+        orderDirection: desc
+      ) {
+        ...ListingFields
+      }
+    }
+  }
+`;
 
 export const getAllActivities = gql`
   ${LISTING_FRAGMENT}
@@ -328,51 +379,51 @@ export const getCollections = gql`
   }
 `;
 
-// export const getTokenDetails = gql`
-//   query getTokenDetails($collectionId: ID!, $tokenId: BigInt!) {
-//     collection(id: $collectionId) {
-//       name
-//       standard
-//       tokens(where: { tokenId: $tokenId }) {
-//         tokenId
-//         lowestPrice: listings(
-//           where: { status: Active }
-//           first: 1
-//           orderBy: pricePerItem
-//           orderDirection: asc
-//         ) {
-//           ...ListingFieldsWithToken
-//         }
-//         metadata {
-//           attributes {
-//             attribute {
-//               id
-//               name
-//               percentage
-//               value
-//             }
-//           }
-//           description
-//           id
-//           image
-//           name
-//         }
-//         listings(orderBy: blockTimestamp, orderDirection: desc) {
-//           id
-//           status
-//           buyer {
-//             id
-//           }
-//           pricePerItem
-//           user {
-//             id
-//           }
-//           blockTimestamp
-//         }
-//         owner {
-//           id
-//         }
-//       }
-//     }
-//   }
-// `;
+export const getTokenDetails = gql`
+  query getTokenDetails($collectionId: ID!, $tokenId: BigInt!) {
+    collection(id: $collectionId) {
+      name
+      standard
+      tokens(where: { tokenId: $tokenId }) {
+        tokenId
+        lowestPrice: listings(
+          where: { status: Active }
+          first: 1
+          orderBy: pricePerItem
+          orderDirection: asc
+        ) {
+          ...ListingFieldsWithToken
+        }
+        # metadata {
+        #   attributes {
+        #     attribute {
+        #       id
+        #       name
+        #       percentage
+        #       value
+        #     }
+        #   }
+        #   description
+        #   id
+        #   image
+        #   name
+        # }
+        listings(orderBy: blockTimestamp, orderDirection: desc) {
+          id
+          status
+          buyer {
+            id
+          }
+          pricePerItem
+          seller {
+            id
+          }
+          blockTimestamp
+        }
+        owners {
+          id
+        }
+      }
+    }
+  }
+`;

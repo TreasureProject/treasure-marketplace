@@ -98,12 +98,24 @@ export const getUserInventory = gql`
   }
 `;
 
-export const getCollectionInfo = gql`
-  query getCollectionInfo($id: ID!) {
+// export const getCollectionInfo = gql`
+//   query getCollectionInfo($id: ID!) {
+//     collection(id: $id) {
+//       id
+//       name
+//       standard
+//       attributes {
+//         name
+//         percentage
+//         value
+//       }
+//     }
+//   }
+// `;
+
+export const getCollectionAttributes = gql`
+  query getCollectionAttributes($id: ID!) {
     collection(id: $id) {
-      id
-      name
-      standard
       attributes {
         name
         percentage

@@ -25,7 +25,7 @@ import ImageWrapper from "../../../components/ImageWrapper";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
 import {
-  GetCollectionInfoQuery,
+  GetCollectionAttributesQuery,
   GetCollectionListingsQuery,
   TokenStandard,
 } from "../../../../generated/queries.graphql";
@@ -102,7 +102,9 @@ const getTotalQuantity = (
 };
 
 const reduceAttributes = (
-  attributes: NonNullable<GetCollectionInfoQuery["collection"]>["attributes"]
+  attributes: NonNullable<
+    GetCollectionAttributesQuery["collection"]
+  >["attributes"]
 ): {
   [key: string]: { value: string; percentage: string }[];
 } | null => {
@@ -264,7 +266,7 @@ const Collection = () => {
   const { data: activityData, isLoading: isActivityLoading } = useQuery(
     ["activity", { formattedAddress, activitySortParam }],
     () =>
-      client.getActivity({
+      marketplace.getActivity({
         id: formattedAddress,
         orderBy:
           activitySortParam === "price"
@@ -277,9 +279,21 @@ const Collection = () => {
   );
 
   const { data: collectionData } = useQuery(
-    ["collection", formattedAddress],
+    ["collection-info", formattedAddress],
     () =>
-      client.getCollectionInfo({
+      marketplace.getCollectionInfo({
+        id: formattedAddress,
+      }),
+    {
+      enabled: !!formattedAddress,
+      refetchInterval: false,
+    }
+  );
+
+  const { data: collectionAttributesData } = useQuery(
+    ["collection-attributes", formattedAddress],
+    () =>
+      client.getCollectionAttributes({
         id: formattedAddress,
       }),
     {
@@ -289,7 +303,7 @@ const Collection = () => {
   );
 
   const attributeFilterList = reduceAttributes(
-    collectionData?.collection?.attributes
+    collectionAttributesData?.collection?.attributes
   );
 
   const { data: statData } = useQuery(
@@ -361,7 +375,7 @@ const Collection = () => {
     ({ queryKey, pageParam = 0 }) =>
       marketplace.getCollectionListings({
         id: formattedAddress,
-        // isERC1155,
+        isERC1155,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         // tokenName: queryKey[1].searchParams,
@@ -386,10 +400,9 @@ const Collection = () => {
     setSearchParams("");
   }, [formattedAddress]);
 
-  // const collection =
-  //   listingData?.pages[listingData.pages.length - 1]?.collection;
+  const page = listingData?.pages[listingData.pages.length - 1];
   // const data = isERC1155 ? collection?.tokens : collection?.listings;
-  const data = listingData?.pages[listingData.pages.length - 1]?.tokens;
+  const data = isERC1155 ? page?.tokens : page?.listings;
 
   const hasNextPage = data?.length === MAX_ITEMS_PER_PAGE;
 
