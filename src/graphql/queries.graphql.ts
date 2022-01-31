@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export const getCollectionMetadata = gql`
   query getCollectionMetadata($id: String!, $tokenId_in: [BigInt!]!) {
-    tokens(where: { collection: $id, tokenId_in: $tokenId_in }) {
+    tokens(first: 1000, where: { collection: $id, tokenId_in: $tokenId_in }) {
       metadata {
         image
         name

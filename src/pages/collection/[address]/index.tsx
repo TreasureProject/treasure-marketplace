@@ -995,7 +995,9 @@ const Collection = () => {
                                       className="w-full h-full object-center object-fill group-hover:opacity-75"
                                       token={metadata}
                                     />
-                                  ) : null}
+                                  ) : (
+                                    <div className="animate-pulse w-full bg-gray-300 h-64 rounded-md m-auto" />
+                                  )}
                                   <Link
                                     href={`/collection/${slugOrAddress}/${token.tokenId}`}
                                     passHref
@@ -1050,7 +1052,9 @@ const Collection = () => {
                                     className="w-full h-full object-center object-fill group-hover:opacity-75"
                                     token={metadata}
                                   />
-                                ) : null}
+                                ) : (
+                                  <div className="animate-pulse w-full bg-gray-300 h-64 rounded-md m-auto" />
+                                )}
                                 <Link
                                   href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
                                 >
