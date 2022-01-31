@@ -357,14 +357,6 @@ const Collection = () => {
   //     getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
   //   }
   // );
-  const { data: metadataData, isLoading: isMetadataLoading } = useQuery(
-    ["metadata", formattedAddress],
-    () => client.getCollectionMetadata({ id: formattedAddress }),
-    {
-      enabled: !!formattedAddress,
-      refetchInterval: false,
-    }
-  );
 
   const {
     data: listingData,
@@ -390,8 +382,25 @@ const Collection = () => {
           : OrderDirection.asc,
       }),
     {
-      enabled: !!formattedAddress && !!collectionData && !isMetadataLoading,
+      enabled: !!formattedAddress && !!collectionData,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
+    }
+  );
+
+  const { data: metadataData, isLoading: isMetadataLoading } = useQuery(
+    ["metadata", formattedAddress, listingData?.pages.length],
+    () =>
+      client.getCollectionMetadata({
+        id: formattedAddress,
+        tokenId_in: listingData?.pages.reduce((acc, page) => {
+          const tokenIds =
+            page.listings?.map((list) => list.token.tokenId) || [];
+          return [...acc, ...tokenIds];
+        }, []),
+      }),
+    {
+      enabled: !!formattedAddress && !!listingData,
+      refetchInterval: false,
     }
   );
 
@@ -1027,27 +1036,34 @@ const Collection = () => {
                             );
                           })}
                         {/* ERC721 */}
-                        {/* {group.collection?.listings?.map((listing) => {
+                        {group?.listings?.map((listing) => {
+                          const metadata = metadataData?.tokens.find(
+                            (metadata) =>
+                              metadata.tokenId === listing.token.tokenId
+                          );
+
                           return (
                             <li key={listing.id} className="group">
                               <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                                <ImageWrapper
-                                  className="w-full h-full object-center object-fill group-hover:opacity-75"
-                                  token={listing.token}
-                                />
+                                {metadata?.metadata ? (
+                                  <ImageWrapper
+                                    className="w-full h-full object-center object-fill group-hover:opacity-75"
+                                    token={metadata}
+                                  />
+                                ) : null}
                                 <Link
                                   href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
                                 >
                                   <a className="absolute inset-0 focus:outline-none">
                                     <span className="sr-only">
-                                      View details for {listing.token.name}
+                                      View details for {metadata?.name}
                                     </span>
                                   </a>
                                 </Link>
                               </div>
                               <div className="mt-4 font-medium text-gray-900 space-y-2">
                                 <p className="text-xs text-gray-500 dark:text-gray-300 truncate font-semibold">
-                                  {listing.token.name}
+                                  {metadata?.name}
                                 </p>
                                 <p className="dark:text-gray-100 text-sm xl:text-base capsize">
                                   {formatNumber(
@@ -1062,7 +1078,7 @@ const Collection = () => {
                               </div>
                             </li>
                           );
-                        })} */}
+                        })}
                       </React.Fragment>
                     ))}
                   </ul>
