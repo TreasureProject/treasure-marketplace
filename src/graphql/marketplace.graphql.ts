@@ -385,6 +385,7 @@ export const getTokenDetails = gql`
       name
       standard
       tokens(where: { tokenId: $tokenId }) {
+        id
         tokenId
         lowestPrice: listings(
           where: { status: Active }
@@ -421,7 +422,9 @@ export const getTokenDetails = gql`
           blockTimestamp
         }
         owners {
-          id
+          user {
+            id
+          }
         }
       }
     }

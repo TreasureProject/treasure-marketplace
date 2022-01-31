@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { useRouter } from "next/router";
-import client from "../../../lib/client";
+import { bridgeworld, client, marketplace } from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
 import {
   useApproveMagic,
@@ -39,12 +39,18 @@ import {
   generateIpfsLink,
   slugToAddress,
 } from "../../../utils";
+// import {
+//   GetTokenDetailsQuery,
+//   GetTokenExistsInWalletQuery,
+//   Status,
+//   TokenStandard,
+// } from "../../../../generated/queries.graphql";
 import {
   GetTokenDetailsQuery,
   GetTokenExistsInWalletQuery,
   Status,
   TokenStandard,
-} from "../../../../generated/queries.graphql";
+} from "../../../../generated/marketplace.graphql";
 import { formatDistanceToNow } from "date-fns";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
@@ -54,7 +60,7 @@ import Button from "../../../components/Button";
 import { Modal } from "../../../components/Modal";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contracts } from "../../../const";
-import { targetNftT } from "../../../types";
+import { NormalizedMetadata, targetNftT } from "../../../types";
 import { Tooltip } from "../../../components/Tooltip";
 import { utils } from "ethers";
 import { EthIcon, SwapIcon, UsdIcon } from "../../../components/Icons";
@@ -133,7 +139,7 @@ export default function Example() {
   const { data, isLoading, isIdle } = useQuery(
     ["details", formattedAddress],
     () =>
-      client.getTokenDetails({
+      marketplace.getTokenDetails({
         collectionId: formattedAddress,
         tokenId: formattedTokenId,
       }),
@@ -146,7 +152,7 @@ export default function Example() {
   const { data: tokenExistance } = useQuery(
     "tokenExistance",
     () =>
-      client.getTokenExistsInWallet({
+      marketplace.getTokenExistsInWallet({
         collectionId: formattedAddress,
         tokenId: formattedTokenId,
         address: account?.toLowerCase() ?? AddressZero,
@@ -165,7 +171,7 @@ export default function Example() {
   } = useInfiniteQuery(
     "erc1155Listings",
     ({ pageParam = 0 }) =>
-      client.getERC1155Listings({
+      marketplace.getERC1155Listings({
         collectionId: formattedAddress,
         tokenId: formattedTokenId,
         skipBy: pageParam,
@@ -181,10 +187,9 @@ export default function Example() {
   );
 
   const hasNextPage =
-    listingData?.pages[listingData.pages.length - 1]?.collection?.tokens
-      .length &&
-    listingData?.pages[listingData.pages.length - 1]?.collection?.tokens[0]
-      .listings?.length === MAX_ITEMS_PER_PAGE;
+    listingData?.pages[listingData.pages.length - 1]?.tokens.length &&
+    listingData?.pages[listingData.pages.length - 1]?.tokens[0].listings
+      ?.length === MAX_ITEMS_PER_PAGE;
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -211,9 +216,9 @@ export default function Example() {
   }, [queryClient, router]);
 
   const hasErc1155Listings =
-    listingData?.pages[0]?.collection?.tokens &&
-    listingData?.pages[0]?.collection?.tokens[0]?.listings &&
-    listingData?.pages[0].collection.tokens[0].listings.length > 0;
+    listingData?.pages[0]?.tokens &&
+    listingData?.pages[0]?.tokens[0]?.listings &&
+    listingData?.pages[0].tokens[0].listings.length > 0;
 
   const { send, state } = useBuyItem();
 
@@ -227,6 +232,107 @@ export default function Example() {
     data && data?.collection?.tokens && data?.collection?.tokens.length > 0
       ? data.collection.tokens[0]
       : null;
+  const id = tokenInfo?.id ?? "";
+
+  const { data: metadataData } = useQuery(
+    ["details-metadata", id],
+    () => client.getTokenMetadata({ id }),
+    {
+      enabled: Boolean(id),
+      refetchInterval: false,
+    }
+  );
+
+  const { data: legionMetadataData } = useQuery(
+    ["details-metadata-legions", id],
+    () => bridgeworld.getLegionMetadata({ ids: [id] }),
+    {
+      enabled: Boolean(id),
+      refetchInterval: false,
+    }
+  );
+  const legionMetadata = legionMetadataData?.tokens?.[0] ?? null;
+  const legacyMetadata = metadataData?.token ?? null;
+
+  const legionMetadataMetadata =
+    (legionMetadata?.metadata?.__typename === "LegionInfo" &&
+      legionMetadata.metadata) ||
+    null;
+
+  const metadata = legionMetadata
+    ? {
+        attributes: legionMetadataMetadata
+          ? [
+              {
+                attribute: {
+                  name: "Atlas Mine Boost",
+                  value: formatPercent(legionMetadataMetadata.boost),
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Summon Fatigue",
+                  value: legionMetadataMetadata.cooldown
+                    ? formatDistanceToNow(
+                        Number(legionMetadataMetadata.cooldown.toString())
+                      )
+                    : "None",
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Crafting Level",
+                  value: legionMetadataMetadata.crafting,
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Questing Level",
+                  value: legionMetadataMetadata.questing,
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Rarity",
+                  value: legionMetadataMetadata.rarity,
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Class",
+                  value: legionMetadataMetadata.role,
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Type",
+                  value: legionMetadataMetadata.type,
+                  percentage: null,
+                },
+              },
+              {
+                attribute: {
+                  name: "Summon Count",
+                  value: formatNumber(
+                    Number(legionMetadataMetadata.summons.toString())
+                  ),
+                  percentage: null,
+                },
+              },
+            ]
+          : [],
+        id,
+        description: "Legions",
+        image: legionMetadata.image,
+        name: legionMetadata.name,
+      }
+    : legacyMetadata?.metadata ?? null;
 
   const loading = isLoading || isIdle;
 
@@ -234,14 +340,14 @@ export default function Example() {
     data?.collection?.standard === TokenStandard.ERC721 &&
     addressEqual(
       account ?? AddressZero,
-      tokenInfo?.owner ? tokenInfo.owner.id : AddressZero
+      tokenInfo?.owners?.[0].user.id ?? AddressZero
     );
 
   const hasErc1155Token =
-    tokenExistance?.collection?.tokens &&
-    tokenExistance.collection.tokens.length > 0 &&
-    tokenExistance.collection.tokens[0].owners
-      ? tokenExistance.collection.tokens[0].owners[0]
+    tokenExistance?.tokens &&
+    tokenExistance.tokens.length > 0 &&
+    tokenExistance.tokens[0].owners
+      ? tokenExistance.tokens[0].owners[0]
       : null;
 
   const showTransfer =
@@ -276,7 +382,20 @@ export default function Example() {
             <div className="lg:grid lg:grid-cols-5 lg:gap-x-8 lg:items-start mt-8">
               <div className="lg:col-span-2">
                 <div className="w-full aspect-w-1 aspect-h-1">
-                  <ImageWrapper token={tokenInfo} />
+                  {metadata ? (
+                    <ImageWrapper
+                      token={{
+                        name: metadata?.name,
+                        metadata:
+                          metadata?.description && metadata?.image
+                            ? {
+                                description: metadata.description,
+                                image: metadata.image,
+                              }
+                            : null,
+                      }}
+                    />
+                  ) : null}
                 </div>
                 {/* hide for mobile */}
                 <div className="hidden xl:block">
@@ -311,52 +430,50 @@ export default function Example() {
                           </Disclosure.Button>
                         </h3>
                         <Disclosure.Panel as="div">
-                          {tokenInfo.metadata?.attributes &&
-                          tokenInfo.metadata.attributes.length > 0 ? (
+                          {metadata?.attributes &&
+                          metadata.attributes.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {tokenInfo.metadata?.attributes.map(
-                                ({ attribute }) => {
-                                  if (attribute.percentage == null) {
-                                    return (
-                                      <div className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2">
-                                        <p className="text-red-700 dark:text-gray-500 text-xs font-light">
-                                          {attribute.name}
-                                        </p>
-                                        <p className="flex-1 flex items-center font-medium dark:text-gray-900">
-                                          {formattable(attribute.value)}
-                                        </p>
-                                      </div>
-                                    );
-                                  }
+                              {metadata?.attributes.map(({ attribute }) => {
+                                if (attribute.percentage == null) {
                                   return (
-                                    <Link
-                                      key={attribute.id}
-                                      href={{
-                                        pathname: `/collection/${slugOrAddress}`,
-                                        query: {
-                                          search: new URLSearchParams({
-                                            [attribute.name]: attribute.value,
-                                          }).toString(),
-                                        },
-                                      }}
-                                      passHref
-                                    >
-                                      <a className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2 hover:shadow-xl shadow-red-500/50">
-                                        <p className="text-red-700 dark:text-gray-500 text-xs font-light">
-                                          {attribute.name}
-                                        </p>
-                                        <p className="mt-1 font-medium dark:text-gray-900">
-                                          {formattable(attribute.value)}
-                                        </p>
-                                        <p className="mt-2 text-[0.6rem] sm:text-xs text-gray-600 dark:text-gray-600">
-                                          {formatPercent(attribute.percentage)}{" "}
-                                          have this trait
-                                        </p>
-                                      </a>
-                                    </Link>
+                                    <div className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2">
+                                      <p className="text-red-700 dark:text-gray-500 text-xs font-light">
+                                        {attribute.name}
+                                      </p>
+                                      <p className="flex-1 flex items-center font-medium dark:text-gray-900">
+                                        {formattable(attribute.value)}
+                                      </p>
+                                    </div>
                                   );
                                 }
-                              )}
+                                return (
+                                  <Link
+                                    key={attribute.id}
+                                    href={{
+                                      pathname: `/collection/${slugOrAddress}`,
+                                      query: {
+                                        search: new URLSearchParams({
+                                          [attribute.name]: attribute.value,
+                                        }).toString(),
+                                      },
+                                    }}
+                                    passHref
+                                  >
+                                    <a className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2 hover:shadow-xl shadow-red-500/50">
+                                      <p className="text-red-700 dark:text-gray-500 text-xs font-light">
+                                        {attribute.name}
+                                      </p>
+                                      <p className="mt-1 font-medium dark:text-gray-900">
+                                        {formattable(attribute.value)}
+                                      </p>
+                                      <p className="mt-2 text-[0.6rem] sm:text-xs text-gray-600 dark:text-gray-600">
+                                        {formatPercent(attribute.percentage)}{" "}
+                                        have this trait
+                                      </p>
+                                    </a>
+                                  </Link>
+                                );
+                              })}
                             </div>
                           ) : (
                             <div className="text-gray-500 dark:text-gray-400">
@@ -396,18 +513,18 @@ export default function Example() {
                 </h2>
                 <div className="mt-3">
                   <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-200">
-                    {tokenInfo.metadata?.name ?? ""}
+                    {metadata?.name ?? ""}
                   </h2>
                 </div>
                 {data.collection.standard === TokenStandard.ERC721 &&
-                  tokenInfo.owner &&
+                  tokenInfo.owners?.[0] &&
                   account && (
                     <div className="mt-2 text-xs text-gray-400">
                       Owned by:{" "}
                       <span>
                         {isYourListing
                           ? "You"
-                          : shortenIfAddress(tokenInfo.owner.id)}
+                          : shortenIfAddress(tokenInfo.owners[0].user.id)}
                       </span>
                     </div>
                   )}
@@ -437,7 +554,7 @@ export default function Example() {
                     <div className="mt-6">
                       {isYourListing ||
                       addressEqual(
-                        tokenInfo.lowestPrice[0].user.id,
+                        tokenInfo.lowestPrice[0].seller.id,
                         account ?? AddressZero
                       ) ? (
                         <div className="mt-10 text-sm sm:text-base text-gray-500 dark:text-gray-400">
@@ -456,7 +573,7 @@ export default function Example() {
                                 setModalProps({
                                   isOpen: true,
                                   targetNft: {
-                                    metadata: tokenInfo.metadata,
+                                    metadata,
                                     payload: {
                                       ...tokenInfo.lowestPrice[0],
                                       standard: data.collection.standard,
@@ -542,78 +659,84 @@ export default function Example() {
                                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-400 dark:bg-gray-300 relative">
                                   {listingData.pages.map((page, i) => (
                                     <React.Fragment key={i}>
-                                      {(
-                                        page.collection?.tokens[0].listings ||
-                                        []
-                                      ).map((listing) => (
-                                        <tr key={listing.id}>
-                                          <td className="px-6 py-4 whitespace-nowrap text-[0.7rem] md:text-sm font-medium text-gray-900">
-                                            {formatPrice(listing.pricePerItem)}
-                                          </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
-                                            ≈{" "}
-                                            {formatNumber(
-                                              Number(
-                                                parseFloat(
-                                                  formatEther(
-                                                    listing.pricePerItem
-                                                  )
-                                                )
-                                              ) * parseFloat(ethPrice)
-                                            )}{" "}
-                                            ETH
-                                          </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-[0.7rem] md:text-sm text-gray-500 dark:text-gray-700">
-                                            {listing.quantity}
-                                          </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
-                                            {formatDistanceToNow(
-                                              new Date(Number(listing.expires))
-                                            )}
-                                          </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
-                                            {shortenAddress(listing.user.id)}
-                                          </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Button
-                                              disabled={addressEqual(
-                                                listing.user.id,
-                                                account ?? AddressZero
+                                      {(page.tokens[0]?.listings || []).map(
+                                        (listing) => (
+                                          <tr key={listing.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-[0.7rem] md:text-sm font-medium text-gray-900">
+                                              {formatPrice(
+                                                listing.pricePerItem
                                               )}
-                                              tooltip={
-                                                addressEqual(
-                                                  listing.user.id,
-                                                  account ?? AddressZero
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
+                                              ≈{" "}
+                                              {formatNumber(
+                                                Number(
+                                                  parseFloat(
+                                                    formatEther(
+                                                      listing.pricePerItem
+                                                    )
+                                                  )
+                                                ) * parseFloat(ethPrice)
+                                              )}{" "}
+                                              ETH
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-[0.7rem] md:text-sm text-gray-500 dark:text-gray-700">
+                                              {listing.quantity}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
+                                              {formatDistanceToNow(
+                                                new Date(
+                                                  Number(listing.expires)
                                                 )
-                                                  ? "You cannot purchase your own listing"
-                                                  : undefined
-                                              }
-                                              onClick={() => {
-                                                if (data.collection?.standard) {
-                                                  setModalProps({
-                                                    isOpen: true,
-                                                    targetNft: {
-                                                      metadata:
-                                                        tokenInfo.metadata,
-                                                      payload: {
-                                                        ...listing,
-                                                        standard:
-                                                          data.collection
-                                                            .standard,
-                                                        tokenId:
-                                                          tokenInfo.tokenId,
-                                                      },
-                                                    },
-                                                  });
+                                              )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-700 hidden lg:table-cell">
+                                              {shortenAddress(
+                                                listing.seller.id
+                                              )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                              <Button
+                                                disabled={addressEqual(
+                                                  listing.seller.id,
+                                                  account ?? AddressZero
+                                                )}
+                                                tooltip={
+                                                  addressEqual(
+                                                    listing.seller.id,
+                                                    account ?? AddressZero
+                                                  )
+                                                    ? "You cannot purchase your own listing"
+                                                    : undefined
                                                 }
-                                              }}
-                                              variant="secondary"
-                                            >
-                                              Purchase
-                                            </Button>
-                                          </td>
-                                        </tr>
-                                      ))}
+                                                onClick={() => {
+                                                  if (
+                                                    data.collection?.standard
+                                                  ) {
+                                                    setModalProps({
+                                                      isOpen: true,
+                                                      targetNft: {
+                                                        metadata,
+                                                        payload: {
+                                                          ...listing,
+                                                          standard:
+                                                            data.collection
+                                                              .standard,
+                                                          tokenId:
+                                                            tokenInfo.tokenId,
+                                                        },
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                variant="secondary"
+                                              >
+                                                Purchase
+                                              </Button>
+                                            </td>
+                                          </tr>
+                                        )
+                                      )}
                                     </React.Fragment>
                                   ))}
                                 </tbody>
@@ -671,52 +794,50 @@ export default function Example() {
                           </Disclosure.Button>
                         </h3>
                         <Disclosure.Panel as="div" className="pb-6">
-                          {tokenInfo.metadata?.attributes &&
-                          tokenInfo.metadata.attributes.length > 0 ? (
+                          {metadata?.attributes &&
+                          metadata.attributes.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {tokenInfo.metadata?.attributes.map(
-                                ({ attribute }) => {
-                                  if (attribute.percentage == null) {
-                                    return (
-                                      <div className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2">
-                                        <p className="text-red-700 dark:text-gray-500 text-xs font-light">
-                                          {attribute.name}
-                                        </p>
-                                        <p className="flex-1 flex items-center font-medium dark:text-gray-900">
-                                          {formattable(attribute.value)}
-                                        </p>
-                                      </div>
-                                    );
-                                  }
+                              {metadata?.attributes.map(({ attribute }) => {
+                                if (attribute.percentage == null) {
                                   return (
-                                    <Link
-                                      key={attribute.id}
-                                      href={{
-                                        pathname: `/collection/${slugOrAddress}`,
-                                        query: {
-                                          search: new URLSearchParams({
-                                            [attribute.name]: attribute.value,
-                                          }).toString(),
-                                        },
-                                      }}
-                                      passHref
-                                    >
-                                      <a className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2 hover:shadow-xl shadow-red-500/50">
-                                        <p className="text-red-700 dark:text-gray-500 text-xs font-light">
-                                          {attribute.name}
-                                        </p>
-                                        <p className="mt-1 font-medium dark:text-gray-900">
-                                          {formattable(attribute.value)}
-                                        </p>
-                                        <p className="mt-2 text-[0.6rem] sm:text-xs text-gray-600 dark:text-gray-600">
-                                          {formatPercent(attribute.percentage)}{" "}
-                                          have this trait
-                                        </p>
-                                      </a>
-                                    </Link>
+                                    <div className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2">
+                                      <p className="text-red-700 dark:text-gray-500 text-xs font-light">
+                                        {attribute.name}
+                                      </p>
+                                      <p className="flex-1 flex items-center font-medium dark:text-gray-900">
+                                        {formattable(attribute.value)}
+                                      </p>
+                                    </div>
                                   );
                                 }
-                              )}
+                                return (
+                                  <Link
+                                    key={attribute.id}
+                                    href={{
+                                      pathname: `/collection/${slugOrAddress}`,
+                                      query: {
+                                        search: new URLSearchParams({
+                                          [attribute.name]: attribute.value,
+                                        }).toString(),
+                                      },
+                                    }}
+                                    passHref
+                                  >
+                                    <a className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2 hover:shadow-xl shadow-red-500/50">
+                                      <p className="text-red-700 dark:text-gray-500 text-xs font-light">
+                                        {attribute.name}
+                                      </p>
+                                      <p className="mt-1 font-medium dark:text-gray-900">
+                                        {formattable(attribute.value)}
+                                      </p>
+                                      <p className="mt-2 text-[0.6rem] sm:text-xs text-gray-600 dark:text-gray-600">
+                                        {formatPercent(attribute.percentage)}{" "}
+                                        have this trait
+                                      </p>
+                                    </a>
+                                  </Link>
+                                );
+                              })}
                             </div>
                           ) : (
                             <div className="text-gray-500 dark:text-gray-400">
@@ -891,7 +1012,7 @@ export default function Example() {
                                                         />
                                                       </span>
                                                     );
-                                                  case Status.Hidden:
+                                                  case Status.Inactive:
                                                     return (
                                                       <span className="bg-gray-400 h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-900">
                                                         <EyeOffIcon
@@ -944,7 +1065,7 @@ export default function Example() {
         <TransferNFTModal
           isOpen={isTransferModalOpen}
           onClose={() => setTransferModalOpen(false)}
-          title={tokenInfo?.metadata?.name ?? ""}
+          title={metadata?.name ?? ""}
           token={hasErc1155Token}
           standard={data.collection.standard}
         />
@@ -975,7 +1096,7 @@ const timelineContent = (
     case Status.Sold:
       return (
         <p>
-          {shortenIfAddress(listing.user.id)} sold to{" "}
+          {shortenIfAddress(listing.seller.id)} sold to{" "}
           {listing.buyer?.id ? shortenIfAddress(listing.buyer.id) : "Unknown"}{" "}
           for{" "}
           <span className="font-medium text-gray-900 dark:text-gray-300">
@@ -987,15 +1108,15 @@ const timelineContent = (
     case Status.Active:
       return (
         <p>
-          {shortenIfAddress(listing.user.id)} listed this item for{" "}
+          {shortenIfAddress(listing.seller.id)} listed this item for{" "}
           <span className="font-medium text-gray-900 dark:text-gray-300">
             {formatPrice(listing.pricePerItem)}
           </span>{" "}
           $MAGIC
         </p>
       );
-    case Status.Hidden:
-      return <p>{shortenIfAddress(listing.user.id)} hid this item</p>;
+    case Status.Inactive:
+      return <p>{shortenIfAddress(listing.seller.id)} hid this item</p>;
   }
 };
 
@@ -1012,9 +1133,9 @@ const TransferNFTModal = ({
   token:
     | Exclude<
         Exclude<
-          GetTokenExistsInWalletQuery["collection"],
+          GetTokenExistsInWalletQuery["tokens"],
           null | undefined
-        >["tokens"][number]["owners"],
+        >[number]["owners"],
         null | undefined
       >[number]
     | null;
@@ -1185,7 +1306,21 @@ const PurchaseItemModal = ({
               className="flex flex-col sm:flex-row py-6 px-4 sm:px-6"
             >
               <div className="flex-shrink-0">
-                <ImageWrapper height="50%" token={targetNft} width="50%" />
+                <ImageWrapper
+                  height="50%"
+                  token={{
+                    name: targetNft.metadata?.name,
+                    metadata:
+                      targetNft.metadata?.description &&
+                      targetNft.metadata?.image
+                        ? {
+                            description: targetNft.metadata.description,
+                            image: targetNft.metadata.image,
+                          }
+                        : null,
+                  }}
+                  width="50%"
+                />
               </div>
 
               <div className="sm:ml-6 sm:space-y-0 mt-2 sm:mt-0 space-y-2 flex-1 flex flex-col">
@@ -1202,7 +1337,7 @@ const PurchaseItemModal = ({
                         <span className="text-gray-500 dark:text-gray-400">
                           Sold by:
                         </span>{" "}
-                        {shortenAddress(payload.user.id)}
+                        {shortenAddress(payload.seller.id)}
                       </p>
                     </h4>
                   </div>
@@ -1276,7 +1411,7 @@ const PurchaseItemModal = ({
                     send(
                       targetNft,
                       normalizedAddress,
-                      payload.user.id,
+                      payload.seller.id,
                       Number(payload.tokenId),
                       quantity
                     );

@@ -18,6 +18,14 @@ export const getTokenMetadata = gql`
   query getTokenMetadata($id: ID!) {
     token(id: $id) {
       metadata {
+        attributes {
+          attribute {
+            id
+            name
+            percentage
+            value
+          }
+        }
         image
         name
         description

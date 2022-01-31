@@ -12,7 +12,7 @@ import { Dialog, Transition, Listbox } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import classNames from "clsx";
-import { client, marketplace } from "../../lib/client";
+import { bridgeworld, client, marketplace } from "../../lib/client";
 import { useQuery } from "react-query";
 import { addMonths, addWeeks, closestIndexTo } from "date-fns";
 import { ethers } from "ethers";
@@ -636,6 +636,15 @@ const Inventory = () => {
     }
   );
 
+  const { data: legionMetadataData } = useQuery(
+    ["inventory-metadata-legions", tokens],
+    () => bridgeworld.getLegionMetadata({ ids: tokens }),
+    {
+      enabled: tokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
   const tabs = useMemo(() => {
     if (inventory.data?.user?.inactive.length) {
       return [...defaultTabs, { name: "Staked", href: "/inventory/staked" }];
@@ -715,9 +724,25 @@ const Inventory = () => {
                       const slugOrAddress =
                         getCollectionSlugFromName(token.collection.name) ??
                         token.collection.id;
-                      const metadata = metadataData?.tokens.find(
-                        (item) => item?.id === token.id
+                      const legionsMetadata = legionMetadataData?.tokens.find(
+                        (item) => item.id === token.id
                       );
+                      const metadata =
+                        metadataData?.tokens.find(
+                          (item) => item?.id === token.id
+                        ) ??
+                        (legionsMetadata
+                          ? {
+                              id: legionsMetadata.id,
+                              name: legionsMetadata.name,
+                              tokenId: token.tokenId,
+                              metadata: {
+                                image: legionsMetadata.image,
+                                name: legionsMetadata.name,
+                                description: "Legions",
+                              },
+                            }
+                          : undefined);
 
                       return (
                         <li key={id}>
@@ -742,7 +767,8 @@ const Inventory = () => {
                                   setNft({
                                     address: token.collection.address,
                                     collection: token.collection.name,
-                                    name: token.name ?? "",
+                                    name:
+                                      legionsMetadata?.name ?? token.name ?? "",
                                     listing: pricePerItem
                                       ? { expires, pricePerItem, quantity }
                                       : updates[
@@ -763,7 +789,8 @@ const Inventory = () => {
                                 }
                               >
                                 <span className="sr-only">
-                                  View details for {token.name}
+                                  View details for{" "}
+                                  {legionsMetadata?.name ?? token.name}
                                 </span>
                               </button>
                             ) : null}

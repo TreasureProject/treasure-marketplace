@@ -1,14 +1,24 @@
 import {
-  GetTokenDetailsQuery,
   ListingFieldsWithTokenFragment,
   TokenStandard,
-} from "../generated/queries.graphql";
+} from "../generated/marketplace.graphql";
+
+export type NormalizedMetadata = Partial<{
+  attributes: Array<{
+    attribute: Partial<{
+      name: string;
+      value: string | number;
+      percentage: number | null;
+    }>;
+  }> | null;
+  id: string;
+  description: string;
+  image: string;
+  name: string;
+}>;
 
 export type targetNftT = {
-  metadata: Exclude<
-    GetTokenDetailsQuery["collection"],
-    null | undefined
-  >["tokens"][number]["metadata"];
+  metadata: NormalizedMetadata | null;
   payload: ListingFieldsWithTokenFragment & {
     standard: TokenStandard;
     tokenId: string;

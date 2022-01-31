@@ -3,6 +3,13 @@ config:
   namingConvention:
     enumValues: keep
 generates:
+  generated/bridgeworld.graphql.ts:
+    schema: ${NEXT_PUBLIC_BRIDGEWORLD_SUBGRAPH}
+    documents: "src/graphql/bridgeworld.graphql.ts"
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"
   generated/queries.graphql.ts:
     schema: ${NEXT_PUBLIC_GRAPHQL_URL}
     documents: "src/graphql/queries.graphql.ts"

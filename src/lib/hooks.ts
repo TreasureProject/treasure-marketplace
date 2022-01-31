@@ -78,7 +78,7 @@ export const collections: Collections = {
       name: "Keys",
       address: "0x25ee208b4f8636b5ceaafdee051bf0bfe514f5f6",
     },
-    // Note: List contract doesn't exist on Rinkeby currently
+    // Note: This contract doesn't exist on Rinkeby currently
     {
       name: "Legions",
       address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1",
