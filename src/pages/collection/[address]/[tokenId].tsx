@@ -1134,7 +1134,8 @@ const PurchaseItemModal = ({
     address: string,
     ownerAddress: string,
     tokenId: number,
-    quantity: number
+    quantity: number,
+    pricePerItem: string
   ) => void;
 }) => {
   const [quantity, setQuantity] = React.useState(1);
@@ -1278,7 +1279,8 @@ const PurchaseItemModal = ({
                       normalizedAddress,
                       payload.user.id,
                       Number(payload.tokenId),
-                      quantity
+                      quantity,
+                      payload.pricePerItem
                     );
                   }}
                 >

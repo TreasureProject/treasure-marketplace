@@ -1,13 +1,16 @@
 import { ChainId } from "@yuyao17/corefork";
+import { AddressZero } from "@ethersproject/constants";
 
 export const Contracts = {
   [ChainId.Rinkeby]: {
     magic: "0xFd25767f710966F8a557b236a3CaeF8F92Eb7C10",
     marketplace: "0xeadbc40f5176Fd6eAb8E63cDF55b9caBa216E682",
+    marketplaceBuyer: AddressZero,
   },
   [ChainId.Arbitrum]: {
     magic: "0x539bdE0d7Dbd336b79148AA742883198BBF60342",
     marketplace: "0x2E3b85F85628301a0Bce300Dee3A6B04195A15Ee",
+    marketplaceBuyer: "0x812cdA2181ed7c45a35a691E0C85E231D218E273",
   },
 };
 
