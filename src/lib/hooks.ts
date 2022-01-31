@@ -528,7 +528,8 @@ export const useApproveMagic = () => {
   const { send, state } = useContractFunction(contract, "approve");
 
   return {
-    send: () => send(Contracts[chainId].marketplace, MaxUint256.toString()),
+    send: () =>
+      send(Contracts[chainId].marketplaceBuyer, MaxUint256.toString()),
     state,
   };
 };
