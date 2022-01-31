@@ -3,7 +3,7 @@ import gql from "graphql-tag";
 export const getUserInventory = gql`
   query getUserInventory($id: ID!) {
     user(id: $id) {
-      listings(where: { status: Active, quantity_gt: 0 }) {
+      listings(where: { collection_not: "", status: Active, quantity_gt: 0 }) {
         id
         expires
         pricePerItem
@@ -12,7 +12,7 @@ export const getUserInventory = gql`
           ...TokenFields
         }
       }
-      hidden: listings(where: { status: Hidden }) {
+      hidden: listings(where: { collection_not: "", status: Hidden }) {
         id
         expires
         quantity
@@ -21,7 +21,7 @@ export const getUserInventory = gql`
           ...TokenFields
         }
       }
-      sold: listings(where: { status: Sold }) {
+      sold: listings(where: { collection_not: "", status: Sold }) {
         id
         quantity
         pricePerItem
