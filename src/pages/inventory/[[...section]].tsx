@@ -19,6 +19,7 @@ import { addMonths, addWeeks, closestIndexTo } from "date-fns";
 import { ethers } from "ethers";
 import {
   useApproveContract,
+  useChainId,
   useContractApprovals,
   useCreateListing,
   useRemoveListing,
@@ -29,6 +30,7 @@ import { AddressZero } from "@ethersproject/constants";
 import {
   formatNumber,
   generateIpfsLink,
+  getCollectionNameFromAddress,
   getCollectionSlugFromName,
 } from "../../utils";
 import { useRouter } from "next/router";
@@ -46,6 +48,15 @@ type DrawerProps = {
   needsContractApproval: boolean;
   nft: Nft;
   onClose: () => void;
+};
+
+type InventoryToken = {
+  token: {
+    collection: {
+      id: string;
+    };
+    id: string;
+  };
 };
 
 const dates = [
@@ -560,6 +571,7 @@ const Drawer = ({
 
 const Inventory = () => {
   const router = useRouter();
+  const chainId = useChainId();
   const [nft, setNft] = useState<Nft | null>(null);
   const { account } = useEthers();
   const [section] = router.query.section ?? [""];
@@ -636,7 +648,19 @@ const Inventory = () => {
     }
   }, [inventory.data?.user, section]);
 
-  const tokens: string[] = data.map((item) => item?.token?.id).filter(Boolean);
+  const tokens = (data as InventoryToken[])
+    .filter(
+      ({ token }) =>
+        getCollectionNameFromAddress(token.collection.id, chainId) !== "Legions"
+    )
+    .map(({ token }) => token.id);
+
+  const legions = (data as InventoryToken[])
+    .filter(
+      ({ token }) =>
+        getCollectionNameFromAddress(token.collection.id, chainId) === "Legions"
+    )
+    .map(({ token }) => token.id);
 
   const { data: metadataData } = useQuery(
     ["inventory-metadata", tokens],
@@ -648,10 +672,10 @@ const Inventory = () => {
   );
 
   const { data: legionMetadataData } = useQuery(
-    ["inventory-metadata-legions", tokens],
-    () => bridgeworld.getLegionMetadata({ ids: tokens }),
+    ["inventory-metadata-legions", legions],
+    () => bridgeworld.getLegionMetadata({ ids: legions }),
     {
-      enabled: tokens.length > 0,
+      enabled: legions.length > 0,
       refetchInterval: false,
     }
   );

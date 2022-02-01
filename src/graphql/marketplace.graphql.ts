@@ -49,17 +49,11 @@ export const getUserInventory = gql`
   fragment TokenFields on Token {
     id
     collection {
+      id
       contract
       name
       standard
     }
-    # metadata {
-    #   image
-    #   name
-    #   description
-    # }
-    # name
-    # contract
     tokenId
   }
 `;
