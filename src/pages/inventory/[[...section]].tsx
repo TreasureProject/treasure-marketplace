@@ -11,6 +11,7 @@ import {
 import { Dialog, Transition, Listbox } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
+import { ExclamationIcon } from "@heroicons/react/outline";
 import classNames from "clsx";
 import { bridgeworld, client, marketplace } from "../../lib/client";
 import { useQuery } from "react-query";
@@ -706,6 +707,26 @@ const Inventory = () => {
                 </div>
               </div>
             </div>
+            {section === "inactive" && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <ExclamationIcon
+                      className="h-5 w-5 text-yellow-400"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-[0.7rem] text-left lg:text-xs text-yellow-700">
+                      Items that were listed while staked or transferred will
+                      appear here. They will reappear as listings when you
+                      unstake them so delist if you don&apos;t want to sell them
+                      at the original price you listed for.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             <section className="mt-8 pb-16">
               {inventory.isLoading && <CenterLoadingDots className="h-36" />}
               {data.length === 0 && !inventory.isLoading && (
