@@ -55,7 +55,13 @@ export const getTokenMetadata = gql`
 
 export const getTokensMetadata = gql`
   query getTokensMetadata($ids: [ID!]!) {
-    tokens(first: 1000, where: { id_in: $ids }) {
+    tokens(
+      first: 1000
+      where: {
+        collection_not: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1"
+        id_in: $ids
+      }
+    ) {
       id
       metadata {
         image
