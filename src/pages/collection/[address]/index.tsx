@@ -412,9 +412,8 @@ const Collection = () => {
       bridgeworld.getLegionMetadata({
         ids:
           listingData?.pages.reduce((acc, page) => {
-            const tokenIds =
-              page.listings?.map((list) => list.token.tokenId) || [];
-            return [...acc, ...tokenIds];
+            const ids = page.listings?.map((list) => list.id) || [];
+            return [...acc, ...ids];
           }, []) || [],
       }),
     {
@@ -422,9 +421,10 @@ const Collection = () => {
         !!formattedAddress &&
         !!listingData &&
         getCollectionNameFromAddress(formattedAddress, chainId) === "Legions",
-      refetchInterval: false,
     }
   );
+
+  console.log(legionMetadataData);
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
@@ -1060,20 +1060,31 @@ const Collection = () => {
                           })}
                         {/* ERC721 */}
                         {group?.listings?.map((listing) => {
-                          const metadata = legionMetadataData
-                            ? legionMetadataData.tokens.find(
-                                (token) =>
-                                  token.tokenId === listing.token.tokenId
-                              )
-                            : metadataData?.erc721.find(
-                                (metadata) =>
-                                  metadata.tokenId === listing.token.tokenId
-                              );
+                          const legionsMetadata =
+                            legionMetadataData?.tokens.find(
+                              (item) => item.id === listing.token.tokenId
+                            );
+                          const metadata =
+                            metadataData?.erc721.find(
+                              (item) => item?.tokenId === listing.token.tokenId
+                            ) ??
+                            (legionsMetadata
+                              ? {
+                                  id: legionsMetadata.id,
+                                  name: legionsMetadata.name,
+                                  tokenId: listing.token.tokenId,
+                                  metadata: {
+                                    image: legionsMetadata.image,
+                                    name: legionsMetadata.name,
+                                    description: "Legions",
+                                  },
+                                }
+                              : undefined);
 
                           return (
                             <li key={listing.id} className="group">
                               <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                                {metadata?.metadata ? (
+                                {metadata ? (
                                   <ImageWrapper
                                     className="w-full h-full object-center object-fill group-hover:opacity-75"
                                     token={metadata}
