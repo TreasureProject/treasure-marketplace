@@ -250,8 +250,6 @@ export function useContractApprovals(
     })) ?? []
   );
 
-  console.log(approvals);
-
   return approvals
     .filter(Boolean)
     .flat()

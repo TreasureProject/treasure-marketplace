@@ -580,6 +580,7 @@ const Inventory = () => {
       listings = [],
       sold = [],
       tokens = [],
+      staked = [],
     } = inventory.data?.user ?? {};
     const totals = [...listings, ...tokens].reduce<Record<string, number>>(
       (acc, value) => {
@@ -613,6 +614,14 @@ const Inventory = () => {
       },
       {}
     );
+    // Filter out staked and listings from tokens until we have UI to handle it
+    const filtered = tokens.filter(
+      (token) =>
+        !(
+          listings.some((listing) => listing.token.id === token.token.id) ||
+          staked.some((stake) => stake.token.id === token.token.id)
+        )
+    );
 
     switch (section) {
       case "inactive":
@@ -622,7 +631,7 @@ const Inventory = () => {
       case "sold":
         return [sold, totals, empty, null] as const;
       default:
-        return [tokens, totals, updates, null] as const;
+        return [filtered, totals, updates, null] as const;
     }
   }, [inventory.data?.user, section]);
 

@@ -36,6 +36,13 @@ export const getUserInventory = gql`
           ...TokenFields
         }
       }
+      staked(first: 1000) {
+        id
+        quantity
+        token {
+          ...TokenFields
+        }
+      }
     }
   }
 
