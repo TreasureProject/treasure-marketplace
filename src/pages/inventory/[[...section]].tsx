@@ -619,7 +619,8 @@ const Inventory = () => {
       (token) =>
         !(
           listings.some((listing) => listing.token.id === token.token.id) ||
-          staked.some((stake) => stake.token.id === token.token.id)
+          staked.some((stake) => stake.token.id === token.token.id) ||
+          inactive.some((listing) => listing.token.id === token.token.id)
         )
     );
 
