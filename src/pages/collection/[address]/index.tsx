@@ -358,13 +358,29 @@ const Collection = () => {
   //     getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
   //   }
   // );
+  const searchFilters = formatSearchFilter(formattedSearch);
+  const { data: filteredData } = useQuery(
+    ["filtered-tokens", filters],
+    () =>
+      client.getFilteredTokens({
+        filters: formatSearchFilter(formattedSearch),
+      }),
+    {
+      enabled: searchFilters.length > 0,
+      refetchInterval: false,
+    }
+  );
 
+  const filteredTokenIds = filteredData?.tokens?.map((token) => token.id) ?? [];
   const {
     data: listingData,
     isLoading: isListingLoading,
     fetchNextPage,
   } = useInfiniteQuery(
-    ["listings", { formattedAddress, sortParam, searchParams, search }],
+    [
+      "listings",
+      { formattedAddress, sortParam, searchParams, search, filteredData },
+    ],
     ({ queryKey, pageParam = 0 }) =>
       marketplace.getCollectionListings({
         id: formattedAddress,
@@ -381,6 +397,8 @@ const Collection = () => {
         orderDirection: sort
           ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
           : OrderDirection.asc,
+        filteredTokenIds,
+        withFilters: filteredTokenIds.length > 0,
       }),
     {
       enabled: !!formattedAddress && !!collectionData,
@@ -396,7 +414,9 @@ const Collection = () => {
         isERC1155,
         tokenId_in: listingData?.pages.reduce((acc, page) => {
           const tokenIds =
-            page.listings?.map((list) => list.token.tokenId) || [];
+            (page.listings ?? page.filtered)?.map(
+              (list) => list.token.tokenId
+            ) || [];
           return [...acc, ...tokenIds];
         }, []),
       }),
@@ -412,7 +432,9 @@ const Collection = () => {
       bridgeworld.getLegionMetadata({
         ids:
           listingData?.pages.reduce((acc, page) => {
-            const ids = page.listings?.map((list) => list.token.id) || [];
+            const ids =
+              (page.listings ?? page.filtered)?.map((list) => list.token.id) ||
+              [];
             return [...acc, ...ids];
           }, []) || [],
       }),
@@ -430,8 +452,7 @@ const Collection = () => {
   }, [formattedAddress]);
 
   const page = listingData?.pages[listingData.pages.length - 1];
-  // const data = isERC1155 ? collection?.tokens : collection?.listings;
-  const data = isERC1155 ? page?.tokens : page?.listings;
+  const data = isERC1155 ? page?.tokens : page?.listings ?? page?.filtered;
 
   const hasNextPage = data?.length === MAX_ITEMS_PER_PAGE;
 
@@ -1058,67 +1079,70 @@ const Collection = () => {
                             );
                           })}
                         {/* ERC721 */}
-                        {group?.listings?.map((listing) => {
-                          const legionsMetadata =
-                            legionMetadataData?.tokens.find(
-                              (item) => item.id === listing.token.id
-                            );
-                          const metadata =
-                            metadataData?.erc721.find(
-                              (item) => item?.tokenId === listing.token.tokenId
-                            ) ??
-                            (legionsMetadata
-                              ? {
-                                  id: legionsMetadata.id,
-                                  name: legionsMetadata.name,
-                                  tokenId: listing.token.tokenId,
-                                  metadata: {
-                                    image: legionsMetadata.image,
+                        {(group?.listings ?? group?.filtered)?.map(
+                          (listing) => {
+                            const legionsMetadata =
+                              legionMetadataData?.tokens.find(
+                                (item) => item.id === listing.token.id
+                              );
+                            const metadata =
+                              metadataData?.erc721.find(
+                                (item) =>
+                                  item?.tokenId === listing.token.tokenId
+                              ) ??
+                              (legionsMetadata
+                                ? {
+                                    id: legionsMetadata.id,
                                     name: legionsMetadata.name,
-                                    description: "Legions",
-                                  },
-                                }
-                              : undefined);
+                                    tokenId: listing.token.tokenId,
+                                    metadata: {
+                                      image: legionsMetadata.image,
+                                      name: legionsMetadata.name,
+                                      description: "Legions",
+                                    },
+                                  }
+                                : undefined);
 
-                          return (
-                            <li key={listing.id} className="group">
-                              <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
-                                {metadata ? (
-                                  <ImageWrapper
-                                    className="w-full h-full object-center object-fill group-hover:opacity-75"
-                                    token={metadata}
-                                  />
-                                ) : (
-                                  <div className="animate-pulse w-full bg-gray-300 h-64 rounded-md m-auto" />
-                                )}
-                                <Link
-                                  href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
-                                >
-                                  <a className="absolute inset-0 focus:outline-none">
-                                    <span className="sr-only">
-                                      View details for {metadata?.name}
+                            return (
+                              <li key={listing.id} className="group">
+                                <div className="block w-full aspect-w-1 aspect-h-1 rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-red-500">
+                                  {metadata ? (
+                                    <ImageWrapper
+                                      className="w-full h-full object-center object-fill group-hover:opacity-75"
+                                      token={metadata}
+                                    />
+                                  ) : (
+                                    <div className="animate-pulse w-full bg-gray-300 h-64 rounded-md m-auto" />
+                                  )}
+                                  <Link
+                                    href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
+                                  >
+                                    <a className="absolute inset-0 focus:outline-none">
+                                      <span className="sr-only">
+                                        View details for {metadata?.name}
+                                      </span>
+                                    </a>
+                                  </Link>
+                                </div>
+                                <div className="mt-4 font-medium text-gray-900 space-y-2">
+                                  <p className="text-xs text-gray-500 dark:text-gray-300 truncate font-semibold">
+                                    {metadata?.name}
+                                  </p>
+                                  <p className="dark:text-gray-100 text-sm xl:text-base capsize">
+                                    {formatNumber(
+                                      parseFloat(
+                                        formatEther(listing.pricePerItem)
+                                      )
+                                    )}{" "}
+                                    <span className="text-[0.5rem] xl:text-xs font-light">
+                                      $MAGIC
                                     </span>
-                                  </a>
-                                </Link>
-                              </div>
-                              <div className="mt-4 font-medium text-gray-900 space-y-2">
-                                <p className="text-xs text-gray-500 dark:text-gray-300 truncate font-semibold">
-                                  {metadata?.name}
-                                </p>
-                                <p className="dark:text-gray-100 text-sm xl:text-base capsize">
-                                  {formatNumber(
-                                    parseFloat(
-                                      formatEther(listing.pricePerItem)
-                                    )
-                                  )}{" "}
-                                  <span className="text-[0.5rem] xl:text-xs font-light">
-                                    $MAGIC
-                                  </span>
-                                </p>
-                              </div>
-                            </li>
-                          );
-                        })}
+                                  </p>
+                                </div>
+                              </li>
+                            );
+                          }
+                        )}
                       </React.Fragment>
                     ))}
                   </ul>

@@ -53,6 +53,14 @@ export const getTokenMetadata = gql`
   }
 `;
 
+export const getFilteredTokens = gql`
+  query getFilteredTokens($filters: [String!]!) {
+    tokens(first: 1000, where: { filters_contains: $filters }) {
+      id
+    }
+  }
+`;
+
 export const getTokensMetadata = gql`
   query getTokensMetadata($ids: [ID!]!) {
     tokens(

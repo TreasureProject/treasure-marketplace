@@ -94,61 +94,57 @@ export const getCollectionListings = gql`
     $skipBy: Int!
     $first: Int!
     $orderBy: Listing_orderBy!
+    $filteredTokenIds: [String!]!
     $isERC1155: Boolean!
-    $filter: [String!]
+    $withFilters: Boolean!
   ) {
     tokens(
       first: 1000
       orderBy: floorPrice
       orderDirection: $orderDirection
       where: { collection: $id }
-    )
-      # where: { name_contains: $tokenName }
-      @include(if: $isERC1155) {
+    ) @include(if: $isERC1155) {
       id
-      # name
       floorPrice
       tokenId
       listings(where: { status: Active }, orderBy: pricePerItem) {
         pricePerItem
         quantity
       }
-      # metadata {
-      #   image
-      #   name
-      #   description
-      # }
     }
     listings(
       first: $first
       skip: $skipBy
       orderBy: $orderBy
       orderDirection: $orderDirection
-      where: {
-        status: Active
-        collection: $id
-        # tokenName_contains: $tokenName
-        # filters_contains: $filter
-      }
-    ) @skip(if: $isERC1155) {
-      seller {
-        id
-      }
-      expires
-      id
-      pricePerItem
-      token {
-        id
-        tokenId
-        # metadata {
-        #   image
-        #   name
-        #   description
-        # }
-        name
-      }
-      quantity
+      where: { status: Active, collection: $id }
+    ) @skip(if: $withFilters) {
+      ...TokenListing
     }
+    filtered: listings(
+      first: $first
+      skip: $skipBy
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: { status: Active, collection: $id, token_in: $filteredTokenIds }
+    ) @include(if: $withFilters) {
+      ...TokenListing
+    }
+  }
+
+  fragment TokenListing on Listing {
+    seller {
+      id
+    }
+    expires
+    id
+    pricePerItem
+    token {
+      id
+      tokenId
+      name
+    }
+    quantity
   }
 `;
 
