@@ -138,7 +138,7 @@ export const collections: Collections = {
       address: "0x658365026d06f00965b5bb570727100e821e6508",
     },
     {
-      name: "Legacy Legion Genesis",
+      name: "Legacy Legions Genesis",
       address: "0xe83c0200e93cb1496054e387bddae590c07f0194",
     },
     {
