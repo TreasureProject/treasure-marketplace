@@ -614,8 +614,8 @@ const Inventory = () => {
     );
 
     switch (section) {
-      case "staked":
-        return [inactive, totals, updates, "No staked listings 🙂"] as const;
+      case "inactive":
+        return [inactive, totals, updates, "No inactive listings 🙂"] as const;
       case "listed":
         return [listings, totals, empty, "No NFTs listed 🙂"] as const;
       case "sold":
@@ -647,7 +647,10 @@ const Inventory = () => {
 
   const tabs = useMemo(() => {
     if (inventory.data?.user?.inactive.length) {
-      return [...defaultTabs, { name: "Staked", href: "/inventory/staked" }];
+      return [
+        ...defaultTabs,
+        { name: "Inactive", href: "/inventory/inactive" },
+      ];
     }
 
     return defaultTabs;
