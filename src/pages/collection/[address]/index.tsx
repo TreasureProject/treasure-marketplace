@@ -412,7 +412,7 @@ const Collection = () => {
       bridgeworld.getLegionMetadata({
         ids:
           listingData?.pages.reduce((acc, page) => {
-            const ids = page.listings?.map((list) => list.id) || [];
+            const ids = page.listings?.map((list) => list.token.id) || [];
             return [...acc, ...ids];
           }, []) || [],
       }),
@@ -424,7 +424,6 @@ const Collection = () => {
     }
   );
 
-  console.log(legionMetadataData);
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
@@ -1062,7 +1061,7 @@ const Collection = () => {
                         {group?.listings?.map((listing) => {
                           const legionsMetadata =
                             legionMetadataData?.tokens.find(
-                              (item) => item.id === listing.token.tokenId
+                              (item) => item.id === listing.token.id
                             );
                           const metadata =
                             metadataData?.erc721.find(

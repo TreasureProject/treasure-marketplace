@@ -137,6 +137,7 @@ export const getCollectionListings = gql`
       id
       pricePerItem
       token {
+        id
         tokenId
         # metadata {
         #   image
