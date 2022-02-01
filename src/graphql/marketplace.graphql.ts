@@ -232,6 +232,7 @@ const LISTING_FRAGMENT = gql`
       id
     }
     token {
+      id
       tokenId
       # metadata {
       #   description

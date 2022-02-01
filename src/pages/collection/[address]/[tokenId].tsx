@@ -1119,7 +1119,12 @@ const timelineContent = (
         </p>
       );
     case Status.Inactive:
-      return <p>{shortenIfAddress(listing.seller.id)} hid this item</p>;
+      return (
+        <p>
+          {shortenIfAddress(listing.seller.id)} inactivated a listing of this
+          item
+        </p>
+      );
   }
 };
 

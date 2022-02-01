@@ -1,9 +1,9 @@
-import { Listing_OrderBy } from "../../generated/queries.graphql";
+import { Listing_OrderBy } from "../../generated/marketplace.graphql";
 
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 
-import client from "../lib/client";
+import { marketplace } from "../lib/client";
 import Listings from "../components/Listings";
 import { CenterLoadingDots } from "../components/CenterLoadingDots";
 
@@ -13,7 +13,7 @@ const Activity = () => {
   const sortParam = activitySort ?? "time";
 
   const { data, isLoading } = useQuery(["activity", { sortParam }], () =>
-    client.getAllActivities({
+    marketplace.getAllActivities({
       orderBy:
         sortParam === "price"
           ? Listing_OrderBy.pricePerItem

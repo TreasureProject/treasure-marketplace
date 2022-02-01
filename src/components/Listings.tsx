@@ -4,12 +4,11 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/solid";
 import { Fragment } from "react";
-import { ListingFieldsFragment } from "../../generated/queries.graphql";
+import { ListingFieldsFragment } from "../../generated/marketplace.graphql";
 import { Menu, Transition } from "@headlessui/react";
 import { formatDistanceToNow } from "date-fns";
 import {
   formatPrice,
-  generateIpfsLink,
   getCollectionSlugFromName,
   getCollectionNameFromAddress,
 } from "../utils";
@@ -21,6 +20,8 @@ import QueryLink from "./QueryLink";
 import classNames from "clsx";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
+import { useQuery } from "react-query";
+import { bridgeworld, client } from "../lib/client";
 
 const sortOptions = [
   { name: "Highest Price", value: "price" },
@@ -36,6 +37,43 @@ const Listings = ({
 }) => {
   const router = useRouter();
   const chainId = useChainId();
+
+  const tokens = listings
+    .filter(
+      (listing) =>
+        getCollectionNameFromAddress(listing.collection.id, chainId) !==
+        "Legions"
+    )
+    .map((listing) => listing.token.id);
+
+  const legions = listings
+    .filter(
+      (listing) =>
+        getCollectionNameFromAddress(listing.collection.id, chainId) ===
+        "Legions"
+    )
+    .map((listing) => listing.token.id);
+
+  const { data: metadataData } = useQuery(
+    ["activity-metadata", tokens],
+    () =>
+      client.getTokensMetadata({
+        ids: tokens,
+      }),
+    {
+      enabled: tokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
+  const { data: legionMetadataData } = useQuery(
+    ["activity-metadata-legions", legions],
+    () => bridgeworld.getLegionMetadata({ ids: legions }),
+    {
+      enabled: legions.length > 0,
+      refetchInterval: false,
+    }
+  );
 
   return (
     <div className="flex-1 flex items-stretch overflow-hidden">
@@ -156,6 +194,24 @@ const Listings = ({
                     getCollectionSlugFromName(collectionName) ??
                     listing.collection.id;
 
+                  const legionsMetadata = legionMetadataData?.tokens.find(
+                    (item) => item.id === listing.token.id
+                  );
+                  const metadata = legionsMetadata
+                    ? {
+                        id: legionsMetadata.id,
+                        name: legionsMetadata.name,
+                        tokenId: listing.token.tokenId,
+                        metadata: {
+                          image: legionsMetadata.image,
+                          name: legionsMetadata.name,
+                          description: "Legions",
+                        },
+                      }
+                    : metadataData?.tokens.find(
+                        (item) => item?.id === listing.token.id
+                      ) ?? undefined;
+
                   return (
                     <tr
                       key={listing.id}
@@ -166,21 +222,25 @@ const Listings = ({
                       }
                     >
                       <td className="flex items-center px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
-                        <ImageWrapper
-                          height={48}
-                          token={listing.token}
-                          width={48}
-                        />
+                        {metadata?.metadata ? (
+                          <ImageWrapper
+                            height={48}
+                            token={metadata}
+                            width={48}
+                          />
+                        ) : (
+                          <div className="animate-pulse w-full bg-gray-300 h-12 rounded-md m-auto" />
+                        )}
                         <div className="pl-2">
                           <p className="text-gray-500 dark:text-gray-400 font-thin tracking-wide uppercase text-[0.5rem]">
-                            {listing.token.metadata?.description}
+                            {metadata?.metadata?.description ?? ""}
                           </p>
                           <Link
                             href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
                             passHref
                           >
                             <a className="text-xs text-gray-800 dark:text-gray-700 font-semibold truncate hover:underline">
-                              {listing.token.name}
+                              {metadata?.name ?? ""}
                             </a>
                           </Link>
                         </div>
@@ -223,90 +283,120 @@ const Listings = ({
             role="list"
             className="mt-2 divide-y divide-gray-200 dark:divide-gray-300 overflow-hidden"
           >
-            {listings.map((listing) => (
-              <Disclosure as="li" key={listing.id}>
-                {({ open }) => (
-                  <>
-                    <div className="relative">
-                      <div className="block px-4 py-4 hover:bg-gray-50 dark:bg-gray-200">
-                        <span className="flex items-center">
-                          <span className="flex-1 flex space-x-4 truncate">
-                            <ImageWrapper
-                              aria-hidden="true"
-                              height="50%"
-                              token={listing.token}
-                              width="60%"
-                            />
-                            <span className="flex flex-col text-gray-500 space-y-1 text-sm truncate">
-                              <span className="truncate text-xs text-gray-400 uppercase">
-                                {" "}
-                                {listing.token.metadata?.description}
-                              </span>
-                              <span className="truncate text-gray-600 font-semibold">
-                                {" "}
-                                {listing.token.name}
-                              </span>
-                              <span>
-                                <span className="text-gray-900 font-medium">
-                                  {formatPrice(listing.pricePerItem)}
-                                </span>{" "}
-                                $MAGIC
+            {listings.map((listing) => {
+              const legionsMetadata = legionMetadataData?.tokens.find(
+                (item) => item.id === listing.token.id
+              );
+              const metadata = legionsMetadata
+                ? {
+                    id: legionsMetadata.id,
+                    name: legionsMetadata.name,
+                    tokenId: listing.token.tokenId,
+                    metadata: {
+                      image: legionsMetadata.image,
+                      name: legionsMetadata.name,
+                      description: "Legions",
+                    },
+                  }
+                : metadataData?.tokens.find(
+                    (item) => item?.id === listing.token.id
+                  ) ?? undefined;
+
+              return (
+                <Disclosure as="li" key={listing.id}>
+                  {({ open }) => (
+                    <>
+                      <div className="relative">
+                        <div className="block px-4 py-4 hover:bg-gray-50 dark:bg-gray-200">
+                          <span className="flex items-center">
+                            <span className="flex-1 flex space-x-4 truncate">
+                              {metadata?.metadata ? (
+                                <ImageWrapper
+                                  aria-hidden="true"
+                                  height="50%"
+                                  token={metadata}
+                                  width="60%"
+                                />
+                              ) : (
+                                <div className="animate-pulse w-full bg-gray-300 h-48 rounded-md m-auto" />
+                              )}
+                              <span className="flex flex-col text-gray-500 space-y-1 text-sm truncate">
+                                <span className="truncate text-xs text-gray-400 uppercase">
+                                  {" "}
+                                  {metadata?.metadata?.description ?? ""}
+                                </span>
+                                <span className="truncate text-gray-600 font-semibold">
+                                  {" "}
+                                  {metadata?.name ?? ""}
+                                </span>
+                                <span>
+                                  <span className="text-gray-900 font-medium">
+                                    {formatPrice(listing.pricePerItem)}
+                                  </span>{" "}
+                                  $MAGIC
+                                </span>
                               </span>
                             </span>
+                            {open ? (
+                              <ChevronDownIcon
+                                className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <ChevronRightIcon
+                                className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            )}
                           </span>
-                          {open ? (
-                            <ChevronDownIcon
-                              className="flex-shrink-0 h-5 w-5 text-gray-400"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <ChevronRightIcon
-                              className="flex-shrink-0 h-5 w-5 text-gray-400"
-                              aria-hidden="true"
-                            />
-                          )}
-                        </span>
-                      </div>
-                      <Disclosure.Button className="absolute inset-0 focus:outline-none w-full h-full" />
-                    </div>
-                    <Transition show={open} as={Fragment}>
-                      <Disclosure.Panel
-                        static
-                        className="block px-4 dark:bg-gray-200 text-gray-700"
-                      >
-                        <div className="pb-4 flex sm:space-y-0 space-y-2 sm:flex-row flex-col sm:divide-x-[1px] divide-gray-400 text-sm">
-                          <div className="space-y-1 sm:pr-8">
-                            <p className="text-xs dark:text-gray-500">From:</p>
-                            <p>{shortenAddress(listing.seller.id)}</p>
-                          </div>
-                          <div className="sm:px-8 space-y-1">
-                            <p className="text-xs dark:text-gray-500">To:</p>
-                            <p>{shortenAddress(listing.buyer?.id ?? "")}</p>
-                          </div>
-                          <div className="sm:pl-8 space-y-1">
-                            <p className="text-xs dark:text-gray-500">Time:</p>
-                            <a
-                              className="flex items-center"
-                              href={listing.transactionLink ?? ""}
-                              rel="noreferrer"
-                              target="_blank"
-                            >
-                              {formatDistanceToNow(
-                                new Date(Number(listing.blockTimestamp) * 1000),
-                                {
-                                  addSuffix: true,
-                                }
-                              )}
-                              <ExternalLinkIcon className="h-4 m-[0.125rem] pl-1" />
-                            </a>
-                          </div>
                         </div>
-                      </Disclosure.Panel>
-                    </Transition>
-                  </>
-                )}
-              </Disclosure>
-            ))}
+                        <Disclosure.Button className="absolute inset-0 focus:outline-none w-full h-full" />
+                      </div>
+                      <Transition show={open} as={Fragment}>
+                        <Disclosure.Panel
+                          static
+                          className="block px-4 dark:bg-gray-200 text-gray-700"
+                        >
+                          <div className="pb-4 flex sm:space-y-0 space-y-2 sm:flex-row flex-col sm:divide-x-[1px] divide-gray-400 text-sm">
+                            <div className="space-y-1 sm:pr-8">
+                              <p className="text-xs dark:text-gray-500">
+                                From:
+                              </p>
+                              <p>{shortenAddress(listing.seller.id)}</p>
+                            </div>
+                            <div className="sm:px-8 space-y-1">
+                              <p className="text-xs dark:text-gray-500">To:</p>
+                              <p>{shortenAddress(listing.buyer?.id ?? "")}</p>
+                            </div>
+                            <div className="sm:pl-8 space-y-1">
+                              <p className="text-xs dark:text-gray-500">
+                                Time:
+                              </p>
+                              <a
+                                className="flex items-center"
+                                href={listing.transactionLink ?? ""}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                {formatDistanceToNow(
+                                  new Date(
+                                    Number(listing.blockTimestamp) * 1000
+                                  ),
+                                  {
+                                    addSuffix: true,
+                                  }
+                                )}
+                                <ExternalLinkIcon className="h-4 m-[0.125rem] pl-1" />
+                              </a>
+                            </div>
+                          </div>
+                        </Disclosure.Panel>
+                      </Transition>
+                    </>
+                  )}
+                </Disclosure>
+              );
+            })}
           </ul>
         </div>
       </main>
