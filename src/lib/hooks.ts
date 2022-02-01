@@ -236,28 +236,30 @@ export function useApproveContract(contract: string, standard: TokenStandard) {
 }
 
 export function useContractApprovals(
-  collections: Array<{ address: string; standard: TokenStandard }>
+  collections: Array<{ contract: string; standard: TokenStandard }>
 ) {
   const { account } = useEthers();
   const chainId = useChainId();
 
   const approvals = useContractCalls(
-    collections.map(({ address, standard }) => ({
+    collections.map(({ contract, standard }) => ({
       abi: new Interface(standard === "ERC721" ? abis.erc721 : abis.erc1155),
-      address,
+      address: contract,
       method: "isApprovedForAll",
       args: [account, Contracts[chainId].marketplace],
     })) ?? []
   );
 
+  console.log(approvals);
+
   return approvals
     .filter(Boolean)
     .flat()
     .reduce<Record<string, boolean>>((acc, value, index) => {
-      const { address } = collections[index];
+      const { contract } = collections[index];
 
-      if (address) {
-        acc[address] = value;
+      if (contract) {
+        acc[contract] = value;
       }
 
       return acc;

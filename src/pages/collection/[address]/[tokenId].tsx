@@ -37,6 +37,7 @@ import {
   formatPrice,
   formattable,
   generateIpfsLink,
+  getCollectionNameFromAddress,
   slugToAddress,
 } from "../../../utils";
 // import {
@@ -247,7 +248,9 @@ export default function Example() {
     ["details-metadata-legions", id],
     () => bridgeworld.getLegionMetadata({ ids: [id] }),
     {
-      enabled: Boolean(id),
+      enabled:
+        Boolean(id) ||
+        getCollectionNameFromAddress(formattedAddress, chainId) === "Legions",
       refetchInterval: false,
     }
   );

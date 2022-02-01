@@ -1,8 +1,25 @@
 import gql from "graphql-tag";
 
 export const getCollectionMetadata = gql`
-  query getCollectionMetadata($id: String!, $tokenId_in: [BigInt!]!) {
-    tokens(first: 1000, where: { collection: $id, tokenId_in: $tokenId_in }) {
+  query getCollectionMetadata(
+    $id: String!
+    $tokenId_in: [BigInt!]!
+    $isERC1155: Boolean!
+  ) {
+    erc721: tokens(
+      first: 1000
+      where: { collection: $id, tokenId_in: $tokenId_in }
+    ) @skip(if: $isERC1155) {
+      metadata {
+        image
+        name
+        description
+      }
+      name
+      tokenId
+    }
+    erc1155: tokens(first: 1000, where: { collection: $id })
+      @include(if: $isERC1155) {
       metadata {
         image
         name

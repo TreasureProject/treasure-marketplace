@@ -654,6 +654,7 @@ const Inventory = () => {
   }, [inventory.data?.user]);
 
   const collections = data.map(({ token: { collection } }) => collection);
+
   const approvals = useContractApprovals(
     [...new Set(collections.map(({ contract }) => contract))]
       .map((address) => collections.find((item) => address === item.contract))
@@ -765,25 +766,27 @@ const Inventory = () => {
                                 className="absolute inset-0 focus:outline-none"
                                 onClick={() =>
                                   setNft({
-                                    address: token.collection.address,
+                                    address: token.collection.contract,
                                     collection: token.collection.name,
                                     name:
                                       legionsMetadata?.name ?? token.name ?? "",
                                     listing: pricePerItem
                                       ? { expires, pricePerItem, quantity }
                                       : updates[
-                                          `${token.collection.address}-${token.tokenId}`
+                                          `${token.collection.contract}-${token.tokenId}`
                                         ],
-                                    source: token.metadata?.image.includes(
+                                    source: metadata?.metadata?.image.includes(
                                       "ipfs"
                                     )
-                                      ? generateIpfsLink(token.metadata.image)
-                                      : token.metadata?.image ?? "",
+                                      ? generateIpfsLink(
+                                          metadata?.metadata?.image
+                                        )
+                                      : metadata?.metadata?.image ?? "",
                                     standard: token.collection.standard,
                                     tokenId: token.tokenId,
                                     total:
                                       totals[
-                                        `${token.collection.address}-${token.tokenId}`
+                                        `${token.collection.contract}-${token.tokenId}`
                                       ],
                                   })
                                 }

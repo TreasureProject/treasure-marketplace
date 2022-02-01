@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/solid";
 
 import { useInfiniteQuery, useQuery } from "react-query";
-import { client, marketplace } from "../../../lib/client";
+import { bridgeworld, client, marketplace } from "../../../lib/client";
 import { AddressZero, Zero } from "@ethersproject/constants";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
@@ -18,6 +18,7 @@ import {
   formatNumber,
   formatPercent,
   formatPrice,
+  getCollectionNameFromAddress,
   slugToAddress,
 } from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
@@ -392,6 +393,7 @@ const Collection = () => {
     () =>
       client.getCollectionMetadata({
         id: formattedAddress,
+        isERC1155,
         tokenId_in: listingData?.pages.reduce((acc, page) => {
           const tokenIds =
             page.listings?.map((list) => list.token.tokenId) || [];
@@ -404,6 +406,25 @@ const Collection = () => {
     }
   );
 
+  const { data: legionMetadataData } = useQuery(
+    ["metadata-legions", listingData?.pages.length],
+    () =>
+      bridgeworld.getLegionMetadata({
+        ids:
+          listingData?.pages.reduce((acc, page) => {
+            const tokenIds =
+              page.listings?.map((list) => list.token.tokenId) || [];
+            return [...acc, ...tokenIds];
+          }, []) || [],
+      }),
+    {
+      enabled:
+        !!formattedAddress &&
+        !!listingData &&
+        getCollectionNameFromAddress(formattedAddress, chainId) === "Legions",
+      refetchInterval: false,
+    }
+  );
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
@@ -983,7 +1004,7 @@ const Collection = () => {
                         {group.tokens
                           ?.filter((token) => Boolean(token?.listings?.length))
                           .map((token) => {
-                            const metadata = metadataData?.tokens.find(
+                            const metadata = metadataData?.erc1155.find(
                               (metadata) => metadata.tokenId === token.tokenId
                             );
 
@@ -1039,10 +1060,15 @@ const Collection = () => {
                           })}
                         {/* ERC721 */}
                         {group?.listings?.map((listing) => {
-                          const metadata = metadataData?.tokens.find(
-                            (metadata) =>
-                              metadata.tokenId === listing.token.tokenId
-                          );
+                          const metadata = legionMetadataData
+                            ? legionMetadataData.tokens.find(
+                                (token) =>
+                                  token.tokenId === listing.token.tokenId
+                              )
+                            : metadataData?.erc721.find(
+                                (metadata) =>
+                                  metadata.tokenId === listing.token.tokenId
+                              );
 
                           return (
                             <li key={listing.id} className="group">

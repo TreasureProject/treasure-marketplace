@@ -6,6 +6,7 @@ export const getLegionMetadata = gql`
       id
       image
       name
+      tokenId
       metadata {
         __typename
         ... on LegionInfo {
