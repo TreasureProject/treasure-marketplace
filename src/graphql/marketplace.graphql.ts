@@ -264,15 +264,13 @@ const LISTING_FRAGMENT_WITH_TOKEN = gql`
 
 export const getActivity = gql`
   ${LISTING_FRAGMENT}
-  query getActivity($id: ID!, $orderBy: Listing_orderBy!) {
-    collection(id: $id) {
-      listings(
-        where: { status: Sold }
-        orderBy: $orderBy
-        orderDirection: desc
-      ) {
-        ...ListingFields
-      }
+  query getActivity($id: String!, $orderBy: Listing_orderBy!) {
+    listings(
+      where: { status: Sold, collection: $id }
+      orderBy: $orderBy
+      orderDirection: desc
+    ) {
+      ...ListingFields
     }
   }
 `;

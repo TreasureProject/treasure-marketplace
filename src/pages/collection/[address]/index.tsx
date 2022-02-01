@@ -1086,7 +1086,7 @@ const Collection = () => {
                                 (item) => item.id === listing.token.id
                               );
                             const metadata =
-                              metadataData?.erc721.find(
+                              metadataData?.erc721?.find(
                                 (item) =>
                                   item?.tokenId === listing.token.tokenId
                               ) ??
@@ -1166,9 +1166,9 @@ const Collection = () => {
         ) : (
           <>
             {isActivityLoading && <CenterLoadingDots className="h-60" />}
-            {activityData?.collection?.listings && (
+            {activityData?.listings && (
               <Listings
-                listings={activityData.collection.listings}
+                listings={activityData.listings}
                 sort={activitySortParam}
               />
             )}
