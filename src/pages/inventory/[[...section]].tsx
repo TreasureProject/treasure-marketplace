@@ -728,22 +728,20 @@ const Inventory = () => {
                       const legionsMetadata = legionMetadataData?.tokens.find(
                         (item) => item.id === token.id
                       );
-                      const metadata =
-                        metadataData?.tokens.find(
-                          (item) => item?.id === token.id
-                        ) ??
-                        (legionsMetadata
-                          ? {
-                              id: legionsMetadata.id,
+                      const metadata = legionsMetadata
+                        ? {
+                            id: legionsMetadata.id,
+                            name: legionsMetadata.name,
+                            tokenId: token.tokenId,
+                            metadata: {
+                              image: legionsMetadata.image,
                               name: legionsMetadata.name,
-                              tokenId: token.tokenId,
-                              metadata: {
-                                image: legionsMetadata.image,
-                                name: legionsMetadata.name,
-                                description: "Legions",
-                              },
-                            }
-                          : undefined);
+                              description: "Legions",
+                            },
+                          }
+                        : metadataData?.tokens.find(
+                            (item) => item?.id === token.id
+                          ) ?? undefined;
 
                       return (
                         <li key={id}>
