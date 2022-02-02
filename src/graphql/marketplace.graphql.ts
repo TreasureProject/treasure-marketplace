@@ -103,7 +103,7 @@ export const getCollectionListings = gql`
       first: 1000
       orderBy: floorPrice
       orderDirection: $orderDirection
-      where: { collection: $id }
+      where: { collection: $id, name_contains: $tokenName }
     ) @include(if: $isERC1155) {
       id
       floorPrice
@@ -146,6 +146,17 @@ export const getCollectionListings = gql`
       name
     }
     quantity
+  }
+`;
+
+export const getTokensByName = gql`
+  query getTokensByName($name: String!, $collection: String!) {
+    tokens(
+      first: 1000
+      where: { name_contains: $name, collection: $collection }
+    ) {
+      id
+    }
   }
 `;
 

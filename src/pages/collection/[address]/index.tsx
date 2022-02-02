@@ -401,9 +401,25 @@ const Collection = () => {
     }
   );
 
+  const { data: searchedData, isLoading: isSearchedDataLoading } = useQuery(
+    ["searched-tokens", searchParams],
+    () =>
+      marketplace.getTokensByName({
+        collection: formattedAddress,
+        name: searchParams,
+      }),
+    {
+      enabled: !!formattedAddress && Boolean(searchParams),
+      refetchInterval: false,
+    }
+  );
+
   const filteredTokenIds = React.useMemo(
-    () => filteredData?.tokens?.map((token) => token.id) ?? [],
-    [filteredData]
+    () => [
+      ...(filteredData?.tokens?.map((token) => token.id) ?? []),
+      ...(searchedData?.tokens?.map((token) => token.id) ?? []),
+    ],
+    [filteredData, searchedData]
   );
 
   const {
@@ -413,7 +429,7 @@ const Collection = () => {
   } = useInfiniteQuery(
     [
       "listings",
-      { formattedAddress, sortParam, searchParams, search, filteredData },
+      { formattedAddress, sortParam, searchParams, search, filteredTokenIds },
     ],
     ({ queryKey, pageParam = 0 }) =>
       marketplace.getCollectionListings({
@@ -422,7 +438,7 @@ const Collection = () => {
         isERC721: !isERC1155 && filteredTokenIds.length === 0,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        // tokenName: queryKey[1].searchParams,
+        tokenName: queryKey[1].searchParams,
         skipBy: pageParam,
         first: MAX_ITEMS_PER_PAGE,
         orderBy: sort
@@ -432,7 +448,7 @@ const Collection = () => {
           ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
           : OrderDirection.asc,
         filteredTokenIds,
-        withFilters: filteredTokenIds.length > 0,
+        withFilters: !isERC1155 && filteredTokenIds.length > 0,
       }),
     {
       enabled: !!formattedAddress && !!collectionData,
@@ -483,6 +499,7 @@ const Collection = () => {
   // reset searchParams on address change
   useEffect(() => {
     setSearchParams("");
+    setSearchToken("");
   }, [formattedAddress]);
 
   const page = listingData?.pages[listingData.pages.length - 1];
@@ -1049,7 +1066,8 @@ const Collection = () => {
               {listingData &&
               collectionData &&
               !isListingLoading &&
-              !isFilterDataLoading ? (
+              !isFilterDataLoading &&
+              !isSearchedDataLoading ? (
                 <section aria-labelledby="products-heading" className="my-8">
                   <h2 id="products-heading" className="sr-only">
                     {collectionData.collection?.name}
