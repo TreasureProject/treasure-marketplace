@@ -95,6 +95,7 @@ export const getCollectionListings = gql`
     $first: Int!
     $orderBy: Listing_orderBy!
     $filteredTokenIds: [String!]!
+    $isERC721: Boolean!
     $isERC1155: Boolean!
     $withFilters: Boolean!
   ) {
@@ -118,7 +119,7 @@ export const getCollectionListings = gql`
       orderBy: $orderBy
       orderDirection: $orderDirection
       where: { status: Active, collection: $id }
-    ) @skip(if: $withFilters) {
+    ) @include(if: $isERC721) {
       ...TokenListing
     }
     filtered: listings(

@@ -419,12 +419,12 @@ const Collection = () => {
       marketplace.getCollectionListings({
         id: formattedAddress,
         isERC1155,
+        isERC721: !isERC1155 && filteredTokenIds.length === 0,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         // tokenName: queryKey[1].searchParams,
         skipBy: pageParam,
         first: MAX_ITEMS_PER_PAGE,
-        // filter: formatSearchFilter(formattedSearch),
         orderBy: sort
           ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
           : Listing_OrderBy.pricePerItem,
