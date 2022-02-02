@@ -384,9 +384,13 @@ const Collection = () => {
   //     getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
   //   }
   // );
-  const searchFilters = formatSearchFilter(formattedSearch);
-  const { data: filteredData } = useQuery(
-    ["filtered-tokens", filters],
+  const searchFilters = React.useMemo(
+    () => formatSearchFilter(formattedSearch),
+    [formattedSearch]
+  );
+
+  const { data: filteredData, isLoading: isFilterDataLoading } = useQuery(
+    ["filtered-tokens", filters, searchFilters],
     () =>
       client.getFilteredTokens({
         filters: formatSearchFilter(formattedSearch),
@@ -397,7 +401,11 @@ const Collection = () => {
     }
   );
 
-  const filteredTokenIds = filteredData?.tokens?.map((token) => token.id) ?? [];
+  const filteredTokenIds = React.useMemo(
+    () => filteredData?.tokens?.map((token) => token.id) ?? [],
+    [filteredData]
+  );
+
   const {
     data: listingData,
     isLoading: isListingLoading,
@@ -433,7 +441,7 @@ const Collection = () => {
   );
 
   const { data: metadataData, isLoading: isMetadataLoading } = useQuery(
-    ["metadata", formattedAddress, listingData?.pages.length],
+    ["metadata", formattedAddress, listingData?.pages.length, filteredTokenIds],
     () =>
       client.getCollectionMetadata({
         id: formattedAddress,
@@ -1028,7 +1036,9 @@ const Collection = () => {
                   </div>
                 )}
               </section>
-              {isListingLoading && <CenterLoadingDots className="h-60" />}
+              {isListingLoading || isFilterDataLoading ? (
+                <CenterLoadingDots className="h-60" />
+              ) : null}
               {data?.length === 0 && !isListingLoading && (
                 <div className="flex flex-col justify-center items-center h-36">
                   <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
@@ -1036,7 +1046,10 @@ const Collection = () => {
                   </h3>
                 </div>
               )}
-              {listingData && collectionData && (
+              {listingData &&
+              collectionData &&
+              !isListingLoading &&
+              !isFilterDataLoading ? (
                 <section aria-labelledby="products-heading" className="my-8">
                   <h2 id="products-heading" className="sr-only">
                     {collectionData.collection?.name}
@@ -1187,7 +1200,7 @@ const Collection = () => {
                     </ul>
                   )}
                 </section>
-              )}
+              ) : null}
             </div>
           </div>
         ) : (
