@@ -1,5 +1,17 @@
 import gql from "graphql-tag";
 
+export const getCollectionAttributes = gql`
+  query getCollectionAttributes($id: ID!) {
+    collection(id: $id) {
+      attributes {
+        name
+        percentage
+        value
+      }
+    }
+  }
+`;
+
 export const getCollectionMetadata = gql`
   query getCollectionMetadata(
     $id: String!

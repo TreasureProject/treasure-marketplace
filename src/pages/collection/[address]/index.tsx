@@ -25,14 +25,12 @@ import { formatEther } from "ethers/lib/utils";
 import ImageWrapper from "../../../components/ImageWrapper";
 import Link from "next/link";
 import { Modal } from "../../../components/Modal";
+import { GetCollectionAttributesQuery } from "../../../../generated/queries.graphql";
 import {
-  GetCollectionAttributesQuery,
   GetCollectionListingsQuery,
-  TokenStandard,
-} from "../../../../generated/queries.graphql";
-import {
   Listing_OrderBy,
   OrderDirection,
+  TokenStandard,
 } from "../../../../generated/marketplace.graphql";
 import classNames from "clsx";
 import { useInView } from "react-intersection-observer";
@@ -117,7 +115,7 @@ const MapSortToEnum = (sort: string) => {
 
 const getTotalQuantity = (
   listings: NonNullable<
-    NonNullable<GetCollectionListingsQuery["collection"]>["tokens"]
+    NonNullable<GetCollectionListingsQuery>["tokens"]
   >[number]["listings"]
 ) => {
   return listings && listings.length > 0
