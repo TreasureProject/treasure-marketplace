@@ -36,16 +36,9 @@ import {
   formatPercent,
   formatPrice,
   formattable,
-  generateIpfsLink,
   getCollectionNameFromAddress,
   slugToAddress,
 } from "../../../utils";
-// import {
-//   GetTokenDetailsQuery,
-//   GetTokenExistsInWalletQuery,
-//   Status,
-//   TokenStandard,
-// } from "../../../../generated/queries.graphql";
 import {
   GetTokenDetailsQuery,
   GetTokenExistsInWalletQuery,
@@ -61,7 +54,7 @@ import Button from "../../../components/Button";
 import { Modal } from "../../../components/Modal";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contracts } from "../../../const";
-import { NormalizedMetadata, targetNftT } from "../../../types";
+import { targetNftT } from "../../../types";
 import { Tooltip } from "../../../components/Tooltip";
 import { utils } from "ethers";
 import { EthIcon, SwapIcon, UsdIcon } from "../../../components/Icons";

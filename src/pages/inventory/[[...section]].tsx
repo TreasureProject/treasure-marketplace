@@ -116,7 +116,7 @@ const Drawer = ({
   const { data: statData } = useQuery(
     ["stats", nft.address],
     () =>
-      client.getCollectionStats({
+      marketplace.getCollectionStats({
         id: nft.address,
       }),
     {

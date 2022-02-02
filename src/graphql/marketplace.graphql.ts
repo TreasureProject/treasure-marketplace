@@ -160,67 +160,6 @@ export const getTokensByName = gql`
   }
 `;
 
-// export const getCollectionListings = gql`
-//   query getCollectionListings(
-//     $id: String!
-//     $orderDirection: OrderDirection!
-//     # $tokenName: String
-//     $skipBy: Int!
-//     $first: Int! # $isERC1155: Boolean!
-//     $orderBy: Listing_orderBy! # $filter: [String!]
-//   ) {
-//     tokens(
-//       first: 200
-//       orderBy: floorPrice
-//       orderDirection: $orderDirection
-//       where: { collection: $id }
-//     ) {
-//       id
-//       # name
-//       floorPrice
-//       tokenId
-//       listings(where: { status: Active }, orderBy: pricePerItem) {
-//         pricePerItem
-//         quantity
-//       }
-//       # metadata {
-//       #   image
-//       #   name
-//       #   description
-//       # }
-//       }
-//       listings(
-//         first: $first
-//         skip: $skipBy
-//         orderBy: $orderBy
-//         orderDirection: $orderDirection
-//         where: {
-//           status: Active
-//           tokenName_contains: $tokenName
-//           filters_contains: $filter
-//         }
-//       ) @skip(if: $isERC1155) {
-//         user {
-//           id
-//         }
-//         expires
-//         id
-//         pricePerItem
-//         token {
-//           tokenId
-//           # metadata {
-//           #   image
-//           #   name
-//           #   description
-//           # }
-//           name
-//         }
-//         quantity
-//       }
-//     }
-//   }
-// `;
-
 const LISTING_FRAGMENT = gql`
   fragment ListingFields on Listing {
     blockTimestamp
@@ -236,11 +175,6 @@ const LISTING_FRAGMENT = gql`
     token {
       id
       tokenId
-      # metadata {
-      #   description
-      #   image
-      # }
-      # name
     }
     collection {
       id
@@ -260,19 +194,6 @@ const LISTING_FRAGMENT_WITH_TOKEN = gql`
     quantity
   }
 `;
-
-// export const getActivity = gql`
-//   ${LISTING_FRAGMENT}
-//   query getActivity($id: String!, $orderBy: Listing_orderBy!) {
-//     listings(
-//       where: { collection: $id, status: Sold }
-//       orderBy: $orderBy
-//       orderDirection: desc
-//     ) {
-//       ...ListingFields
-//     }
-//   }
-// `;
 
 export const getActivity = gql`
   ${LISTING_FRAGMENT}
@@ -295,31 +216,6 @@ export const getAllActivities = gql`
     }
   }
 `;
-
-// export const getERC1155Listings = gql`
-//   ${LISTING_FRAGMENT_WITH_TOKEN}
-//   query getERC1155Listings(
-//     $collectionId: ID!
-//     $tokenId: BigInt!
-//     $skipBy: Int!
-//     $first: Int!
-//   ) {
-//     collection(id: $collectionId) {
-//       tokens(where: { tokenId: $tokenId }) {
-//         tokenId
-//         listings(
-//           where: { status: Active }
-//           skip: $skipBy
-//           first: $first
-//           orderBy: pricePerItem
-//           orderDirection: asc
-//         ) {
-//           ...ListingFieldsWithToken
-//         }
-//       }
-//     }
-//   }
-// `;
 
 export const getERC1155Listings = gql`
   ${LISTING_FRAGMENT_WITH_TOKEN}
@@ -344,24 +240,6 @@ export const getERC1155Listings = gql`
   }
 `;
 
-// export const getTokenExistsInWallet = gql`
-//   query getTokenExistsInWallet(
-//     $collectionId: ID!
-//     $tokenId: BigInt!
-//     $address: String!
-//   ) {
-//     collection(id: $collectionId) {
-//       tokens(where: { tokenId: $tokenId }) {
-//         owners(where: { user: $address }) {
-//           user {
-//             id
-//           }
-//           quantity
-//         }
-//       }
-//     }
-//   }
-// `;
 export const getTokenExistsInWallet = gql`
   query getTokenExistsInWallet(
     $collectionId: String!
@@ -404,20 +282,6 @@ export const getTokenDetails = gql`
         ) {
           ...ListingFieldsWithToken
         }
-        # metadata {
-        #   attributes {
-        #     attribute {
-        #       id
-        #       name
-        #       percentage
-        #       value
-        #     }
-        #   }
-        #   description
-        #   id
-        #   image
-        #   name
-        # }
         listings(orderBy: blockTimestamp, orderDirection: desc) {
           id
           status

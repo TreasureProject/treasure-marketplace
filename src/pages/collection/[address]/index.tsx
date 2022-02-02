@@ -356,34 +356,6 @@ const Collection = () => {
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.ERC1155;
 
-  // const {
-  //   data: listingData,
-  //   isLoading: isListingLoading,
-  //   fetchNextPage,
-  // } = useInfiniteQuery(
-  //   ["listings", { formattedAddress, sortParam, searchParams, search }],
-  //   ({ queryKey, pageParam = 0 }) =>
-  //     client.getCollectionListings({
-  //       id: formattedAddress,
-  //       isERC1155,
-  //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //       // @ts-ignore
-  //       tokenName: queryKey[1].searchParams,
-  //       skipBy: pageParam,
-  //       first: MAX_ITEMS_PER_PAGE,
-  //       filter: formatSearchFilter(formattedSearch),
-  //       orderBy: sort
-  //         ? MapSortToOrder(Array.isArray(sort) ? sort[0] : sort)
-  //         : Listing_OrderBy.pricePerItem,
-  //       orderDirection: sort
-  //         ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
-  //         : OrderDirection.asc,
-  //     }),
-  //   {
-  //     enabled: !!formattedAddress && !!collectionData,
-  //     getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
-  //   }
-  // );
   const searchFilters = React.useMemo(
     () => formatSearchFilter(formattedSearch),
     [formattedSearch]
@@ -457,7 +429,7 @@ const Collection = () => {
   );
 
   const { data: metadataData, isLoading: isMetadataLoading } = useQuery(
-    ["metadata", formattedAddress, listingData?.pages.length, filteredTokenIds],
+    ["metadata", formattedAddress, listingData, filteredTokenIds],
     () =>
       client.getCollectionMetadata({
         id: formattedAddress,
