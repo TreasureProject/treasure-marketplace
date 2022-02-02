@@ -43,8 +43,34 @@ import Button from "../../../components/Button";
 import { useChainId } from "../../../lib/hooks";
 import { EthIcon, MagicIcon, SwapIcon } from "../../../components/Icons";
 import { useMagic } from "../../../context/magicContext";
+import { ChainId } from "@yuyao17/corefork";
 
 const MAX_ITEMS_PER_PAGE = 42;
+
+const generateDescription = (cotract: string, chainId: ChainId) => {
+  const collectionName = getCollectionNameFromAddress(cotract, chainId);
+
+  switch (collectionName) {
+    case "Legacy Legions Genesis":
+    case "Legacy Legions":
+      return (
+        <p className="text-gray-500 dark:text-gray-400 text-[0.5rem] sm:text-sm mt-4 sm:mt-6">
+          Legacy Legions need to undergo{" "}
+          <a
+            href="https://bridgeworld.treasure.lol/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Pilgrimage
+          </a>{" "}
+          to participate in Bridgeworld.
+        </p>
+      );
+    default:
+      return "";
+  }
+};
 
 const tabs = [
   { name: "Collection", value: "collection" },
@@ -657,9 +683,10 @@ const Collection = () => {
         <div className="py-24 flex flex-col items-center">
           {collectionData?.collection && statData?.collection ? (
             <>
-              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+              <h1 className="text-xl md:text-5xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                 {statData.collection.name}
               </h1>
+              {generateDescription(formattedAddress, chainId)}
               <div className="mt-12 overflow-hidden flex flex-col">
                 <dl className="sm:-mx-8 -mt-8 flex divide-x-2">
                   <div className="flex flex-col px-6 sm:px-8 pt-8">
