@@ -342,6 +342,30 @@ const Header = () => {
               </div>
             </div>
           )}
+        {currentChainId &&
+          currentChainId === ChainId.Arbitrum &&
+          process.env.NEXT_PUBLIC_VERCEL_ENV === "production" && (
+            <div className="bg-red-600">
+              <div className="py-3 px-3 sm:px-6 lg:px-8">
+                <div className="flex sm:items-center lg:justify-between flex-col space-y-2 sm:space-y-0 sm:flex-row">
+                  <div className="flex-1 flex items-center">
+                    <span className="flex p-2 rounded-lg bg-red-800">
+                      <SpeakerphoneIcon
+                        className="h-6 w-6 text-white"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <p className="ml-3 font-medium text-white">
+                      <span>
+                        Please be aware that the floor price is currently
+                        bugged. Double check all prices before proceeding.
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
       </div>
       <Modal
         title="Convert between ETH and MAGIC"

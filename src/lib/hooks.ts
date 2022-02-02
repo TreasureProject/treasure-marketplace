@@ -393,7 +393,7 @@ export function useBuyItem() {
   const webhook = useRef<() => void>();
 
   const { send: sendBuy, state } = useContractFunction(
-    new Contract(Contracts[chainId].marketplace, abis.marketplace),
+    new Contract(Contracts[chainId].marketplaceBuyer, abis.marketplaceBuyer),
     "buyItem"
   );
 
@@ -421,9 +421,10 @@ export function useBuyItem() {
       address: string,
       ownerAddress: string,
       tokenId: number,
-      quantity: number
+      quantity: number,
+      pricePerItem: string
     ) => {
-      sendBuy(address, tokenId, ownerAddress, quantity);
+      sendBuy(address, tokenId, ownerAddress, quantity, pricePerItem);
 
       webhook.current = () => {
         const { metadata, payload } = nft;
@@ -541,7 +542,8 @@ export const useApproveMagic = () => {
   const { send, state } = useContractFunction(contract, "approve");
 
   return {
-    send: () => send(Contracts[chainId].marketplace, MaxUint256.toString()),
+    send: () =>
+      send(Contracts[chainId].marketplaceBuyer, MaxUint256.toString()),
     state,
   };
 };

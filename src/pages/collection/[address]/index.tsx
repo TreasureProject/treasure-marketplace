@@ -729,7 +729,7 @@ const Collection = () => {
                       Total Listings
                     </dt>
                     <dd className="order-1 text-base font-extrabold text-red-600 dark:text-gray-200 sm:text-3xl capsize">
-                      {statData.collection.totalListings}
+                      {formatNumber(statData.collection.totalListings)}
                     </dd>
                   </div>
                   <div className="flex flex-col px-6 sm:px-8 pt-8">
