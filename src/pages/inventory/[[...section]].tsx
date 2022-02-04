@@ -808,9 +808,10 @@ const Inventory = () => {
                             description: "Legions",
                           },
                         }
-                      : metadataData?.tokens.find(
+                      : getPetsMetadata(token) ??
+                        metadataData?.tokens.find(
                           (item) => item?.id === token.id
-                        ) ?? getPetsMetadata(token);
+                        );
                     const { expires, pricePerItem } = {
                       ...item,
                       ...updates[
