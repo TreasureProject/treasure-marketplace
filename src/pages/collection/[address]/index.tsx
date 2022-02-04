@@ -19,6 +19,7 @@ import {
   formatPercent,
   formatPrice,
   getCollectionNameFromAddress,
+  getPetsMetadata,
   slugToAddress,
 } from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
@@ -1158,7 +1159,10 @@ const Collection = () => {
                                       description: "Legions",
                                     },
                                   }
-                                : erc721Metadata
+                                : getPetsMetadata({
+                                    ...listing.token,
+                                    collection: collectionData.collection!,
+                                  }) ?? erc721Metadata
                               : erc721Metadata;
 
                             return (

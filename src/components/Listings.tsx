@@ -11,6 +11,7 @@ import {
   formatPrice,
   getCollectionSlugFromName,
   getCollectionNameFromAddress,
+  getPetsMetadata,
 } from "../utils";
 import { useChainId } from "../lib/hooks";
 import { shortenAddress } from "@yuyao17/corefork";
@@ -211,22 +212,26 @@ const Listings = ({
                           description: "Legions",
                         },
                       }
-                    : legacyMetadata?.metadata
-                    ? {
-                        id: legacyMetadata.id,
-                        name: legacyMetadata.name,
-                        tokenId: listing.token.tokenId,
-                        metadata: {
-                          image: legacyMetadata.metadata.image,
-                          name: legacyMetadata.metadata.name,
-                          description:
-                            legacyMetadata.metadata.description.replace(
-                              "Legion",
-                              "Legacy Legion"
-                            ),
-                        },
-                      }
-                    : undefined;
+                    : getPetsMetadata({
+                        ...listing.token,
+                        collection: { name: `${collectionName}` },
+                      }) ??
+                      (legacyMetadata?.metadata
+                        ? {
+                            id: legacyMetadata.id,
+                            name: legacyMetadata.name,
+                            tokenId: listing.token.tokenId,
+                            metadata: {
+                              image: legacyMetadata.metadata.image,
+                              name: legacyMetadata.metadata.name,
+                              description:
+                                legacyMetadata.metadata.description.replace(
+                                  "Legion",
+                                  "Legacy Legion"
+                                ),
+                            },
+                          }
+                        : undefined);
 
                   return (
                     <tr

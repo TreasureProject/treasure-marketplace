@@ -83,3 +83,39 @@ export function getCollectionNameFromAddress(
 ): string | undefined {
   return collections?.[chainId]?.find((c) => c.address === tokenAddress)?.name;
 }
+
+type Token = {
+  collection: {
+    name: string;
+  };
+  id: string;
+  tokenId: string;
+};
+
+export function getPetsMetadata(token: Token) {
+  const {
+    id,
+    tokenId,
+    collection: { name: collection },
+  } = token;
+  const name = `${collection} #${tokenId}`;
+  const isPets = collection.endsWith("Pets");
+  const isBrains = collection.endsWith("Brains Pets");
+
+  return isPets
+    ? {
+        id,
+        name,
+        tokenId,
+        metadata: {
+          image: `ipfs://${
+            isBrains
+              ? "QmdRyjjv6suTcS9E1aNnKRhvL2McYynrzLbg5VwXH8cCQB"
+              : "Qmak8RVrMWWLEsGtTgVqUJ5a7kkouM2atjyynWT5qQCP2N"
+          }/${tokenId}.gif`,
+          name,
+          description: collection,
+        },
+      }
+    : undefined;
+}
