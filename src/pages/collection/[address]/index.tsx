@@ -1159,11 +1159,11 @@ const Collection = () => {
                                       description: "Legions",
                                     },
                                   }
-                                : getPetsMetadata({
-                                    ...listing.token,
-                                    collection: collectionData.collection!,
-                                  }) ?? erc721Metadata
-                              : erc721Metadata;
+                                : erc721Metadata
+                              : getPetsMetadata({
+                                  ...listing.token,
+                                  collection: collectionData.collection!,
+                                }) ?? erc721Metadata;
 
                             return (
                               <li key={listing.id} className="group">
