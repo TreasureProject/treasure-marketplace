@@ -45,8 +45,8 @@ import { ChainId } from "@yuyao17/corefork";
 
 const MAX_ITEMS_PER_PAGE = 42;
 
-const generateDescription = (cotract: string, chainId: ChainId) => {
-  const collectionName = getCollectionNameFromAddress(cotract, chainId);
+const generateDescription = (contract: string, chainId: ChainId) => {
+  const collectionName = getCollectionNameFromAddress(contract, chainId);
 
   switch (collectionName) {
     case "Legacy Legions Genesis":
@@ -62,7 +62,11 @@ const generateDescription = (cotract: string, chainId: ChainId) => {
           >
             Pilgrimage
           </a>{" "}
-          to participate in Bridgeworld.
+          to become a{" "}
+          <Link href={"/collection/legions"} passHref>
+            <a className="underline">Legion</a>
+          </Link>{" "}
+          and to participate in Bridgeworld.
         </p>
       );
     default:
