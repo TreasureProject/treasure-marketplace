@@ -695,8 +695,6 @@ const Inventory = () => {
     }
   );
 
-  console.log(bridgeworldMetadata);
-
   const tabs = useMemo(() => {
     if (inventory.data?.user?.inactive.length) {
       return [
@@ -827,6 +825,8 @@ const Inventory = () => {
                       updates[
                         `${token.collection.contract}-${token.tokenId}`
                       ] ?? {};
+                    const buttonEnabled =
+                      section !== "sold" && bwMetadata?.name !== "Recruit";
 
                     return (
                       <li key={id}>
@@ -836,13 +836,13 @@ const Inventory = () => {
                               className={classNames(
                                 "object-fill object-center pointer-events-none",
                                 {
-                                  "group-hover:opacity-80": section !== "sold",
+                                  "group-hover:opacity-80": buttonEnabled,
                                 }
                               )}
                               token={metadata}
                             />
                           ) : null}
-                          {section !== "sold" ? (
+                          {buttonEnabled ? (
                             <button
                               type="button"
                               className="absolute inset-0 focus:outline-none"
