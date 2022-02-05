@@ -41,7 +41,7 @@ import Link from "next/link";
 import { CenterLoadingDots } from "../../components/CenterLoadingDots";
 import { formatEther } from "ethers/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { FEE, USER_SHARE } from "../../const";
+import { BridgeworldItems, FEE, USER_SHARE } from "../../const";
 import { TokenStandard } from "../../../generated/queries.graphql";
 
 type DrawerProps = {
@@ -663,7 +663,7 @@ const Inventory = () => {
   const tokens = (data as InventoryToken[])
     .filter(
       ({ token }) =>
-        !["Legions Auxiliary", "Legions Genesis", "Consumables"].includes(
+        !BridgeworldItems.includes(
           getCollectionNameFromAddress(token.collection.id, chainId) || ""
         )
     )
@@ -671,7 +671,7 @@ const Inventory = () => {
 
   const bridgeworldTokens = (data as InventoryToken[])
     .filter(({ token }) =>
-      ["Legions Auxiliary", "Legions Genesis", "Consumables"].includes(
+      BridgeworldItems.includes(
         getCollectionNameFromAddress(token.collection.id, chainId) || ""
       )
     )

@@ -16,5 +16,11 @@ export const Contracts = {
 // TODO: Put this data in the graph
 export const coreCollections = ["Legions", "Treasures", "Smol Brains"];
 
+export const BridgeworldItems = [
+  "Legions Auxiliary",
+  "Legions Genesis",
+  "Consumables",
+];
+
 export const FEE = 0.05;
 export const USER_SHARE = 1 - FEE;

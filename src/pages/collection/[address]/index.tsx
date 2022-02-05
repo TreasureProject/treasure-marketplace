@@ -43,6 +43,7 @@ import { useChainId } from "../../../lib/hooks";
 import { EthIcon, MagicIcon, SwapIcon } from "../../../components/Icons";
 import { useMagic } from "../../../context/magicContext";
 import { ChainId } from "@usedapp/core";
+import { BridgeworldItems } from "../../../const";
 
 const MAX_ITEMS_PER_PAGE = 42;
 
@@ -355,11 +356,9 @@ const Collection = () => {
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.ERC1155;
 
-  const isBridgeworldItem = [
-    "Legions Auxiliary",
-    "Legions Genesis",
-    "Consumables",
-  ].includes(getCollectionNameFromAddress(formattedAddress, chainId) || "");
+  const isBridgeworldItem = BridgeworldItems.includes(
+    getCollectionNameFromAddress(formattedAddress, chainId) || ""
+  );
 
   const searchFilters = React.useMemo(
     () => formatSearchFilter(formattedSearch),

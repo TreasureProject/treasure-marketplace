@@ -54,7 +54,7 @@ import { formatEther } from "ethers/lib/utils";
 import Button from "../../../components/Button";
 import { Modal } from "../../../components/Modal";
 import { BigNumber } from "@ethersproject/bignumber";
-import { Contracts } from "../../../const";
+import { BridgeworldItems, Contracts } from "../../../const";
 import { targetNftT } from "../../../types";
 import { Tooltip } from "../../../components/Tooltip";
 import { utils } from "ethers";
@@ -229,40 +229,43 @@ export default function Example() {
       : null;
   const id = tokenInfo?.id ?? "";
 
-  const { data: metadataData } = useQuery(
+  const isBridgeworldItem = BridgeworldItems.includes(
+    getCollectionNameFromAddress(formattedAddress, chainId) || ""
+  );
+
+  const { data: metadataData, isLoading: metadataLoading } = useQuery(
     ["details-metadata", id],
     () => client.getTokenMetadata({ id }),
     {
-      enabled:
-        Boolean(id) &&
-        getCollectionNameFromAddress(formattedAddress, chainId) !== "Legions",
+      enabled: Boolean(id) && !isBridgeworldItem,
       refetchInterval: false,
     }
   );
 
-  const { data: legionMetadataData } = useQuery(
+  const {
+    data: BridgeworldMetadataData,
+    isLoading: bridgeworldMetadataLoading,
+  } = useQuery(
     ["details-metadata-bridgeworld", id],
     () => bridgeworld.getBridgeworldMetadata({ ids: [id] }),
     {
-      enabled:
-        Boolean(id) &&
-        getCollectionNameFromAddress(formattedAddress, chainId) === "Legions",
+      enabled: Boolean(id) && isBridgeworldItem,
       refetchInterval: false,
     }
   );
-  const legionMetadata = legionMetadataData?.tokens?.[0] ?? null;
+  const bridgeworldMetadata = BridgeworldMetadataData?.tokens?.[0] ?? null;
   const legacyMetadata = metadataData?.token ?? null;
 
   const legionMetadataMetadata =
-    (legionMetadata?.metadata?.__typename === "LegionInfo" &&
-      legionMetadata.metadata) ||
+    (bridgeworldMetadata?.metadata?.__typename === "LegionInfo" &&
+      bridgeworldMetadata.metadata) ||
     null;
 
   const petsMetadata = getPetsMetadata({
     ...tokenInfo,
     collection: data?.collection ?? { name: "" },
   } as any);
-  const metadata = legionMetadata
+  const metadata = bridgeworldMetadata
     ? {
         attributes: legionMetadataMetadata
           ? [
@@ -332,8 +335,8 @@ export default function Example() {
           : [],
         id,
         description: "Legions",
-        image: legionMetadata.image,
-        name: legionMetadata.name,
+        image: bridgeworldMetadata.image,
+        name: bridgeworldMetadata.name,
       }
     : legacyMetadata?.metadata
     ? {
@@ -344,7 +347,12 @@ export default function Example() {
         ),
       }
     : (petsMetadata?.metadata as any) ?? null;
-  const loading = isLoading || isIdle;
+
+  const allMetadataLoaded = isBridgeworldItem
+    ? !bridgeworldMetadataLoading && bridgeworldMetadata
+    : !metadataLoading && metadataData;
+
+  const loading = isLoading || isIdle || !allMetadataLoaded;
 
   const isYourListing =
     data?.collection?.standard === TokenStandard.ERC721 &&
@@ -381,7 +389,7 @@ export default function Example() {
             </Link>
           </div>
         )}
-        {data?.collection && tokenInfo && (
+        {data?.collection && tokenInfo && allMetadataLoaded && (
           <>
             <Link href={`/collection/${slugOrAddress}`} passHref>
               <a className="text-gray-600 dark:text-gray-400 dark:hover:text-gray-500 inline-flex items-center space-x-2 hover:text-gray-800">
