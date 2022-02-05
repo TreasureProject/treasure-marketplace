@@ -369,7 +369,7 @@ export default function Example() {
       : null;
 
   const showTransfer =
-    isYourListing ||
+    (isYourListing && metadata?.name !== "Recruit") ||
     (data?.collection?.standard === TokenStandard.ERC1155 && hasErc1155Token);
 
   return (
