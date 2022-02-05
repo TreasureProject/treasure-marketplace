@@ -115,13 +115,13 @@ const Drawer = ({
     ].includes("Mining");
 
   const { data: statData } = useQuery(
-    ["stats", nft.address],
+    ["stats", nft.collectionId],
     () =>
       marketplace.getCollectionStats({
-        id: nft.address,
+        id: nft.collectionId,
       }),
     {
-      enabled: !!nft.address,
+      enabled: !!nft.collectionId,
     }
   );
 
@@ -850,6 +850,7 @@ const Inventory = () => {
                                 setNft({
                                   address: token.collection.contract,
                                   collection: token.collection.name,
+                                  collectionId: token.collection.id,
                                   name: bwMetadata?.name ?? token.name ?? "",
                                   listing:
                                     updates[

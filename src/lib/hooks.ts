@@ -91,6 +91,11 @@ export const collections: Collections = {
       name: "Legion Genesis",
       address: "0x96f791c0c11baee97526d5a9674494805afbec1c-0",
     },
+    // Recruits
+    {
+      name: "Legions",
+      address: "0x96f791c0c11baee97526d5a9674494805afbec1c-2",
+    },
     {
       name: "Unpilgrimaged Legion Auxiliary",
       address: "0x5ffdf09caa5bb19d18dccd93ec97fabbab84f15f",
@@ -146,7 +151,6 @@ export const collections: Collections = {
       name: "Keys",
       address: "0xf0a35ba261ece4fc12870e5b7b9e7790202ef9b5",
     },
-
     {
       name: "Legion Auxiliary",
       address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-1",
@@ -154,6 +158,11 @@ export const collections: Collections = {
     {
       name: "Legion Genesis",
       address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-0",
+    },
+    // Recruits
+    {
+      name: "Legions",
+      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-2",
     },
     {
       name: "Unpilgrimaged Legion Auxiliary",
