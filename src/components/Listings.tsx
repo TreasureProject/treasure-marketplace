@@ -23,6 +23,7 @@ import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { useQuery } from "react-query";
 import { bridgeworld, client } from "../lib/client";
+import { BridgeworldItems } from "../const";
 
 const sortOptions = [
   { name: "Highest Price", value: "price" },
@@ -42,16 +43,17 @@ const Listings = ({
   const tokens = listings
     .filter(
       (listing) =>
-        getCollectionNameFromAddress(listing.collection.id, chainId) !==
-        "Legions"
+        !BridgeworldItems.includes(
+          getCollectionNameFromAddress(listing.collection.id, chainId) || ""
+        )
     )
     .map((listing) => listing.token.id);
 
-  const legions = listings
-    .filter(
-      (listing) =>
-        getCollectionNameFromAddress(listing.collection.id, chainId) ===
-        "Legions"
+  const bridgeworldTokens = listings
+    .filter((listing) =>
+      BridgeworldItems.includes(
+        getCollectionNameFromAddress(listing.collection.id, chainId) || ""
+      )
     )
     .map((listing) => listing.token.id);
 
@@ -68,10 +70,10 @@ const Listings = ({
   );
 
   const { data: legionMetadataData } = useQuery(
-    ["activity-metadata-legions", legions],
-    () => bridgeworld.getLegionMetadata({ ids: legions }),
+    ["activity-metadata-bridgeworld", bridgeworldTokens],
+    () => bridgeworld.getBridgeworldMetadata({ ids: bridgeworldTokens }),
     {
-      enabled: legions.length > 0,
+      enabled: bridgeworldTokens.length > 0,
       refetchInterval: false,
     }
   );
