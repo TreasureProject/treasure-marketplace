@@ -28,6 +28,7 @@ export type targetNftT = {
 export type Nft = {
   address: string;
   collection: string;
+  collectionId: string;
   listing?: {
     expires: string;
     pricePerItem: string;

@@ -917,7 +917,11 @@ export default function Example() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
-                                    <p>{shortenIfAddress(formattedAddress)}</p>
+                                    <p>
+                                      {shortenIfAddress(
+                                        formattedAddress.slice(0, 42)
+                                      )}
+                                    </p>
                                     <ExternalLinkIcon className="h-4 w-4" />
                                   </a>
                                 </dd>
@@ -1185,7 +1189,7 @@ const TransferNFTModal = ({
     : tokenId ?? "0";
 
   const { send: transfer, state: transferState } = useTransferNFT(
-    normalizedAddress,
+    normalizedAddress.slice(0, 42),
     standard
   );
 
@@ -1295,9 +1299,11 @@ const PurchaseItemModal = ({
   const { address: slugOrAddress } = router.query;
   const { magicBalance, ethPrice, setSushiModalOpen } = useMagic();
 
-  const normalizedAddress = Array.isArray(slugOrAddress)
-    ? slugToAddress(slugOrAddress[0], chainId)
-    : slugToAddress(slugOrAddress ?? AddressZero, chainId);
+  const normalizedAddress = (
+    Array.isArray(slugOrAddress)
+      ? slugToAddress(slugOrAddress[0], chainId)
+      : slugToAddress(slugOrAddress ?? AddressZero, chainId)
+  ).slice(0, 42);
 
   const totalPrice =
     quantity * Number(parseFloat(formatEther(targetNft.payload.pricePerItem)));

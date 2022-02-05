@@ -47,8 +47,8 @@ import { BridgeworldItems } from "../../../const";
 
 const MAX_ITEMS_PER_PAGE = 42;
 
-const generateDescription = (cotract: string, chainId: ChainId) => {
-  const collectionName = getCollectionNameFromAddress(cotract, chainId);
+const generateDescription = (contract: string, chainId: ChainId) => {
+  const collectionName = getCollectionNameFromAddress(contract, chainId);
 
   switch (collectionName) {
     case "Unpilgrimaged Legion Genesis":
@@ -289,6 +289,16 @@ const Collection = () => {
     : slugToAddress(slugOrAddress?.toLowerCase() ?? AddressZero, chainId);
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
+
+  const collectionName = getCollectionNameFromAddress(
+    formattedAddress,
+    chainId
+  );
+
+  // This is a faux collection with only recruits. Which are not sellable. Redirect to Legion Auxiliary collection.
+  if (collectionName === "Legions") {
+    router.replace("/collection/legion-auxiliary");
+  }
 
   const { data: activityData, isLoading: isActivityLoading } = useQuery(
     ["activity", { formattedAddress, activitySortParam }],
