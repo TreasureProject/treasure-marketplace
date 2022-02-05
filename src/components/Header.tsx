@@ -83,8 +83,6 @@ const Header = () => {
     "Unpilgrimaged Legion Genesis",
   ].includes(collectionName ?? "");
 
-  console.log(showBwWarning);
-
   const switchToArbitrum = async () => {
     if (window.ethereum) {
       try {
@@ -388,13 +386,13 @@ const Header = () => {
                         undergone Pilgrimage will be listed under the{" "}
                         <Link href="/collection/legion-auxiliary">
                           <a className="hover:underline">
-                            &apos;Legions Auxiliary&apos;
+                            &apos;Legion Auxiliary&apos;
                           </a>
                         </Link>{" "}
                         or{" "}
                         <Link href="/collection/legion-genesis">
                           <a className="hover:underline">
-                            &apos;Legions Genesis&apos;
+                            &apos;Legion Genesis&apos;
                           </a>
                         </Link>{" "}
                         collection.
