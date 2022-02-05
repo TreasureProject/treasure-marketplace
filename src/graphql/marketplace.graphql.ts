@@ -105,6 +105,7 @@ export const getCollectionListings = gql`
       orderDirection: $orderDirection
       where: { collection: $id, name_contains: $tokenName }
     ) @include(if: $isERC1155) {
+      __typename
       id
       floorPrice
       tokenId
@@ -120,6 +121,7 @@ export const getCollectionListings = gql`
       orderDirection: $orderDirection
       where: { status: Active, collection: $id }
     ) @include(if: $isERC721) {
+      __typename
       ...TokenListing
     }
     filtered: listings(

@@ -84,15 +84,19 @@ export const collections: Collections = {
       address: AddressZero,
     },
     {
-      name: "Legions",
-      address: "0x96f791c0c11baee97526d5a9674494805afbec1c",
+      name: "Legion Auxiliary",
+      address: "0x96f791c0c11baee97526d5a9674494805afbec1c-1",
     },
     {
-      name: "Legacy Legions",
+      name: "Legion Genesis",
+      address: "0x96f791c0c11baee97526d5a9674494805afbec1c-0",
+    },
+    {
+      name: "Unpilgrimaged Legion Auxiliary",
       address: "0x5ffdf09caa5bb19d18dccd93ec97fabbab84f15f",
     },
     {
-      name: "Legacy Legions Genesis",
+      name: "Unpilgrimaged Legion Genesis",
       address: "0x63160c8e00e9b6f30dab7f172e0f9bf0666f75b7",
     },
 
@@ -142,16 +146,21 @@ export const collections: Collections = {
       name: "Keys",
       address: "0xf0a35ba261ece4fc12870e5b7b9e7790202ef9b5",
     },
+
     {
-      name: "Legions",
-      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1",
+      name: "Legion Auxiliary",
+      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-1",
     },
     {
-      name: "Legacy Legions",
+      name: "Legion Genesis",
+      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-0",
+    },
+    {
+      name: "Unpilgrimaged Legion Auxiliary",
       address: "0x658365026d06f00965b5bb570727100e821e6508",
     },
     {
-      name: "Legacy Legions Genesis",
+      name: "Unpilgrimaged Legion Genesis",
       address: "0xe83c0200e93cb1496054e387bddae590c07f0194",
     },
     {

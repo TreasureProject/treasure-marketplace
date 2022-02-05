@@ -663,7 +663,7 @@ const Inventory = () => {
   const tokens = (data as InventoryToken[])
     .filter(
       ({ token }) =>
-        !["Legions", "Consumables"].includes(
+        !["Legions Auxiliary", "Legions Genesis", "Consumables"].includes(
           getCollectionNameFromAddress(token.collection.id, chainId) || ""
         )
     )
@@ -671,7 +671,7 @@ const Inventory = () => {
 
   const bridgeworldTokens = (data as InventoryToken[])
     .filter(({ token }) =>
-      ["Legions", "Consumables"].includes(
+      ["Legions Auxiliary", "Legions Genesis", "Consumables"].includes(
         getCollectionNameFromAddress(token.collection.id, chainId) || ""
       )
     )
@@ -685,8 +685,6 @@ const Inventory = () => {
       refetchInterval: false,
     }
   );
-
-  console.log(metadataData, tokens);
 
   const { data: bridgeworldMetadata } = useQuery(
     ["inventory-metadata-bridgeworld", bridgeworldTokens],

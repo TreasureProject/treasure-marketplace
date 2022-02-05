@@ -355,8 +355,11 @@ const Collection = () => {
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.ERC1155;
 
-  const isLegions =
-    getCollectionNameFromAddress(formattedAddress, chainId) === "Legions";
+  const isBridgeworldItem = [
+    "Legions Auxiliary",
+    "Legions Genesis",
+    "Consumables",
+  ].includes(getCollectionNameFromAddress(formattedAddress, chainId) || "");
 
   const searchFilters = React.useMemo(
     () => formatSearchFilter(formattedSearch),
@@ -387,7 +390,8 @@ const Collection = () => {
         name: searchParams,
       }),
     {
-      enabled: !!formattedAddress && Boolean(searchParams) && !isLegions,
+      enabled:
+        !!formattedAddress && Boolean(searchParams) && !isBridgeworldItem,
       refetchInterval: false,
     }
   );
@@ -401,7 +405,8 @@ const Collection = () => {
           name: searchParams,
         }),
       {
-        enabled: !!formattedAddress && Boolean(searchParams) && isLegions,
+        enabled:
+          !!formattedAddress && Boolean(searchParams) && isBridgeworldItem,
         refetchInterval: false,
       }
     );
@@ -474,25 +479,33 @@ const Collection = () => {
         }, []),
       }),
     {
-      enabled: !!formattedAddress && !!listingData && !isLegions,
+      enabled: !!formattedAddress && !!listingData && !isBridgeworldItem,
       keepPreviousData: true,
     }
   );
 
-  const { data: legionMetadataData } = useQuery(
-    ["metadata-legions", listingData?.pages.length],
+  const { data: bridgeworldMetadataData } = useQuery(
+    ["metadata-bridgeworld", listingData, formattedAddress],
     () =>
-      bridgeworld.getLegionMetadata({
+      bridgeworld.getBridgeworldMetadata({
         ids:
           listingData?.pages.reduce((acc, page) => {
+            const tokenIds = isERC1155
+              ? page.tokens
+              : page.listings ?? page.filtered;
             const ids =
-              (page.listings ?? page.filtered)?.map((list) => list.token.id) ||
-              [];
+              tokenIds?.map((value: NonNullable<typeof tokenIds>[number]) => {
+                if (value.__typename === "Listing") {
+                  return value.token.id;
+                }
+
+                return value.id;
+              }) || [];
             return [...acc, ...ids];
           }, []) || [],
       }),
     {
-      enabled: !!formattedAddress && !!listingData && isLegions,
+      enabled: !!formattedAddress && !!listingData && isBridgeworldItem,
       keepPreviousData: true,
     }
   );
@@ -1083,9 +1096,28 @@ const Collection = () => {
                         {group.tokens
                           ?.filter((token) => Boolean(token?.listings?.length))
                           .map((token) => {
-                            const metadata = metadataData?.erc1155?.find(
+                            const erc1155Metadata = metadataData?.erc1155?.find(
                               (metadata) => metadata.tokenId === token.tokenId
                             );
+
+                            const legionsMetadata =
+                              bridgeworldMetadataData?.tokens.find(
+                                (item) => item.id === token.id
+                              );
+
+                            const metadata =
+                              isBridgeworldItem && legionsMetadata
+                                ? {
+                                    id: legionsMetadata.id,
+                                    name: legionsMetadata.name,
+                                    tokenId: token.tokenId,
+                                    metadata: {
+                                      image: legionsMetadata.image,
+                                      name: legionsMetadata.name,
+                                      description: "Consumables",
+                                    },
+                                  }
+                                : erc1155Metadata;
 
                             return (
                               <li key={token.id} className="group">
@@ -1141,13 +1173,13 @@ const Collection = () => {
                         {(group?.listings ?? group?.filtered)?.map(
                           (listing) => {
                             const legionsMetadata =
-                              legionMetadataData?.tokens.find(
+                              bridgeworldMetadataData?.tokens.find(
                                 (item) => item.id === listing.token.id
                               );
                             const erc721Metadata = metadataData?.erc721?.find(
                               (item) => item?.tokenId === listing.token.tokenId
                             );
-                            const metadata = isLegions
+                            const metadata = isBridgeworldItem
                               ? legionsMetadata
                                 ? {
                                     id: legionsMetadata.id,
