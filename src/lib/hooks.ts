@@ -7,7 +7,7 @@ import {
   useContractCalls,
   useContractFunction,
   useEthers,
-} from "@yuyao17/corefork";
+} from "@usedapp/core";
 import { BigNumber, Contract } from "ethers";
 import { Contracts } from "../const";
 import { Interface } from "@ethersproject/abi";
@@ -19,6 +19,7 @@ import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
 import { TokenStandard } from "../../generated/queries.graphql";
 import { marketplace } from "./client";
+import { AddressZero } from "@ethersproject/constants";
 
 type WebhookBody = {
   address: string;
@@ -52,7 +53,7 @@ export function useChainId() {
 
   switch (chainId) {
     case ChainId.Arbitrum:
-    case ChainId.Rinkeby:
+    case ChainId.ArbitrumRinkeby:
       return chainId;
     default:
       return ChainId.Arbitrum;
@@ -69,43 +70,43 @@ export type Collections = {
 };
 
 export const collections: Collections = {
-  [ChainId.Rinkeby]: [
+  [ChainId.ArbitrumRinkeby]: [
+    {
+      name: "Consumables",
+      address: "0x906369481b258ca3c21a6737bce052d85572a8f3",
+    },
     {
       name: "Extra Life",
-      address: "0x5e6ae51147d1ec18edccae516a59fb0a26a0b48f",
+      address: AddressZero,
     },
     {
       name: "Keys",
-      address: "0x25ee208b4f8636b5ceaafdee051bf0bfe514f5f6",
+      address: AddressZero,
     },
-    // Note: This contract doesn't exist on Rinkeby currently
     {
       name: "Legions",
-      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1",
+      address: "0x96f791c0c11baee97526d5a9674494805afbec1c",
     },
     {
       name: "Legacy Legions",
-      address: "0x6fd12312f70fa5b04d66584600f39abe31a99708",
+      address: "0x5ffdf09caa5bb19d18dccd93ec97fabbab84f15f",
     },
     {
       name: "Legacy Legions Genesis",
-      address: "0xac2f8732a67c15bf81f8a6181364ce753e915037",
+      address: "0x63160c8e00e9b6f30dab7f172e0f9bf0666f75b7",
     },
-    // {
-    //   name: "Life",
-    //   address: "#"
-    // },
+
     {
       name: "Seed of Life",
-      address: "0x6a67fbf40142e3db2e6a950a4d48b0eb41107ce8",
+      address: AddressZero,
     },
     {
       name: "Smol Bodies",
-      address: "0x9e638bfe78b372b8f5cc63cf6b01b90f568496cb",
+      address: AddressZero,
     },
     {
       name: "Smol Bodies Pets",
-      address: "0xcacdCFDe05f5FB62fb49924DC6d5c632a1746C62",
+      address: AddressZero,
     },
     {
       name: "Smol Brains",
@@ -113,22 +114,26 @@ export const collections: Collections = {
     },
     {
       name: "Smol Brains Land",
-      address: "0xe42c57ab8e093d21e52cb07b5f32b1b106cdbfe4",
+      address: AddressZero,
     },
     {
       name: "Smol Brains Pets",
-      address: "0xfF8B8d23581dF7Da74410A470bB56357772E213e",
+      address: AddressZero,
     },
     {
       name: "Treasures",
-      address: "0x61b468f85b2e50baa0b1729ffc99efe9ef0428f0",
+      address: "0x6333F38F98f5c46dA6F873aCbF25DCf8748DDc2c",
     },
     {
       name: "Smol Cars",
-      address: "0x16bdf0b2d8bb8e98aecb32e004febf9653da5f43",
+      address: AddressZero,
     },
   ],
   [ChainId.Arbitrum]: [
+    {
+      name: "Consumables",
+      address: "0xf3d00a2559d84de7ac093443bcaada5f4ee4165c",
+    },
     {
       name: "Extra Life",
       address: "0x21e1969884d477afd2afd4ad668864a0eebd644c",

@@ -1,6 +1,6 @@
 import { formatEther } from "ethers/lib/utils";
 import { BigNumberish } from "ethers";
-import { ChainId } from "@yuyao17/corefork";
+import { ChainId } from "@usedapp/core";
 import { collections } from "./lib/hooks";
 import { utils } from "ethers";
 

@@ -14,7 +14,7 @@ import {
   getPetsMetadata,
 } from "../utils";
 import { useChainId } from "../lib/hooks";
-import { shortenAddress } from "@yuyao17/corefork";
+import { shortenAddress } from "@usedapp/core";
 import { useRouter } from "next/router";
 import ImageWrapper from "./ImageWrapper";
 import QueryLink from "./QueryLink";

@@ -18,7 +18,7 @@ import {
   addressEqual,
   useTokenAllowance,
   TransactionStatus,
-} from "@yuyao17/corefork";
+} from "@usedapp/core";
 import Link from "next/link";
 import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { useRouter } from "next/router";
@@ -241,8 +241,8 @@ export default function Example() {
   );
 
   const { data: legionMetadataData } = useQuery(
-    ["details-metadata-legions", id],
-    () => bridgeworld.getLegionMetadata({ ids: [id] }),
+    ["details-metadata-bridgeworld", id],
+    () => bridgeworld.getBridgeworldMetadata({ ids: [id] }),
     {
       enabled:
         Boolean(id) &&

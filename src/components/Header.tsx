@@ -12,7 +12,7 @@ import {
   shortenAddress,
   ChainId,
   getChainName,
-} from "@yuyao17/corefork";
+} from "@usedapp/core";
 import { formatEther } from "ethers/lib/utils";
 import { formatNumber } from "../utils";
 import { Modal } from "./Modal";
@@ -33,8 +33,8 @@ import { getCollectionSlugFromName } from "../utils";
 const walletconnect = new WalletConnectConnector({
   rpc: {
     [ChainId.Arbitrum]: `https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`,
-    [ChainId.Rinkeby]:
-      "https://rinkeby.infura.io/v3/62687d1a985d4508b2b7a24827551934",
+    [ChainId.ArbitrumRinkeby]:
+      "https://arb-rinkeby.g.alchemy.com/v2/PDUCdHLoNrdDJwgVvCNPTx7MrHuQ0uBg",
   },
   qrcode: true,
 });
@@ -396,9 +396,7 @@ const Header = () => {
           <button
             className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-md"
             onClick={() => {
-              activateBrowserWallet((err) => {
-                console.log(err);
-              });
+              activateBrowserWallet();
               onClose();
             }}
           >

@@ -2,7 +2,7 @@ import "../css/tailwind.css";
 
 import { Fragment, useEffect, useState } from "react";
 import Head from "next/head";
-import { ChainId, DAppProvider } from "@yuyao17/corefork";
+import { ChainId, DAppProvider } from "@usedapp/core";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { resolveValue, Toaster } from "react-hot-toast";
@@ -31,8 +31,8 @@ const queryClient = new QueryClient({
 const config = {
   readOnlyChainId: ChainId.Arbitrum,
   readOnlyUrls: {
-    [ChainId.Rinkeby]:
-      "https://rinkeby.infura.io/v3/62687d1a985d4508b2b7a24827551934",
+    [ChainId.ArbitrumRinkeby]:
+      "https://arb-rinkeby.g.alchemy.com/v2/PDUCdHLoNrdDJwgVvCNPTx7MrHuQ0uBg",
     [ChainId.Arbitrum]: `https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`,
   },
 };

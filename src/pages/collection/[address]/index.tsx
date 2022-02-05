@@ -42,7 +42,7 @@ import Button from "../../../components/Button";
 import { useChainId } from "../../../lib/hooks";
 import { EthIcon, MagicIcon, SwapIcon } from "../../../components/Icons";
 import { useMagic } from "../../../context/magicContext";
-import { ChainId } from "@yuyao17/corefork";
+import { ChainId } from "@usedapp/core";
 
 const MAX_ITEMS_PER_PAGE = 42;
 

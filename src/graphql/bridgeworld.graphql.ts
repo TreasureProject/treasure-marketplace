@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 
-export const getLegionMetadata = gql`
-  query getLegionMetadata($ids: [ID!]!) {
+export const getBridgeworldMetadata = gql`
+  query getBridgeworldMetadata($ids: [ID!]!) {
     tokens(first: 1000, where: { id_in: $ids }) {
       id
       image
@@ -19,6 +19,11 @@ export const getLegionMetadata = gql`
           role
           type
           summons
+        }
+        ... on ConsumableInfo {
+          id
+          type
+          size
         }
       }
     }
