@@ -211,7 +211,7 @@ const Listings = ({
                         metadata: {
                           image: legionsMetadata.image,
                           name: legionsMetadata.name,
-                          description: "Legions",
+                          description: collectionName ?? "Legions",
                         },
                       }
                     : getPetsMetadata({
@@ -310,6 +310,10 @@ const Listings = ({
               const legionsMetadata = legionMetadataData?.tokens.find(
                 (item) => item.id === listing.token.id
               );
+              const collectionName = getCollectionNameFromAddress(
+                listing?.collection?.id,
+                chainId
+              );
               const metadata = legionsMetadata
                 ? {
                     id: legionsMetadata.id,
@@ -318,17 +322,12 @@ const Listings = ({
                     metadata: {
                       image: legionsMetadata.image,
                       name: legionsMetadata.name,
-                      description: "Legions",
+                      description: collectionName ?? "Legions",
                     },
                   }
                 : metadataData?.tokens.find(
                     (item) => item?.id === listing.token.id
                   ) ?? undefined;
-
-              const collectionName = getCollectionNameFromAddress(
-                listing?.collection?.id,
-                chainId
-              );
 
               const slugOrAddress =
                 getCollectionSlugFromName(collectionName) ??

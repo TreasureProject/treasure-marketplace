@@ -810,7 +810,7 @@ const Inventory = () => {
                           metadata: {
                             image: bwMetadata.image,
                             name: bwMetadata.name,
-                            description: "Legions",
+                            description: token.collection.name,
                           },
                         }
                       : getPetsMetadata(token) ??
