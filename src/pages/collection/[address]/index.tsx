@@ -51,11 +51,11 @@ const generateDescription = (cotract: string, chainId: ChainId) => {
   const collectionName = getCollectionNameFromAddress(cotract, chainId);
 
   switch (collectionName) {
-    case "Legacy Legions Genesis":
-    case "Legacy Legions":
+    case "Unpilgrimaged Legion Genesis":
+    case "Unpilgrimaged Legion Auxiliary":
       return (
         <p className="text-gray-500 dark:text-gray-400 text-[0.5rem] sm:text-sm mt-4 sm:mt-6">
-          Legacy Legions need to undergo{" "}
+          Unpilgrimaged Legions need to undergo{" "}
           <a
             href="https://bridgeworld.treasure.lol/"
             target="_blank"
