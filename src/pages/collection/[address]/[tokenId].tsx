@@ -228,11 +228,6 @@ export default function Example() {
       ? data.collection.tokens[0]
       : null;
   const id = tokenInfo?.id ?? "";
-  const isLegions = Boolean(
-    getCollectionNameFromAddress(formattedAddress, chainId)?.startsWith(
-      "Legions"
-    )
-  );
 
   const isBridgeworldItem = BridgeworldItems.includes(
     getCollectionNameFromAddress(formattedAddress, chainId) || ""
