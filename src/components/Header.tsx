@@ -469,9 +469,9 @@ const Header = () => {
         hideCloseIcon
       >
         <div className="grid grid-cols-1 divide-y-[1px] sm:divide-y-0 sm:grid-cols-2">
-          <div className="flex justify-center">
+          <div className="flex justify-center px-4 py-3">
             <button
-              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-3 rounded-md"
+              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
               onClick={() => {
                 activateBrowserWallet();
                 onClose();
@@ -489,9 +489,9 @@ const Header = () => {
               />
             </button>
           </div>
-          <div className="flex justify-center">
+          <div className="flex justify-center px-4 py-3">
             <button
-              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-md"
+              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
               onClick={async () => {
                 try {
                   await activate(walletconnect);
@@ -514,9 +514,9 @@ const Header = () => {
               />
             </button>
           </div>
-          <div className="sm:col-span-2 sm:mt-2 flex justify-center">
+          <div className="sm:col-span-2 sm:mt-2 flex justify-center px-4 py-3">
             <button
-              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-md"
+              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
               onClick={async () => {
                 try {
                   await activate(walletLink);
