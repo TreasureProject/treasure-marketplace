@@ -29,11 +29,21 @@ import classNames from "clsx";
 import toast from "react-hot-toast";
 import MetaMaskSvg from "../../public/img/metamask.svg";
 import WalletConnectSvg from "../../public/img/walletconnect.svg";
+import Coinbase from "../../public/img/coinbase.png";
+
 import Image from "next/image";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { useChainId, useCollections } from "../lib/hooks";
 import { getCollectionSlugFromName } from "../utils";
 import { AddressZero } from "@ethersproject/constants";
+import { WalletLinkConnector } from "@web3-react/walletlink-connector";
+
+const walletLink = new WalletLinkConnector({
+  url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`,
+  appName: "Treasure Marketplace",
+  appLogoUrl: "https://marketplace.treasure.lol/favicon-32x32.png",
+  supportedChainIds: [ChainId.Arbitrum, ChainId.ArbitrumRinkeby],
+});
 
 const walletconnect = new WalletConnectConnector({
   rpc: {
@@ -176,7 +186,7 @@ const Header = () => {
               {account && (
                 <div className="flex-shrink-0 flex flex-col items-center border-t border-gray-200 dark:border-gray-500 p-4">
                   <div className="w-full items-center rounded-lg dark:bg-gray-500 bg-red-500 p-0.5 whitespace-nowrap font-bold select-none pointer-events-auto mx-2 flex-col">
-                    <div className="px-2 py-2 text-bold flex items-center justify-center text-xs sm:text-sm">
+                    <div className="px-2 py-3 text-bold flex items-center justify-center text-xs sm:text-sm">
                       <span className="text-white block">
                         {formatNumber(parseFloat(formatEther(magicBalance)))}
                       </span>{" "}
@@ -458,43 +468,77 @@ const Header = () => {
         className="md:max-w-3xl sm:max-w-xl"
         hideCloseIcon
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2">
-          <button
-            className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-md"
-            onClick={() => {
-              activateBrowserWallet();
-              onClose();
-            }}
-          >
-            <p className="md:text-xl sm:text-lg mb-2">MetaMask</p>
-            <p className="text-gray-400 font-bold sm:text-sm text-xs mb-8">
-              Connect to your MetaMask Wallet
-            </p>
-            <Image
-              src={MetaMaskSvg.src}
-              alt="MetaMask"
-              height={48}
-              width={48}
-            />
-          </button>
-          <button
-            className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-md"
-            onClick={() => {
-              activate(walletconnect);
-              onClose();
-            }}
-          >
-            <p className="md:text-xl sm:text-lg mb-2">WalletConnect</p>
-            <p className="text-gray-400 font-bold sm:text-sm text-xs mb-8">
-              Scan with WalletConnect to connect
-            </p>
-            <Image
-              src={WalletConnectSvg.src}
-              alt="WalletConnect"
-              height={48}
-              width={48}
-            />
-          </button>
+        <div className="grid grid-cols-1 divide-y-[1px] sm:divide-y-0 sm:grid-cols-2">
+          <div className="flex justify-center">
+            <button
+              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-3 rounded-md"
+              onClick={() => {
+                activateBrowserWallet();
+                onClose();
+              }}
+            >
+              <p className="md:text-xl sm:text-lg mb-2">MetaMask</p>
+              <p className="text-gray-400 font-bold sm:text-sm text-xs mb-8">
+                Connect to your MetaMask Wallet
+              </p>
+              <Image
+                src={MetaMaskSvg.src}
+                alt="MetaMask"
+                height={48}
+                width={48}
+              />
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <button
+              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-md"
+              onClick={async () => {
+                try {
+                  await activate(walletconnect);
+                } catch (e) {
+                  toast.error(e.message);
+                } finally {
+                  onClose();
+                }
+              }}
+            >
+              <p className="md:text-xl sm:text-lg mb-2">WalletConnect</p>
+              <p className="text-gray-400 font-bold sm:text-sm text-xs mb-8">
+                Scan with WalletConnect to connect
+              </p>
+              <Image
+                src={WalletConnectSvg.src}
+                alt="WalletConnect"
+                height={48}
+                width={48}
+              />
+            </button>
+          </div>
+          <div className="sm:col-span-2 sm:mt-2 flex justify-center">
+            <button
+              className="flex items-center justify-center flex-col hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-md"
+              onClick={async () => {
+                try {
+                  await activate(walletLink);
+                } catch (e) {
+                  toast.error(e.message);
+                } finally {
+                  onClose();
+                }
+              }}
+            >
+              <p className="md:text-xl sm:text-lg mb-2">Coinbase Wallet</p>
+              <p className="text-gray-400 font-bold sm:text-sm text-xs mb-8">
+                Scan with Coinbase Wallet to connect
+              </p>
+              <Image
+                src={Coinbase.src}
+                alt="Coinbase Wallet"
+                height={48}
+                width={48}
+              />
+            </button>
+          </div>
         </div>
       </Modal>
     </div>
