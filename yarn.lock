@@ -867,7 +867,7 @@
     aes-js "3.0.0"
     scrypt-js "3.0.1"
 
-"@ethersproject/keccak256@5.5.0", "@ethersproject/keccak256@^5.0.0-beta.130", "@ethersproject/keccak256@^5.5.0":
+"@ethersproject/keccak256@5.5.0", "@ethersproject/keccak256@^5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/keccak256/-/keccak256-5.5.0.tgz#e4b1f9d7701da87c564ffe336f86dcee82983492"
   integrity sha512-5VoFCTjo2rYbBe1l2f4mccaRFN/4VQEYFwwn04aJV2h7qf4ZvI2wFxUE1XOX+snbwCLRzIeikOqtAoPwMza9kg==
@@ -2942,14 +2942,6 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.4.tgz#fcf7205c25dff795ee79af1e30da2c9790808f11"
   integrity sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==
 
-"@types/react@17.0.1":
-  version "17.0.1"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.1.tgz#eb1f1407dea8da3bc741879c1192aa703ab9975b"
-  integrity sha512-w8t9f53B2ei4jeOqf/gxtc2Sswnc3LBK5s0DyJcg5xd10tMHXts2N31cKjWfH9IC/JvEPa/YF1U4YeP1t4R6HQ==
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^3.0.2"
-
 "@types/react@^17.0.38":
   version "17.0.38"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.38.tgz#f24249fefd89357d5fa71f739a686b8d7c7202bd"
@@ -3077,34 +3069,20 @@
   resolved "https://registry.yarnpkg.com/@uniswap/token-lists/-/token-lists-1.0.0-beta.27.tgz#8b02a979b0b0024cc96f60e694a3f6db6b2ccab2"
   integrity sha512-x5hmIniQ9TGqOBCRqfWcmZi/U5kB0qrHMDQ9igs3nMbK0wwmYLraL4owbIwXFGR/co6/lJYJC4K/Gjn4wZY5mQ==
 
-"@usedapp/coingecko@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@usedapp/coingecko/-/coingecko-0.4.0.tgz#2156174e0df157984272e440a47ee8668adc24df"
-  integrity sha512-06Zehpa0lhy4KkhGJrhbnBlHtfpqLjFbW249aHRklITY4KqporXERQpU65EsWcHd0ZmDfz9wVpnUunnJ/BW4qA==
+"@usedapp/coingecko@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@usedapp/coingecko/-/coingecko-0.4.2.tgz#34f645c952ee05d48f7a5f66cbd044c858905007"
+  integrity sha512-GorSpHDKAS7YCBvO02BTVrcqFYfAc9HJTr77HCLEcUkGYsmmZRd6v/YJaqELHnO94SCE90dgSQLmXIMWFtQalA==
   dependencies:
-    "@usedapp/core" "^0.8.0"
+    "@usedapp/core" "^0.10.0"
 
-"@usedapp/core@^0.10.1":
+"@usedapp/core@^0.10.0", "@usedapp/core@^0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@usedapp/core/-/core-0.10.1.tgz#4fee95f43b8295fe510bb72c87f3884e8433c807"
   integrity sha512-hQSQfIkG9mM2nswgth4c0z9ch3CYWY2TVKcWp9cSHjUdsXj3om1oEEX0DjhWKYm7PdWcOihgJh4bYXayD/dqeQ==
   dependencies:
     "@metamask/detect-provider" "^1.2.0"
     "@uniswap/token-lists" "^1.0.0-beta.27"
-    ethers "5.5.1"
-    lodash.merge "^4.6.2"
-    nanoid "3.1.22"
-
-"@usedapp/core@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@usedapp/core/-/core-0.8.0.tgz#a7062a9cf03ace2f9e1c5e5b3a4e1d3c0de8f0b4"
-  integrity sha512-N3PU3fKw2OhyY8U/xJ3JPJ/ZXZ3VUhtYalhLBYLInDiXFtPcL3RO8hSJt/hj07G8Cb7Qxp/Y5cATqTpd/qxLPg==
-  dependencies:
-    "@types/react" "17.0.1"
-    "@uniswap/token-lists" "^1.0.0-beta.27"
-    "@web3-react/core" "6.1.1"
-    "@web3-react/injected-connector" "6.0.7"
-    "@web3-react/network-connector" "6.1.5"
     ethers "5.5.1"
     lodash.merge "^4.6.2"
     nanoid "3.1.22"
@@ -3306,35 +3284,6 @@
   integrity sha512-RhQasA4Ox8CxUC0OENc1AJJm8UTybu/oOCM61Zjg6y0iF7Z0sqv1Ai1VdhC33hrQpA8qSBgoXN9PaP8jKmtdqg==
   dependencies:
     "@web3-react/types" "^6.0.7"
-
-"@web3-react/core@6.1.1":
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/@web3-react/core/-/core-6.1.1.tgz#06c853890723f600b387b738a4b71ef41d5cccb7"
-  integrity sha512-HKXOgPNCmFvrVsed+aW/HlVhwzs8t3b+nzg3BoxgJQo/5yLiJXSumHRBdUrPxhBQiHkHRZiVPAvzf/8JMnm74Q==
-  dependencies:
-    "@ethersproject/keccak256" "^5.0.0-beta.130"
-    "@web3-react/abstract-connector" "^6.0.7"
-    "@web3-react/types" "^6.0.7"
-    tiny-invariant "^1.0.6"
-    tiny-warning "^1.0.3"
-
-"@web3-react/injected-connector@6.0.7":
-  version "6.0.7"
-  resolved "https://registry.yarnpkg.com/@web3-react/injected-connector/-/injected-connector-6.0.7.tgz#1e0be23f51fa07fe6547fe986768a46b74c3a426"
-  integrity sha512-Y7aJSz6pg+MWKtvdyuqyy6LWuH+4Tqtph1LWfiyVms9II9ar/9B/de4R8wh4wjg91wmHkU+D75yP09E/Soh2RA==
-  dependencies:
-    "@web3-react/abstract-connector" "^6.0.7"
-    "@web3-react/types" "^6.0.7"
-    tiny-warning "^1.0.3"
-
-"@web3-react/network-connector@6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@web3-react/network-connector/-/network-connector-6.1.5.tgz#1fcce1dc7b03dac23fcc01ad0b0c870cb0e39e0b"
-  integrity sha512-Uwk8iMG8YCnTeKmyXt3Q7QJN28qTs0YTTW8/aes2R26KmYWCk3GdL2eal0QcXUixJy/IjrhXzbwzHgpneJqrWg==
-  dependencies:
-    "@web3-react/abstract-connector" "^6.0.7"
-    "@web3-react/types" "^6.0.7"
-    tiny-invariant "^1.0.6"
 
 "@web3-react/types@^6.0.7":
   version "6.0.7"
@@ -8395,11 +8344,6 @@ tiny-invariant@^1.0.6:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.2.0.tgz#a1141f86b672a9148c72e978a19a73b9b94a15a9"
   integrity sha512-1Uhn/aqw5C6RI4KejVeTg6mIS7IqxnLJ8Mv2tV5rTc0qWobay7pDUz6Wi392Cnc8ak1H0F2cjoRzb2/AW4+Fvg==
-
-tiny-warning@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
-  integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
 
 title-case@^3.0.3:
   version "3.0.3"
