@@ -40,3 +40,11 @@ export const getTokensByName = gql`
     }
   }
 `;
+
+export const getFilteredLegions = gql`
+  query getFilteredLegions($filters: LegionInfo_filter!) {
+    legionInfos(first: 1000, where: $filters, orderBy: id) {
+      id
+    }
+  }
+`;

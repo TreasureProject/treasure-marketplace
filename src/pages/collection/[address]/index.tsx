@@ -46,9 +46,44 @@ import { useMagic } from "../../../context/magicContext";
 import { ChainId } from "@usedapp/core";
 import { BridgeworldItems } from "../../../const";
 import * as Popover from "@radix-ui/react-popover";
-import { formatDistanceToNow } from "date-fns";
+import { addDays, formatDistanceToNow } from "date-fns";
 
 const MAX_ITEMS_PER_PAGE = 42;
+
+const ROLES = [
+  "Siege",
+  "Fighter",
+  "Assassin",
+  "Ranged",
+  "Spellcaster",
+  "Riverman",
+  "Numeraire",
+  "All-Class",
+  "Origin",
+];
+
+const AUX_ROLES = ROLES.slice(0, 5);
+
+const RARITY = ["Legendary", "Rare", "Special", "Uncommon", "Common"];
+
+const AUX_RARITY = [RARITY[1], ...RARITY.slice(-2)];
+
+const FATIGUE = [
+  "1 Day",
+  "2 Days",
+  "3 Days",
+  "4 Days",
+  "5 Days",
+  "6 Days",
+  "7 Days",
+];
+
+const SUMMONS = ["0", "1", "2"];
+const BOOST = ["0.05", "0.1", "0.25", "0.5", "0.75", "1.0", "2.0", "6.0"];
+const LEVELS = ["1", "2", "3", "4", "5", "6"];
+const XPS = Array(20)
+  .fill("")
+  .map((_, index) => `>= ${index * 10}`);
 
 const generateDescription = (contract: string, chainId: ChainId) => {
   const collectionName = getCollectionNameFromAddress(contract, chainId);
@@ -201,9 +236,6 @@ const getInititalFilters = (search: string | undefined) => {
     {}
   );
 };
-/*
-
-*/
 
 const createFilter = (
   base: string | undefined,
@@ -342,9 +374,49 @@ const Collection = () => {
     }
   );
 
-  const attributeFilterList = reduceAttributes(
-    collectionAttributesData?.collection?.attributes
-  );
+  const attributeFilterList = React.useMemo(() => {
+    switch (true) {
+      case collectionName?.startsWith("Legion"):
+        return {
+          Role: (collectionName?.includes("Genesis") ? ROLES : AUX_ROLES).map(
+            (value) => ({ value, percentage: null })
+          ),
+          Rarity: (collectionName?.includes("Genesis")
+            ? RARITY
+            : AUX_RARITY
+          ).map((value) => ({ value, percentage: null })),
+          "Summon Fatigue": (collectionName?.includes("Genesis")
+            ? []
+            : FATIGUE
+          ).map((value) => ({
+            value,
+            percentage: null,
+          })),
+          "Times Summoned": SUMMONS.map((value) => ({
+            value,
+            percentage: null,
+          })),
+          "Atlas Mine Boost": BOOST.map((value) => ({
+            value: formatPercent(value),
+            percentage: null,
+          })),
+          "Crafting Level": LEVELS.map((value) => ({
+            value,
+            percentage: null,
+          })),
+          "Crafting XP": XPS.map((value) => ({ value, percentage: null })),
+          "Questing Level": LEVELS.map((value) => ({
+            value,
+            percentage: null,
+          })),
+          "Questing XP": XPS.map((value) => ({ value, percentage: null })),
+        };
+      default:
+        return reduceAttributes(
+          collectionAttributesData?.collection?.attributes
+        );
+    }
+  }, [collectionAttributesData?.collection?.attributes, collectionName]);
 
   const { data: statData } = useQuery(
     ["stats", formattedAddress],
@@ -369,9 +441,8 @@ const Collection = () => {
   const isERC1155 =
     collectionData?.collection?.standard === TokenStandard.ERC1155;
 
-  const isBridgeworldItem = BridgeworldItems.includes(
-    getCollectionNameFromAddress(formattedAddress, chainId) || ""
-  );
+  const isBridgeworldItem = BridgeworldItems.includes(collectionName ?? "");
+  const isLegion = collectionName?.startsWith("Legion");
 
   const searchFilters = React.useMemo(
     () => formatSearchFilter(formattedSearch),
@@ -386,10 +457,96 @@ const Collection = () => {
         filters: searchFilters,
       }),
     {
-      enabled: searchFilters.length > 0,
+      enabled: searchFilters.length > 0 && !isBridgeworldItem,
       refetchInterval: false,
     }
   );
+
+  const {
+    data: filteredLegionData,
+    isLoading: isFilterLegionDataLoading,
+    fetchNextPage: fetchMoreTokens,
+    hasNextPage: hasMoreTokens,
+  } = useInfiniteQuery(
+    ["legion-filtered-tokens", { filters }] as const,
+    ({ pageParam, queryKey }) => {
+      const filters = Object.entries(queryKey[1].filters).reduce(
+        (acc, [key, [value]]) => {
+          switch (key) {
+            case "Summon Fatigue":
+              acc["cooldown_gte"] = addDays(new Date(), Number(value[0]))
+                .getTime()
+                .toString();
+
+              break;
+            case "Times Summoned":
+              acc["summons_in"] = value.split(",");
+
+              break;
+            case "Atlas Mine Boost":
+              acc["boost_in"] = value
+                .split(",")
+                .map(
+                  (choice) =>
+                    BOOST[
+                      attributeFilterList?.["Atlas Mine Boost"]?.findIndex(
+                        (item) => item.value === choice
+                      ) ?? 0
+                    ]
+                );
+
+              break;
+            case "Crafting Level":
+            case "Questing Level":
+              acc[`${key.toLowerCase().replace(" level", "")}_in`] = value
+                .split(",")
+                .map(Number);
+
+              break;
+            case "Crafting XP":
+            case "Questing XP":
+              acc[`${key.toLowerCase().replace(" xp", "")}_gte`] = Number(
+                value.split(",")[0].replace(/[^\d]+/, "")
+              );
+
+              break;
+            default:
+              acc[`${key.toLowerCase()}_in`] = value.split(",");
+          }
+
+          return acc;
+        },
+        {}
+      );
+
+      return bridgeworld.getFilteredLegions({
+        filters: { ...filters, id_gt: pageParam },
+      });
+    },
+    {
+      enabled: searchFilters.length > 0 && isLegion,
+      getNextPageParam: (last) => {
+        const { legionInfos } = last;
+
+        if (legionInfos.length < 1000) {
+          return;
+        }
+
+        const [{ id }] = legionInfos.slice(-1);
+
+        return id;
+      },
+      refetchInterval: false,
+    }
+  );
+
+  const isFilterBridgeworldDataLoading = isFilterLegionDataLoading;
+
+  React.useEffect(() => {
+    if (hasMoreTokens) {
+      fetchMoreTokens();
+    }
+  }, [fetchMoreTokens, hasMoreTokens]);
 
   const {
     data: searchedMarketplaceData,
@@ -436,10 +593,14 @@ const Collection = () => {
 
   const filteredTokenIds = React.useMemo(
     () => [
-      ...(filteredData?.tokens?.map((token) => token.id) ?? []),
+      ...(
+        filteredLegionData?.pages?.map((page) =>
+          page.legionInfos.map((token) => token.id.replace("-metadata", ""))
+        ) ?? []
+      ).flat(),
       ...searchedData,
     ],
-    [filteredData, searchedData]
+    [filteredLegionData?.pages, searchedData]
   );
 
   const {
@@ -518,6 +679,7 @@ const Collection = () => {
       }),
     {
       enabled: !!formattedAddress && !!listingData && isBridgeworldItem,
+      refetchInterval: false,
       keepPreviousData: true,
     }
   );
@@ -699,7 +861,9 @@ const Collection = () => {
                                         </label>
                                       </div>
                                       <p className="text-gray-400 dark:text-gray-500">
-                                        {formatPercent(percentage)}
+                                        {percentage !== null
+                                          ? formatPercent(percentage)
+                                          : ""}
                                       </p>
                                     </div>
                                   )
@@ -859,6 +1023,11 @@ const Collection = () => {
                       (a, b) =>
                         parseFloat(a.percentage) - parseFloat(b.percentage)
                     );
+
+                    if (attributes.length === 0) {
+                      return null;
+                    }
+
                     return (
                       <Disclosure
                         as="div"
@@ -938,7 +1107,8 @@ const Collection = () => {
                                           checked={
                                             filters[attributeKey]?.[0]
                                               .split(",")
-                                              .includes(value) ?? false
+                                              .includes(value.toString()) ??
+                                            false
                                           }
                                           type="checkbox"
                                           className="h-4 w-4 border-gray-300 rounded accent-red-500"
@@ -951,7 +1121,9 @@ const Collection = () => {
                                         </label>
                                       </div>
                                       <p className="text-gray-400 dark:text-gray-500">
-                                        {formatPercent(percentage)}
+                                        {percentage !== null
+                                          ? formatPercent(percentage)
+                                          : ""}
                                       </p>
                                     </div>
                                   )
@@ -1093,6 +1265,7 @@ const Collection = () => {
               collectionData &&
               !isListingLoading &&
               !isFilterDataLoading &&
+              !isFilterBridgeworldDataLoading &&
               !isSearchedDataLoading ? (
                 <section aria-labelledby="products-heading" className="my-8">
                   <h2 id="products-heading" className="sr-only">
