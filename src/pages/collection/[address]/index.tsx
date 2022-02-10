@@ -85,6 +85,16 @@ const XPS = Array(20)
   .fill("")
   .map((_, index) => `>= ${index * 10}`);
 
+const CATEGORY = [
+  "Alchemy",
+  "Arcana",
+  "Brewing",
+  "Enchanter",
+  "Leatherworking",
+  "Smithing",
+];
+const TIERS = LEVELS.slice(0, 5);
+
 const generateDescription = (contract: string, chainId: ChainId) => {
   const collectionName = getCollectionNameFromAddress(contract, chainId);
 
@@ -376,6 +386,11 @@ const Collection = () => {
 
   const attributeFilterList = React.useMemo(() => {
     switch (true) {
+      case collectionName === "Treasures":
+        return {
+          Category: CATEGORY.map((value) => ({ value, percentage: null })),
+          Tier: TIERS.map((value) => ({ value, percentage: null })),
+        };
       case collectionName?.startsWith("Legion"):
         return {
           Role: (collectionName?.includes("Genesis") ? ROLES : AUX_ROLES).map(
@@ -442,6 +457,7 @@ const Collection = () => {
     collectionData?.collection?.standard === TokenStandard.ERC1155;
 
   const isBridgeworldItem = BridgeworldItems.includes(collectionName ?? "");
+  const isTreasure = collectionName === "Treasures";
   const isLegion = collectionName?.startsWith("Legion");
 
   const searchFilters = React.useMemo(
@@ -461,6 +477,29 @@ const Collection = () => {
       refetchInterval: false,
     }
   );
+
+  const { data: filteredTreasureData, isLoading: isFilterTreasureDataLoading } =
+    useQuery(
+      ["treasure-filtered-tokens", { filters }] as const,
+      ({ queryKey }) => {
+        const filters = Object.entries(queryKey[1].filters).reduce(
+          (acc, [key, [value]]) => {
+            acc[`${key.toLowerCase()}_in`] = value
+              .split(",")
+              .map((item) => (key === "Tier" ? Number(item) : item));
+
+            return acc;
+          },
+          {}
+        );
+
+        return bridgeworld.getFilteredTreasures({ filters });
+      },
+      {
+        enabled: searchFilters.length > 0 && isTreasure,
+        refetchInterval: false,
+      }
+    );
 
   const {
     data: filteredLegionData,
@@ -540,7 +579,8 @@ const Collection = () => {
     }
   );
 
-  const isFilterBridgeworldDataLoading = isFilterLegionDataLoading;
+  const isFilterBridgeworldDataLoading =
+    isFilterLegionDataLoading || isFilterTreasureDataLoading;
 
   React.useEffect(() => {
     if (hasMoreTokens) {
@@ -598,9 +638,16 @@ const Collection = () => {
           page.legionInfos.map((token) => token.id.replace("-metadata", ""))
         ) ?? []
       ).flat(),
+      ...(filteredTreasureData?.treasureInfos?.map((token) =>
+        token.id.replace("-metadata", "")
+      ) ?? []),
       ...searchedData,
     ],
-    [filteredLegionData?.pages, searchedData]
+    [
+      filteredLegionData?.pages,
+      filteredTreasureData?.treasureInfos,
+      searchedData,
+    ]
   );
 
   const {
@@ -611,15 +658,24 @@ const Collection = () => {
     [
       "listings",
       { formattedAddress, sortParam, searchParams, search, filteredTokenIds },
-    ],
-    ({ queryKey, pageParam = 0 }) =>
-      marketplace.getCollectionListings({
+    ] as const,
+    ({ queryKey, pageParam = 0 }) => {
+      const tokenName = queryKey[1].searchParams;
+      const erc1155Filters = { collection: formattedAddress };
+
+      if (tokenName) {
+        erc1155Filters["name_contains"] = tokenName;
+      }
+
+      if (filteredTokenIds.length > 0) {
+        erc1155Filters["id_in"] = filteredTokenIds;
+      }
+
+      return marketplace.getCollectionListings({
         id: formattedAddress,
         isERC1155,
         isERC721: !isERC1155 && filteredTokenIds.length === 0,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        tokenName: queryKey[1].searchParams,
+        tokenName,
         skipBy: pageParam,
         first: MAX_ITEMS_PER_PAGE,
         orderBy: sort
@@ -629,8 +685,10 @@ const Collection = () => {
           ? MapSortToEnum(Array.isArray(sort) ? sort[0] : sort)
           : OrderDirection.asc,
         filteredTokenIds,
+        erc1155Filters,
         withFilters: !isERC1155 && filteredTokenIds.length > 0,
-      }),
+      });
+    },
     {
       enabled: !!formattedAddress && !!collectionData,
       getNextPageParam: (_, pages) => pages.length * MAX_ITEMS_PER_PAGE,
@@ -653,6 +711,7 @@ const Collection = () => {
       }),
     {
       enabled: !!formattedAddress && !!listingData && !isBridgeworldItem,
+      refetchInterval: false,
       keepPreviousData: true,
     }
   );

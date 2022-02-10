@@ -48,3 +48,11 @@ export const getFilteredLegions = gql`
     }
   }
 `;
+
+export const getFilteredTreasures = gql`
+  query getFilteredTreasures($filters: TreasureInfo_filter!) {
+    treasureInfos(first: 200, where: $filters) {
+      id
+    }
+  }
+`;

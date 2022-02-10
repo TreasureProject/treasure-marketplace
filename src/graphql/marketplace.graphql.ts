@@ -95,6 +95,7 @@ export const getCollectionListings = gql`
     $first: Int!
     $orderBy: Listing_orderBy!
     $filteredTokenIds: [String!]!
+    $erc1155Filters: Token_filter!
     $isERC721: Boolean!
     $isERC1155: Boolean!
     $withFilters: Boolean!
@@ -103,7 +104,7 @@ export const getCollectionListings = gql`
       first: 1000
       orderBy: floorPrice
       orderDirection: $orderDirection
-      where: { collection: $id, name_contains: $tokenName }
+      where: $erc1155Filters
     ) @include(if: $isERC1155) {
       __typename
       id
@@ -121,7 +122,6 @@ export const getCollectionListings = gql`
       orderDirection: $orderDirection
       where: { status: Active, collection: $id }
     ) @include(if: $isERC721) {
-      __typename
       ...TokenListing
     }
     filtered: listings(
@@ -136,6 +136,7 @@ export const getCollectionListings = gql`
   }
 
   fragment TokenListing on Listing {
+    __typename
     seller {
       id
     }
