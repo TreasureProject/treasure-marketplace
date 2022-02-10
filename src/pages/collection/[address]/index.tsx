@@ -466,12 +466,15 @@ const Collection = () => {
   );
 
   const { data: filteredData, isLoading: isFilterDataLoading } = useQuery(
-    ["filtered-tokens", filters, searchFilters],
-    () =>
-      client.getFilteredTokens({
-        collection: formattedAddress,
-        filters: searchFilters,
-      }),
+    ["filtered-tokens", formattedAddress, filters, searchFilters],
+    () => {
+      const ids = searchFilters.map(
+        (filter) =>
+          `${formattedAddress}-${filter.toLowerCase().replace(",", "-")}`
+      );
+
+      return client.getFilteredTokens({ ids });
+    },
     {
       enabled: searchFilters.length > 0 && !isBridgeworldItem,
       refetchInterval: false,
@@ -631,8 +634,31 @@ const Collection = () => {
     [searchedLegionsData, searchedMarketplaceData]
   );
 
-  const filteredTokenIds = React.useMemo(
-    () => [
+  const filteredTokenIds = React.useMemo(() => {
+    const filtersBySection =
+      filteredData?.attributes?.reduce((acc, value) => {
+        const { id, _tokenIds } = value;
+        const [, key] = id.split("-");
+
+        acc[key] ??= [];
+        acc[key] = Array.from(new Set([...acc[key], ..._tokenIds]));
+
+        return acc;
+      }, {}) ?? {};
+    const filters: string[] = Object.keys(filtersBySection)
+      .reduce((acc, key) => {
+        const items = filtersBySection[key];
+
+        return acc.length > 0
+          ? acc.filter((item) => items.includes(item))
+          : items;
+      }, [])
+      .map(
+        (tokenId: string) =>
+          `${formattedAddress}-0x${Number(tokenId).toString(16)}`
+      );
+
+    return [
       ...(
         filteredLegionData?.pages?.map((page) =>
           page.legionInfos.map((token) => token.id.replace("-metadata", ""))
@@ -641,14 +667,16 @@ const Collection = () => {
       ...(filteredTreasureData?.treasureInfos?.map((token) =>
         token.id.replace("-metadata", "")
       ) ?? []),
+      ...filters,
       ...searchedData,
-    ],
-    [
-      filteredLegionData?.pages,
-      filteredTreasureData?.treasureInfos,
-      searchedData,
-    ]
-  );
+    ];
+  }, [
+    filteredData?.attributes,
+    filteredLegionData?.pages,
+    filteredTreasureData?.treasureInfos,
+    formattedAddress,
+    searchedData,
+  ]);
 
   const {
     data: listingData,
@@ -659,9 +687,15 @@ const Collection = () => {
       "listings",
       { formattedAddress, sortParam, searchParams, search, filteredTokenIds },
     ] as const,
-    ({ queryKey, pageParam = 0 }) => {
-      const tokenName = queryKey[1].searchParams;
+    ({ queryKey: [, queryKey], pageParam = 0 }) => {
+      const tokenName = queryKey.searchParams;
+      const hasFilters = Boolean(queryKey.search);
       const erc1155Filters = { collection: formattedAddress };
+
+      // No results from filtering
+      if (hasFilters && filteredTokenIds.length === 0) {
+        return Promise.resolve({ filtered: [] });
+      }
 
       if (tokenName) {
         erc1155Filters["name_contains"] = tokenName;

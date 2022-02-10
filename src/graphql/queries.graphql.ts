@@ -66,12 +66,10 @@ export const getTokenMetadata = gql`
 `;
 
 export const getFilteredTokens = gql`
-  query getFilteredTokens($collection: String!, $filters: [String!]!) {
-    tokens(
-      first: 1000
-      where: { collection: $collection, filters_contains: $filters }
-    ) {
+  query getFilteredTokens($ids: [ID!]!) {
+    attributes(where: { id_in: $ids }) {
       id
+      _tokenIds
     }
   }
 `;
