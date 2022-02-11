@@ -11,7 +11,7 @@ import {
 import { MinusSmIcon, PlusSmIcon } from "@heroicons/react/outline";
 import ImageWrapper from "../../../components/ImageWrapper";
 import {
-  getExplorerAddressLink,
+  Arbitrum,
   shortenAddress,
   shortenIfAddress,
   useEthers,
@@ -909,9 +909,8 @@ export default function Example() {
                                 </dt>
                                 <dd className="mt-1">
                                   <a
-                                    href={getExplorerAddressLink(
-                                      formattedAddress,
-                                      chainId
+                                    href={Arbitrum.getExplorerAddressLink(
+                                      formattedAddress.slice(0, 42)
                                     )}
                                     className="text-red-500 hover:text-red-700 dark:text-gray-200 dark:hover:text-gray-300 text-sm flex items-center space-x-1"
                                     target="_blank"
