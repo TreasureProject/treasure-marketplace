@@ -19,6 +19,8 @@ export const getBridgeworldMetadata = gql`
           role
           type
           summons
+          questingXp
+          craftingXp
         }
         ... on ConsumableInfo {
           id

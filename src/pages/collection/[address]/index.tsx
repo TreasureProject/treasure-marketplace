@@ -1403,10 +1403,49 @@ const Collection = () => {
                               ? legionsMetadata.metadata.role
                               : null;
 
-                          const summonCount =
+                          const legionStats =
                             legionsMetadata?.metadata?.__typename ===
                             "LegionInfo"
-                              ? legionsMetadata.metadata.summons
+                              ? {
+                                  summons: legionsMetadata.metadata.summons,
+                                  summonTotal: collectionName?.includes(
+                                    "Genesis"
+                                  )
+                                    ? "Unlimited"
+                                    : "1",
+                                  questingXp:
+                                    legionsMetadata.metadata.questingXp,
+                                  questing: legionsMetadata.metadata.questing,
+                                  questingTotal:
+                                    legionsMetadata.metadata.questing == 1
+                                      ? 100
+                                      : legionsMetadata.metadata.questing == 2
+                                      ? 200
+                                      : legionsMetadata.metadata.questing == 3
+                                      ? 500
+                                      : legionsMetadata.metadata.questing == 4
+                                      ? 1000
+                                      : legionsMetadata.metadata.questing == 5
+                                      ? 2000
+                                      : null,
+                                  craftingTotal:
+                                    legionsMetadata.metadata.crafting == 1
+                                      ? 140
+                                      : legionsMetadata.metadata.crafting == 2
+                                      ? 160
+                                      : legionsMetadata.metadata.crafting == 3
+                                      ? 160
+                                      : legionsMetadata.metadata.crafting == 4
+                                      ? 160
+                                      : legionsMetadata.metadata.crafting == 5
+                                      ? 480
+                                      : legionsMetadata.metadata.crafting == 6
+                                      ? 480
+                                      : null,
+                                  craftingXp:
+                                    legionsMetadata.metadata.craftingXp,
+                                  crafting: legionsMetadata.metadata.crafting,
+                                }
                               : null;
 
                           const metadata = isBridgeworldItem
@@ -1572,13 +1611,32 @@ const Collection = () => {
                                     $MAGIC
                                   </span>
                                 </p>
-                                {summonCount ? (
+                                {legionStats?.summons ? (
                                   <p className="text-xs text-[0.6rem] ml-auto whitespace-nowrap">
                                     <span className="text-gray-500 dark:text-gray-400">
-                                      Times Summoned:
+                                      Summoned:
                                     </span>{" "}
                                     <span className="font-bold text-gray-700 dark:text-gray-300">
-                                      {summonCount}
+                                      {legionStats.summons} /{" "}
+                                      {legionStats.summonTotal}
+                                    </span>
+                                    <br />
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Questing:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      Level {legionStats.questing} (
+                                      {legionStats.questingXp}/
+                                      {legionStats.questingTotal} XP)
+                                    </span>
+                                    <br />
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Crafting:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      Level {legionStats.crafting} (
+                                      {legionStats.craftingXp}/
+                                      {legionStats.craftingTotal} XP)
                                     </span>
                                   </p>
                                 ) : null}
