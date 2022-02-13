@@ -55,10 +55,11 @@ import Button from "../../../components/Button";
 import { Modal } from "../../../components/Modal";
 import { BigNumber } from "@ethersproject/bignumber";
 import { BridgeworldItems, Contracts } from "../../../const";
-import { targetNftT } from "../../../types";
+import { BridgeworldToken, targetNftT } from "../../../types";
 import { Tooltip } from "../../../components/Tooltip";
 import { utils } from "ethers";
 import { EthIcon, SwapIcon, UsdIcon } from "../../../components/Icons";
+import { normalizeBridgeworldTokenMetadata } from "../../../utils/metadata";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -229,15 +230,16 @@ export default function Example() {
       : null;
   const id = tokenInfo?.id ?? "";
 
-  const isBridgeworldItem = BridgeworldItems.includes(
-    getCollectionNameFromAddress(formattedAddress, chainId) || ""
-  );
+  const collectionName =
+    getCollectionNameFromAddress(formattedAddress, chainId) ?? "";
+  const isBridgeworldItem = BridgeworldItems.includes(collectionName);
+  const isTreasure = collectionName === "Treasures";
 
   const { data: metadataData, isLoading: metadataLoading } = useQuery(
     ["details-metadata", id],
     () => client.getTokenMetadata({ id }),
     {
-      enabled: Boolean(id) && !isBridgeworldItem,
+      enabled: Boolean(id) && !isBridgeworldItem && !isTreasure,
       refetchInterval: false,
     }
   );
@@ -249,95 +251,19 @@ export default function Example() {
     ["details-metadata-bridgeworld", id],
     () => bridgeworld.getBridgeworldMetadata({ ids: [id] }),
     {
-      enabled: Boolean(id) && isBridgeworldItem,
+      enabled: Boolean(id) && (isBridgeworldItem || isTreasure),
       refetchInterval: false,
     }
   );
   const bridgeworldMetadata = BridgeworldMetadataData?.tokens?.[0] ?? null;
   const legacyMetadata = metadataData?.token ?? null;
 
-  const legionMetadataMetadata =
-    (bridgeworldMetadata?.metadata?.__typename === "LegionInfo" &&
-      bridgeworldMetadata.metadata) ||
-    null;
-
   const petsMetadata = getPetsMetadata({
     ...tokenInfo,
     collection: data?.collection ?? { name: "" },
   } as any);
   const metadata = bridgeworldMetadata
-    ? {
-        attributes: legionMetadataMetadata
-          ? [
-              {
-                attribute: {
-                  name: "Atlas Mine Boost",
-                  value: formatPercent(legionMetadataMetadata.boost),
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Summon Fatigue",
-                  value: legionMetadataMetadata.cooldown
-                    ? formatDistanceToNow(
-                        Number(legionMetadataMetadata.cooldown.toString())
-                      )
-                    : "None",
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Crafting Level",
-                  value: legionMetadataMetadata.crafting,
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Questing Level",
-                  value: legionMetadataMetadata.questing,
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Rarity",
-                  value: legionMetadataMetadata.rarity,
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Class",
-                  value: legionMetadataMetadata.role,
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Type",
-                  value: legionMetadataMetadata.type,
-                  percentage: null,
-                },
-              },
-              {
-                attribute: {
-                  name: "Times Summoned",
-                  value: formatNumber(
-                    Number(legionMetadataMetadata.summons.toString())
-                  ),
-                  percentage: null,
-                },
-              },
-            ]
-          : [],
-        id,
-        description: "Legions",
-        image: bridgeworldMetadata.image,
-        name: bridgeworldMetadata.name,
-      }
+    ? normalizeBridgeworldTokenMetadata(bridgeworldMetadata as BridgeworldToken)
     : legacyMetadata?.metadata
     ? {
         ...legacyMetadata.metadata,
@@ -348,9 +274,10 @@ export default function Example() {
       }
     : (petsMetadata?.metadata as any) ?? null;
 
-  const allMetadataLoaded = isBridgeworldItem
-    ? !bridgeworldMetadataLoading && bridgeworldMetadata
-    : !metadataLoading && metadataData;
+  const allMetadataLoaded =
+    isBridgeworldItem || isTreasure
+      ? !bridgeworldMetadataLoading && bridgeworldMetadata
+      : !metadataLoading && metadataData;
 
   const loading = isLoading || isIdle || !allMetadataLoaded;
 

@@ -1,7 +1,17 @@
 import {
+  ConsumableInfo,
+  LegionInfo,
+  Token,
+  TreasureInfo,
+} from "../generated/bridgeworld.graphql";
+import {
   ListingFieldsWithTokenFragment,
   TokenStandard,
 } from "../generated/marketplace.graphql";
+
+export type BridgeworldToken = Token & {
+  metadata: ConsumableInfo | LegionInfo | TreasureInfo;
+};
 
 export type NormalizedMetadata = Partial<{
   attributes: Array<{

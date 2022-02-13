@@ -25,6 +25,12 @@ export const getBridgeworldMetadata = gql`
           type
           size
         }
+        ... on TreasureInfo {
+          id
+          boost
+          category
+          tier
+        }
       }
     }
   }
