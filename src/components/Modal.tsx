@@ -9,15 +9,27 @@ type ModalProps = {
   hideCloseIcon?: boolean;
   children: React.ReactNode;
   className?: string;
+  zIndex?: string;
 };
 
 export const Modal = React.forwardRef<HTMLElement, ModalProps>(
-  ({ onClose, isOpen, title, children, className, hideCloseIcon }, ref) => {
+  (
+    {
+      onClose,
+      isOpen,
+      title,
+      children,
+      className,
+      hideCloseIcon,
+      zIndex = "30",
+    },
+    ref
+  ) => {
     return (
       <Transition.Root show={isOpen} as={React.Fragment}>
         <Dialog
           as="div"
-          className="fixed z-30 inset-0 overflow-y-auto"
+          className={`fixed z-${zIndex} inset-0 overflow-y-auto`}
           onClose={onClose}
           initialFocus={
             ref as React.MutableRefObject<HTMLElement | null> | undefined

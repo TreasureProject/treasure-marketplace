@@ -46,6 +46,7 @@ import { TokenStandard } from "../../../generated/queries.graphql";
 import { useMagic } from "../../context/magicContext";
 import Listings from "../../components/Listings";
 import { ListingFieldsFragment } from "../../../generated/marketplace.graphql";
+import { Modal } from "../../components/Modal";
 
 type DrawerProps = {
   actions: Array<"create" | "remove" | "update">;
@@ -79,6 +80,31 @@ const defaultTabs = [
 const startCase = (text: string) =>
   text.slice(0, 1).toUpperCase().concat(text.slice(1));
 
+function WarningModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Modal onClose={onClose} isOpen={isOpen} title="Warning" zIndex="50">
+      <div className="mt-6 text-xs text-gray-700 dark:text-gray-300">
+        <p>
+          The current listing price is 10% or more below the current floor
+          price.
+        </p>
+      </div>
+      <Button
+        className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm disabled:opacity-30 disabled:pointer-events-none"
+        onClick={onClose}
+      >
+        Okay
+      </Button>
+    </Modal>
+  );
+}
+
 const Drawer = ({
   actions,
   needsContractApproval,
@@ -102,7 +128,8 @@ const Drawer = ({
       : dates[3]
   );
   const [priceBelowFloorWarning, setPriceBelowFloorWarning] = useState(false);
-  const [show, toggle] = useReducer((value) => !value, true);
+  const [showDrawer, toggleDrawer] = useReducer((value) => !value, true);
+  const [showModal, setShowModal] = useState(false);
 
   const approveContract = useApproveContract(nft.address, nft.standard);
   const createListing = useCreateListing();
@@ -118,15 +145,31 @@ const Drawer = ({
       updateListing.state.status,
     ].includes("Mining");
 
-  const { data: statData } = useQuery(
-    ["stats", nft.collectionId],
+  const floorPrice = useQuery(
+    ["floor-price", nft.collectionId, nft.tokenId],
     () =>
-      marketplace.getCollectionStats({
-        id: nft.collectionId,
+      marketplace.getFloorPrice({
+        collection: nft.collectionId,
+        tokenId: nft.tokenId,
       }),
     {
-      enabled: !!nft.collectionId,
+      select: ({ collection }) => {
+        if (!collection) {
+          return "0";
+        }
+
+        return (
+          (collection.standard === TokenStandard.ERC1155
+            ? collection.tokens[0].floorPrice
+            : collection.floorPrice) ?? "0"
+        );
+      },
     }
+  );
+
+  const floorThreshold = useMemo(
+    () => Number(floorPrice?.data ?? "0") / 10 ** 18,
+    [floorPrice?.data]
   );
 
   useEffect(() => {
@@ -137,7 +180,7 @@ const Drawer = ({
         updateListing.state.status,
       ].includes("Success")
     ) {
-      toggle();
+      toggleDrawer();
     }
   }, [
     createListing.state.status,
@@ -145,12 +188,18 @@ const Drawer = ({
     updateListing.state.status,
   ]);
 
+  useEffect(() => {
+    const warning = !!price && Number(price) < floorThreshold;
+
+    setPriceBelowFloorWarning(warning);
+  }, [floorThreshold, price]);
+
   return (
-    <Transition.Root appear show={show} as={Fragment}>
+    <Transition.Root appear show={showDrawer} as={Fragment}>
       <Dialog
         as="div"
         className="fixed inset-0 overflow-hidden z-50"
-        onClose={toggle}
+        onClose={toggleDrawer}
       >
         <div className="absolute inset-0 overflow-hidden">
           <Dialog.Overlay className="absolute inset-0 bg-gray-300 dark:bg-gray-600 opacity-60" />
@@ -178,7 +227,7 @@ const Drawer = ({
                         <button
                           type="button"
                           className="bg-white dark:bg-transparent rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          onClick={toggle}
+                          onClick={toggleDrawer}
                         >
                           <span className="sr-only">Close panel</span>
                           <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -209,6 +258,11 @@ const Drawer = ({
                         </div>
                       </div>
 
+                      <WarningModal
+                        isOpen={showModal}
+                        onClose={() => setShowModal(false)}
+                      />
+
                       {needsContractApproval ? (
                         <Button
                           isLoading={approveContract.state.status === "Mining"}
@@ -222,18 +276,29 @@ const Drawer = ({
                         <>
                           <div className="space-y-4">
                             <div>
-                              <label
-                                htmlFor="price"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                              >
-                                Price
-                                {nft.standard === TokenStandard.ERC1155
-                                  ? " Per Item"
-                                  : ""}
-                              </label>
-                              <p className="text-xs text-gray-500 my-1">
-                                * No need for decimals as a separator.
-                              </p>
+                              <div className="flex justify-between text-sm font-medium">
+                                <label
+                                  htmlFor="price"
+                                  className="text-gray-700 dark:text-gray-300"
+                                >
+                                  Price
+                                  {nft.standard === TokenStandard.ERC1155
+                                    ? " Per Item"
+                                    : ""}
+                                </label>
+                                <button
+                                  className="text-gray-500 dark:text-gray-400 transition-colors duration-300 motion-reduce:transition-none hover:text-red-500"
+                                  onClick={() =>
+                                    setPrice(
+                                      formatEther(
+                                        floorPrice?.data ?? "0"
+                                      ).replace(/\.0$/, "")
+                                    )
+                                  }
+                                >
+                                  Floor price
+                                </button>
+                              </div>
                               <div className="mt-1 relative rounded-md shadow-sm">
                                 <input
                                   type="number"
@@ -248,22 +313,21 @@ const Drawer = ({
                                   onWheel={(event) =>
                                     (event.target as HTMLInputElement).blur()
                                   }
+                                  onBlur={() => {
+                                    if (priceBelowFloorWarning) {
+                                      setShowModal(true);
+                                    }
+                                  }}
                                   onChange={(event) => {
                                     const { value, maxLength } = event.target;
                                     const price = value.slice(0, maxLength);
                                     const emptyPrice = price === "";
+
                                     setPrice(
                                       emptyPrice
                                         ? ""
                                         : String(Math.abs(parseFloat(price)))
                                     );
-
-                                    const warning =
-                                      !emptyPrice &&
-                                      Number(price) <
-                                        statData?.collection?.floorPrice /
-                                          10 ** 18;
-                                    setPriceBelowFloorWarning(warning);
                                   }}
                                   value={price}
                                   disabled={isFormDisabled}
@@ -279,9 +343,7 @@ const Drawer = ({
                               </div>
                               <p className="flex text-red-600 text-[0.75rem] mt-1 h-[1rem]">
                                 {priceBelowFloorWarning &&
-                                  `Price is below floor of ${
-                                    statData?.collection?.floorPrice / 10 ** 18
-                                  } $MAGIC`}
+                                  `Price is below floor of ${floorThreshold} $MAGIC`}
                               </p>
                             </div>
                             <div>

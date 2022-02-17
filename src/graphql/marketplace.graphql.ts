@@ -305,3 +305,15 @@ export const getCollectionsListedTokens = gql`
     }
   }
 `;
+
+export const getFloorPrice = gql`
+  query getFloorPrice($collection: ID!, $tokenId: BigInt!) {
+    collection(id: $collection) {
+      floorPrice
+      standard
+      tokens(where: { tokenId: $tokenId }) {
+        floorPrice
+      }
+    }
+  }
+`;
