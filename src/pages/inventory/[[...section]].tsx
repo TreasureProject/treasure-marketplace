@@ -841,7 +841,7 @@ const Inventory = () => {
   }, [allCollections, data]);
 
   const { data: metadataData } = useQuery(
-    ["inventory-metadata", tokens],
+    ["metadata", tokens],
     () => client.getTokensMetadata({ ids: tokens }),
     {
       enabled: tokens.length > 0,
@@ -850,7 +850,7 @@ const Inventory = () => {
   );
 
   const { data: bridgeworldMetadata } = useQuery(
-    ["inventory-metadata-bridgeworld", bridgeworldTokens],
+    ["metadata-bridgeworld", bridgeworldTokens],
     () => bridgeworld.getBridgeworldMetadata({ ids: bridgeworldTokens }),
     {
       enabled: bridgeworldTokens.length > 0,
@@ -859,7 +859,7 @@ const Inventory = () => {
   );
 
   const { data: smolverseMetadata } = useQuery(
-    ["inventory-metadata-smolverse", smolverseTokens],
+    ["metadata-smolverse", smolverseTokens],
     () => smolverse.getSmolverseMetadata({ ids: smolverseTokens }),
     {
       enabled: smolverseTokens.length > 0,
@@ -869,7 +869,7 @@ const Inventory = () => {
 
   const battleflyMetadatas = useQueries(
     battleflyTokens.map((id) => ({
-      queryKey: ["inventory-metadata-bf", id],
+      queryKey: ["metadata-bf", id],
       queryFn: () =>
         fetch(
           `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/battleflies/${parseInt(
@@ -884,7 +884,7 @@ const Inventory = () => {
 
   const foundersMetadatas = useQueries(
     foundersTokens.map((id) => ({
-      queryKey: ["inventory-metadata-fs", id],
+      queryKey: ["metadata-fs", id],
       queryFn: () =>
         fetch(
           `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/specials/${parseInt(

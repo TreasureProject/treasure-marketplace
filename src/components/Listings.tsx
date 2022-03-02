@@ -12,10 +12,9 @@ import { formatDistanceToNow } from "date-fns";
 import {
   formatPrice,
   getCollectionSlugFromName,
-  getCollectionNameFromAddress,
   getPetsMetadata,
 } from "../utils";
-import { useChainId } from "../lib/hooks";
+import { useCollections } from "../lib/hooks";
 import { shortenAddress, useEthers } from "@usedapp/core";
 import { useRouter } from "next/router";
 import ImageWrapper from "./ImageWrapper";
@@ -23,7 +22,7 @@ import QueryLink from "./QueryLink";
 import classNames from "clsx";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
-import { useQuery } from "react-query";
+import { useQueries, useQuery } from "react-query";
 import { bridgeworld, client, smolverse } from "../lib/client";
 import { BridgeworldItems, smolverseItems } from "../const";
 
@@ -46,19 +45,31 @@ const Listings: FC<ListingProps> = ({
   includeStatus,
 }) => {
   const router = useRouter();
-  const chainId = useChainId();
   const { account } = useEthers();
 
-  const { tokens, bridgeworldTokens, smolverseTokens } = useMemo(() => {
+  const collections = useCollections();
+
+  const {
+    tokens,
+    battleflyTokens,
+    bridgeworldTokens,
+    foundersTokens,
+    smolverseTokens,
+  } = useMemo(() => {
     return listings.reduce(
       (acc, { collection, token }) => {
         const collectionName =
-          getCollectionNameFromAddress(collection.id, chainId) ?? "";
+          collections.find(({ address }) => address === collection.id)?.name ??
+          "";
 
         if (BridgeworldItems.includes(collectionName)) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
+        } else if (collectionName === "BattleFly") {
+          acc.battleflyTokens.push(token.id);
+        } else if (collectionName.startsWith("BattleFly")) {
+          acc.foundersTokens.push(token.id);
         } else {
           acc.tokens.push(token.id);
         }
@@ -67,14 +78,16 @@ const Listings: FC<ListingProps> = ({
       },
       {
         tokens: [] as string[],
+        battleflyTokens: [] as string[],
         bridgeworldTokens: [] as string[],
+        foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
       }
     );
-  }, [chainId, listings]);
+  }, [collections, listings]);
 
   const { data: metadataData } = useQuery(
-    ["activity-metadata", tokens],
+    ["metadata", tokens],
     () => client.getTokensMetadata({ ids: tokens }),
     {
       enabled: tokens.length > 0,
@@ -83,7 +96,7 @@ const Listings: FC<ListingProps> = ({
   );
 
   const { data: legionMetadataData } = useQuery(
-    ["activity-metadata-bridgeworld", bridgeworldTokens],
+    ["metadata-bridgeworld", bridgeworldTokens],
     () => bridgeworld.getBridgeworldMetadata({ ids: bridgeworldTokens }),
     {
       enabled: bridgeworldTokens.length > 0,
@@ -92,12 +105,42 @@ const Listings: FC<ListingProps> = ({
   );
 
   const { data: smolverseMetadata } = useQuery(
-    ["activity-metadata-smolverse", smolverseTokens],
+    ["metadata-smolverse", smolverseTokens],
     () => smolverse.getSmolverseMetadata({ ids: smolverseTokens }),
     {
       enabled: smolverseTokens.length > 0,
       refetchInterval: false,
     }
+  );
+
+  const battleflyMetadatas = useQueries(
+    battleflyTokens.map((id) => ({
+      queryKey: ["metadata-bf", id],
+      queryFn: () =>
+        fetch(
+          `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/battleflies/${parseInt(
+            id.slice(45),
+            16
+          )}/metadata`
+        ).then((res) => res.json()),
+      select: (data) => ({ id, ...data }),
+      refetchInterval: false as const,
+    }))
+  );
+
+  const foundersMetadatas = useQueries(
+    foundersTokens.map((id) => ({
+      queryKey: ["metadata-fs", id],
+      queryFn: () =>
+        fetch(
+          `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/specials/${parseInt(
+            id.slice(45),
+            16
+          )}/metadata`
+        ).then((res) => res.json()),
+      select: (data) => ({ id, ...data }),
+      refetchInterval: false as const,
+    }))
   );
 
   const getListingStatus = (listing: ListingFieldsFragment) => {
@@ -228,10 +271,9 @@ const Listings: FC<ListingProps> = ({
               </thead>
               <tbody>
                 {listings.map((listing, index) => {
-                  const collectionName = getCollectionNameFromAddress(
-                    listing?.collection?.id,
-                    chainId
-                  );
+                  const collectionName = collections.find(
+                    (item) => item.id === listing?.collection?.id
+                  )?.name;
                   const slugOrAddress =
                     getCollectionSlugFromName(collectionName) ??
                     listing.collection.id;
@@ -245,6 +287,13 @@ const Listings: FC<ListingProps> = ({
                   const svMetadata = smolverseMetadata?.tokens.find(
                     (item) => item?.id === listing.token.id
                   );
+                  const bfMetadata = battleflyMetadatas.find(
+                    (item) => item.data?.id === listing.token.id
+                  )?.data;
+                  const fsMetadata = foundersMetadatas.find(
+                    (item) => item.data?.id === listing.token.id
+                  )?.data;
+
                   const metadata = legionsMetadata
                     ? {
                         id: legionsMetadata.id,
@@ -264,6 +313,28 @@ const Listings: FC<ListingProps> = ({
                         metadata: {
                           image: svMetadata.image ?? "",
                           name: svMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : bfMetadata
+                    ? {
+                        id: bfMetadata.id,
+                        name: bfMetadata.name,
+                        tokenId: listing.token.tokenId,
+                        metadata: {
+                          image: bfMetadata.image ?? "",
+                          name: bfMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : fsMetadata
+                    ? {
+                        id: fsMetadata.id,
+                        name: fsMetadata.name,
+                        tokenId: listing.token.tokenId,
+                        metadata: {
+                          image: fsMetadata.image ?? "",
+                          name: fsMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -365,10 +436,9 @@ const Listings: FC<ListingProps> = ({
             className="mt-2 divide-y divide-gray-200 dark:divide-gray-300 overflow-hidden"
           >
             {listings.map((listing) => {
-              const collectionName = getCollectionNameFromAddress(
-                listing?.collection?.id,
-                chainId
-              );
+              const collectionName = collections.find(
+                (item) => item.id === listing?.collection?.id
+              )?.name;
               const slugOrAddress =
                 getCollectionSlugFromName(collectionName) ??
                 listing.collection.id;
@@ -379,6 +449,16 @@ const Listings: FC<ListingProps> = ({
               const legacyMetadata = metadataData?.tokens.find(
                 (item) => item?.id === listing.token.id
               );
+              const svMetadata = smolverseMetadata?.tokens.find(
+                (item) => item?.id === listing.token.id
+              );
+              const bfMetadata = battleflyMetadatas.find(
+                (item) => item.data?.id === listing.token.id
+              )?.data;
+              const fsMetadata = foundersMetadatas.find(
+                (item) => item.data?.id === listing.token.id
+              )?.data;
+
               const metadata = legionsMetadata
                 ? {
                     id: legionsMetadata.id,
@@ -388,6 +468,39 @@ const Listings: FC<ListingProps> = ({
                       image: legionsMetadata.image,
                       name: legionsMetadata.name,
                       description: collectionName ?? "Legions",
+                    },
+                  }
+                : svMetadata
+                ? {
+                    id: svMetadata.id,
+                    name: svMetadata.name,
+                    tokenId: listing.token.tokenId,
+                    metadata: {
+                      image: svMetadata.image ?? "",
+                      name: svMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : bfMetadata
+                ? {
+                    id: bfMetadata.id,
+                    name: bfMetadata.name,
+                    tokenId: listing.token.tokenId,
+                    metadata: {
+                      image: bfMetadata.image ?? "",
+                      name: bfMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : fsMetadata
+                ? {
+                    id: fsMetadata.id,
+                    name: fsMetadata.name,
+                    tokenId: listing.token.tokenId,
+                    metadata: {
+                      image: fsMetadata.image ?? "",
+                      name: fsMetadata.name,
+                      description: collectionName ?? "",
                     },
                   }
                 : getPetsMetadata({
