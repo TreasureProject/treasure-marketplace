@@ -3,7 +3,7 @@ on:
   deployment_status
 jobs:
   post-deploy:
-    if: ${{ github.event.deployment_status.state == 'success' }}
+    if: ${{ github.event.deployment.environment == 'production' && github.event.deployment_status.state == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Purge Cloudflare Cache

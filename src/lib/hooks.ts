@@ -9,17 +9,18 @@ import {
   useEthers,
 } from "@usedapp/core";
 import { BigNumber, Contract } from "ethers";
-import { Contracts } from "../const";
+import { BridgeworldItems, Contracts, smolverseItems } from "../const";
 import { Interface } from "@ethersproject/abi";
-import { generateIpfsLink } from "../utils";
+import { generateIpfsLink, getPetsMetadata } from "../utils";
 import { toast } from "react-hot-toast";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
 import { TokenStandard } from "../../generated/queries.graphql";
-import { marketplace } from "./client";
+import { bridgeworld, client, marketplace, smolverse } from "./client";
 import { AddressZero } from "@ethersproject/constants";
+import { normalizeBridgeworldTokenMetadata } from "../utils/metadata";
 
 type WebhookBody = {
   address: string;
@@ -69,166 +70,44 @@ export type Collections = {
   [key: number]: CollectionItem[];
 };
 
-export const collections: Collections = {
-  [ChainId.ArbitrumRinkeby]: [
-    {
-      name: "Consumables",
-      address: "0x906369481b258ca3c21a6737bce052d85572a8f3",
-    },
-    {
-      name: "Extra Life",
-      address: AddressZero,
-    },
-    {
-      name: "Keys",
-      address: AddressZero,
-    },
-    {
-      name: "Legion Auxiliary",
-      address: "0x96f791c0c11baee97526d5a9674494805afbec1c-1",
-    },
-    {
-      name: "Legion Genesis",
-      address: "0x96f791c0c11baee97526d5a9674494805afbec1c-0",
-    },
-    // Recruits
-    {
-      name: "Legions",
-      address: "0x96f791c0c11baee97526d5a9674494805afbec1c-2",
-    },
-    {
-      name: "Unpilgrimaged Legion Auxiliary",
-      address: "0x5ffdf09caa5bb19d18dccd93ec97fabbab84f15f",
-    },
-    {
-      name: "Unpilgrimaged Legion Genesis",
-      address: "0x63160c8e00e9b6f30dab7f172e0f9bf0666f75b7",
-    },
+type Collection = Record<"address" | "id" | "name" | "slug", string>;
 
-    {
-      name: "Seed of Life",
-      address: AddressZero,
-    },
-    {
-      name: "Smol Bodies",
-      address: "0x11ff50aa78dad7f559b997fd008722a125105f07",
-    },
-    {
-      name: "Smol Bodies Pets",
-      address: "0x5b5d6709170aa4d36a0661015b495d19875acb14",
-    },
-    {
-      name: "Smol Brains",
-      address: "0x2542421aca04a98f5cf04da97a36dad8f1fac3f4",
-    },
-    {
-      name: "Smol Brains Land",
-      address: "0xf8e004f5447a3d9ae0841fac98523fa89c1ea63d",
-    },
-    {
-      name: "Smol Brains Pets",
-      address: "0xb13177402caaffb4355247ab35490bb13ea63964",
-    },
-    {
-      name: "Smol Treasures",
-      address: "0x8e79c8607a28fe1ec3527991c89f1d9e36d1bad9",
-    },
-    {
-      name: "Treasures",
-      address: "0x6333f38f98f5c46da6f873acbf25dcf8748ddc2c",
-    },
-    {
-      name: "Smol Cars",
-      address: AddressZero,
-    },
-  ],
-  [ChainId.Arbitrum]: [
-    {
-      name: "Consumables",
-      address: "0xf3d00a2559d84de7ac093443bcaada5f4ee4165c",
-    },
-    {
-      name: "Extra Life",
-      address: "0x21e1969884d477afd2afd4ad668864a0eebd644c",
-    },
-    {
-      name: "Keys",
-      address: "0xf0a35ba261ece4fc12870e5b7b9e7790202ef9b5",
-    },
-    {
-      name: "Legion Auxiliary",
-      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-1",
-    },
-    {
-      name: "Legion Genesis",
-      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-0",
-    },
-    // Recruits
-    {
-      name: "Legions",
-      address: "0xfe8c1ac365ba6780aec5a985d989b327c27670a1-2",
-    },
-    {
-      name: "Unpilgrimaged Legion Auxiliary",
-      address: "0x658365026d06f00965b5bb570727100e821e6508",
-    },
-    {
-      name: "Unpilgrimaged Legion Genesis",
-      address: "0xe83c0200e93cb1496054e387bddae590c07f0194",
-    },
-    {
-      name: "Smol Bodies",
-      address: "0x17dacad7975960833f374622fad08b90ed67d1b5",
-    },
-    {
-      name: "Smol Bodies Pets",
-      address: "0xae0d0c4cc3335fd49402781e406adf3f02d41bca",
-    },
-    {
-      name: "Smol Brains",
-      address: "0x6325439389e0797ab35752b4f43a14c004f22a9c",
-    },
-    {
-      name: "Smol Brains Land",
-      address: "0xd666d1cc3102cd03e07794a61e5f4333b4239f53",
-    },
-    {
-      name: "Smol Brains Pets",
-      address: "0xf6cc57c45ce730496b4d3df36b9a4e4c3a1b9754",
-    },
-    {
-      name: "Smol Cars",
-      address: "0xb16966dad2b5a5282b99846b23dcdf8c47b6132c",
-    },
-    {
-      name: "Smol Treasures",
-      address: "0xc5295c6a183f29b7c962df076819d44e0076860e",
-    },
-    {
-      name: "Treasures",
-      address: "0xebba467ecb6b21239178033189ceae27ca12eadf",
-    },
-    {
-      name: "Seed of Life",
-      address: "0x3956c81a51feaed98d7a678d53f44b9166c8ed66",
-    },
-  ],
-};
-
-export function useCollections(): Array<{ address: string; name: string }> {
-  const chainId = useChainId();
-  const { data, isError } = useQuery(
+export function useCollections(): Collection[] {
+  const { data } = useQuery(
     ["collections"],
     () => marketplace.getCollections(),
-    { refetchInterval: false }
+    { refetchInterval: 60_000 }
   );
 
-  return isError
-    ? collections[chainId]
-    : data?.collections.map((item) => ({
-        address: item.contract,
-        name: item.name,
-      })) ?? collections[chainId];
+  return (
+    data?.collections.map((item) => ({
+      address: item.contract,
+      id: item.id,
+      name: item.name,
+      slug: item.name.replace(/\s+/g, "-")?.toLowerCase(),
+    })) ?? []
+  );
+}
+
+export function useCollection(input?: string | string[]) {
+  const collections = useCollections();
+  const slugOrAddress =
+    (Array.isArray(input) ? input[0]?.toLowerCase() : input?.toLowerCase()) ??
+    AddressZero;
+
+  const collection = collections.find(({ address, slug }) =>
+    [address, slug].includes(slugOrAddress)
+  ) ?? { id: "", address: AddressZero, name: "", slug: "" };
+
+  return collection;
+}
+
+export function useCollectionNameFromAddress(
+  tokenAddress: string
+): string | undefined {
+  const collections = useCollections();
+
+  return collections.find(({ address }) => address === tokenAddress)?.name;
 }
 
 export function useTransferNFT(contract: string, standard: TokenStandard) {
@@ -594,3 +473,173 @@ export const useApproveMagic = () => {
     state,
   };
 };
+
+type Metadata = {
+  id: string;
+  description?: string;
+  image?: string | null;
+  name: string;
+};
+
+export function useMetadata(
+  collectionName: string,
+  { id = "", ids = [] }: Partial<{ id: string; ids: string[] }>
+) {
+  const isBridgeworldItem = BridgeworldItems.includes(collectionName);
+  const isSmolverseItem = smolverseItems.includes(collectionName);
+  const isBattleflyItem = collectionName === "BattleFly";
+  const isFoundersItem = collectionName.includes("Founders");
+  const isTreasureItem = collectionName === "Treasures";
+
+  const legacyMetadataResult = useQuery(
+    ["metadata", ids],
+    () => client.getCollectionMetadata({ ids }),
+    {
+      enabled:
+        !!ids &&
+        !isBridgeworldItem &&
+        !isSmolverseItem &&
+        !isBattleflyItem &&
+        !isFoundersItem,
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
+  const tokenMetadataResult = useQuery(
+    ["details-metadata", id],
+    () => client.getTokenMetadata({ id }),
+    {
+      enabled:
+        !!id &&
+        !isBridgeworldItem &&
+        !isTreasureItem &&
+        !isSmolverseItem &&
+        !isBattleflyItem &&
+        !isFoundersItem,
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
+  const bridgeworldMetadataResult = useQuery(
+    ["bw-metadata", ids],
+    () => bridgeworld.getBridgeworldMetadata({ ids }),
+    {
+      enabled: !!ids && (isBridgeworldItem || isTreasureItem),
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
+  const smolverseMetadataResult = useQuery(
+    ["sv-metadata", ids],
+    () => smolverse.getSmolverseMetadata({ ids }),
+    {
+      enabled: !!ids && isSmolverseItem,
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
+  const battleflyMetadataResult = useQuery(
+    ["bf-metadata", id],
+    () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/battleflies/${parseInt(
+          id.slice(45),
+          16
+        )}/metadata`
+      ).then((res) => res.json()),
+    {
+      enabled: !!id && isBattleflyItem,
+      refetchInterval: false,
+      keepPreviousData: true,
+      select: (data) => ({
+        ...data,
+        attributes: data.attributes.map((attribute) => ({ attribute })),
+      }),
+    }
+  );
+
+  const foundersMetadataResult = useQuery(
+    ["founders-metadata", id],
+    () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/specials/${parseInt(
+          id.slice(45),
+          16
+        )}/metadata`
+      ).then((res) => res.json()),
+    {
+      enabled: !!id && isFoundersItem,
+      refetchInterval: false,
+      keepPreviousData: true,
+      select: (data) => ({
+        ...data,
+        attributes: data.attributes.map((attribute) => ({ attribute })),
+      }),
+    }
+  );
+
+  const data = {
+    battlefly: battleflyMetadataResult.data,
+    bridgeworld: bridgeworldMetadataResult.data,
+    legacy: legacyMetadataResult.data,
+    founders: foundersMetadataResult.data,
+    smolverse: smolverseMetadataResult.data,
+    token: tokenMetadataResult.data,
+  };
+
+  const getMetadata = useCallback(
+    (
+      battleflyMetadata?: Metadata,
+      bridgeworldMetadata?: Metadata,
+      foundersMetadata?: Metadata,
+      legacyMetadata?: Metadata,
+      smolverseMetadata?: Metadata,
+      tokenMetadata?: Metadata
+    ) => {
+      const petsMetadata = getPetsMetadata({
+        id: "",
+        tokenId: "",
+        ...tokenMetadata,
+        collection: { name: collectionName },
+      });
+
+      const metadata = bridgeworldMetadata
+        ? normalizeBridgeworldTokenMetadata(bridgeworldMetadata as any)
+        : smolverseMetadata
+        ? {
+            id: smolverseMetadata.id,
+            description: collectionName,
+            image: smolverseMetadata.image,
+            name: smolverseMetadata.name,
+          }
+        : tokenMetadata ??
+          legacyMetadata ??
+          foundersMetadata ??
+          battleflyMetadata ??
+          petsMetadata?.metadata ??
+          null;
+
+      return metadata;
+    },
+    [collectionName]
+  );
+
+  const allMetadataLoaded =
+    isBridgeworldItem || isTreasureItem
+      ? !bridgeworldMetadataResult.isLoading && !!bridgeworldMetadataResult.data
+      : isSmolverseItem
+      ? !smolverseMetadataResult.isLoading && !!smolverseMetadataResult.data
+      : isBattleflyItem
+      ? !battleflyMetadataResult.isLoading && !!battleflyMetadataResult.data
+      : isFoundersItem
+      ? !foundersMetadataResult.isLoading && !!foundersMetadataResult.data
+      : !legacyMetadataResult.isLoading && !!legacyMetadataResult.data && !!id
+      ? !tokenMetadataResult.isLoading && !!tokenMetadataResult.data
+      : true;
+
+  return { allMetadataLoaded, data, getMetadata };
+}

@@ -22,17 +22,14 @@ import {
 import Link from "next/link";
 import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { useRouter } from "next/router";
-import {
-  bridgeworld,
-  client,
-  marketplace,
-  smolverse,
-} from "../../../lib/client";
+import { marketplace } from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
 import {
   useApproveMagic,
   useBuyItem,
   useChainId,
+  useCollection,
+  useMetadata,
   useTransferNFT,
 } from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
@@ -41,9 +38,6 @@ import {
   formatPercent,
   formatPrice,
   formattable,
-  getCollectionNameFromAddress,
-  getPetsMetadata,
-  slugToAddress,
 } from "../../../utils";
 import {
   GetTokenDetailsQuery,
@@ -59,12 +53,11 @@ import { formatEther } from "ethers/lib/utils";
 import Button from "../../../components/Button";
 import { Modal } from "../../../components/Modal";
 import { BigNumber } from "@ethersproject/bignumber";
-import { BridgeworldItems, Contracts, smolverseItems } from "../../../const";
-import { targetNftT } from "../../../types";
+import { Contracts } from "../../../const";
+import { NormalizedMetadata, targetNftT } from "../../../types";
 import { Tooltip } from "../../../components/Tooltip";
 import { utils } from "ethers";
 import { EthIcon, SwapIcon, UsdIcon } from "../../../components/Icons";
-import { normalizeBridgeworldTokenMetadata } from "../../../utils/metadata";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
@@ -113,7 +106,7 @@ const CurrencySwitcher = ({ price }: { price: number }) => {
 //   return "Common";
 // };
 
-export default function Example() {
+export default function TokenDetail() {
   const router = useRouter();
   const { account } = useEthers();
   const queryClient = useQueryClient();
@@ -131,11 +124,9 @@ export default function Example() {
   const { ethPrice } = useMagic();
 
   const formattedTokenId = Array.isArray(tokenId) ? tokenId[0] : tokenId;
-  const chainId = useChainId();
 
-  const formattedAddress = Array.isArray(slugOrAddress)
-    ? slugToAddress(slugOrAddress[0], chainId)
-    : slugToAddress(slugOrAddress?.toLowerCase() ?? AddressZero, chainId);
+  const { id: formattedAddress, name: collectionName } =
+    useCollection(slugOrAddress);
 
   const { data, isLoading, isIdle } = useQuery(
     ["details", formattedAddress],
@@ -146,7 +137,6 @@ export default function Example() {
       }),
     {
       enabled: formattedAddress !== AddressZero && Boolean(formattedTokenId),
-      refetchInterval: false,
     }
   );
 
@@ -235,74 +225,40 @@ export default function Example() {
       : null;
   const id = tokenInfo?.id ?? "";
 
-  const collectionName =
-    getCollectionNameFromAddress(formattedAddress, chainId) ?? "";
-  const isBridgeworldItem = BridgeworldItems.includes(collectionName);
-  const isSmolverseItem = smolverseItems.includes(collectionName);
-  const isTreasure = collectionName === "Treasures";
-
-  const { data: metadataData, isLoading: metadataLoading } = useQuery(
-    ["details-metadata", id],
-    () => client.getTokenMetadata({ id }),
-    {
-      enabled:
-        Boolean(id) && !isBridgeworldItem && !isTreasure && !isSmolverseItem,
-      refetchInterval: false,
-    }
-  );
-
   const {
-    data: BridgeworldMetadataData,
-    isLoading: bridgeworldMetadataLoading,
-  } = useQuery(
-    ["details-metadata-bridgeworld", id],
-    () => bridgeworld.getBridgeworldMetadata({ ids: [id] }),
-    {
-      enabled: Boolean(id) && (isBridgeworldItem || isTreasure),
-      refetchInterval: false,
-    }
-  );
+    allMetadataLoaded,
+    data: metadataData,
+    getMetadata,
+  } = useMetadata(collectionName, {
+    id,
+    ids: [id],
+  });
 
-  const { data: smolverseMetadataData, isLoading: smolverseMetadataLoading } =
-    useQuery(
-      ["details-metadata-smolverse", id],
-      () => smolverse.getSmolverseMetadata({ ids: [id] }),
-      {
-        enabled: Boolean(id) && isSmolverseItem,
-        refetchInterval: false,
-      }
-    );
+  const bridgeworldMetadata = metadataData.bridgeworld?.tokens?.[0];
+  const smolverseMetadata = metadataData.smolverse?.tokens?.[0];
+  const tokenMetadata = metadataData.token?.token?.metadata ?? undefined;
 
-  const bridgeworldMetadata = BridgeworldMetadataData?.tokens?.[0] ?? null;
-  const smolverseMetadata = smolverseMetadataData?.tokens?.[0] ?? null;
-  const legacyMetadata = metadataData?.token ?? null;
+  const metadata = getMetadata(
+    metadataData.battlefly,
+    bridgeworldMetadata,
+    metadataData.founders,
+    undefined,
+    smolverseMetadata,
+    tokenMetadata ? { ...tokenInfo, ...tokenMetadata, id } : undefined
+  ) as NormalizedMetadata;
 
-  const petsMetadata = getPetsMetadata({
-    ...tokenInfo,
-    collection: data?.collection ?? { name: "" },
-  } as any);
-  const metadata = bridgeworldMetadata
-    ? normalizeBridgeworldTokenMetadata(bridgeworldMetadata)
-    : smolverseMetadata
-    ? {
-        id: smolverseMetadata.id,
-        description: collectionName,
-        image: smolverseMetadata.image,
-        name: smolverseMetadata.name,
-      }
-    : legacyMetadata?.metadata
-    ? {
-        ...legacyMetadata.metadata,
-        description: legacyMetadata.metadata.description,
-      }
-    : (petsMetadata?.metadata as any) ?? null;
-
-  const allMetadataLoaded =
-    isBridgeworldItem || isTreasure
-      ? !bridgeworldMetadataLoading && bridgeworldMetadata
-      : isSmolverseItem
-      ? !smolverseMetadataLoading && smolverseMetadata
-      : !metadataLoading && metadataData;
+  const attributes = metadata
+    ? "attributes" in metadata
+      ? (metadata.attributes as {
+          attribute: {
+            id: string;
+            name: string;
+            value: string;
+            percentage?: string | null;
+          };
+        }[]) ?? []
+      : []
+    : [];
 
   const loading = isLoading || isIdle || !allMetadataLoaded;
 
@@ -400,10 +356,9 @@ export default function Example() {
                           </Disclosure.Button>
                         </h3>
                         <Disclosure.Panel as="div">
-                          {metadata?.attributes &&
-                          metadata.attributes.length > 0 ? (
+                          {attributes.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {metadata?.attributes.map(({ attribute }) => {
+                              {attributes.map(({ attribute }) => {
                                 if (attribute.percentage == null) {
                                   return (
                                     <div className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2">
@@ -768,10 +723,9 @@ export default function Example() {
                           </Disclosure.Button>
                         </h3>
                         <Disclosure.Panel as="div" className="pb-6">
-                          {metadata?.attributes &&
-                          metadata.attributes.length > 0 ? (
+                          {attributes.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {metadata?.attributes.map(({ attribute }) => {
+                              {attributes.map(({ attribute }) => {
                                 if (attribute.percentage == null) {
                                   return (
                                     <div className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2">
@@ -893,20 +847,6 @@ export default function Example() {
                                   {data.collection?.standard}
                                 </dd>
                               </div>
-                              {data.collection?.standard ===
-                                TokenStandard.ERC721 && (
-                                <div className="sm:col-span-1">
-                                  <dt className="text-sm font-medium text-gray-500">
-                                    Rank
-                                  </dt>
-                                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-300 space-x-1">
-                                    <span>Coming Soon!</span>
-                                    {/* <span className="text-gray-400">
-                                      ({getRarity(tokenInfo.rank ?? 0)})
-                                    </span> */}
-                                  </dd>
-                                </div>
-                              )}
                             </div>
                           </Disclosure.Panel>
                         </>
@@ -1040,6 +980,7 @@ export default function Example() {
       </div>
       {tokenInfo && data?.collection?.standard && (
         <TransferNFTModal
+          address={formattedAddress}
           isOpen={isTransferModalOpen}
           onClose={() => setTransferModalOpen(false)}
           title={metadata?.name ?? ""}
@@ -1049,6 +990,7 @@ export default function Example() {
       )}
       {modalProps.isOpen && modalProps.targetNft && (
         <PurchaseItemModal
+          address={formattedAddress}
           isOpen={true}
           state={state}
           send={send}
@@ -1103,12 +1045,14 @@ const timelineContent = (
 };
 
 const TransferNFTModal = ({
+  address,
   isOpen,
   onClose,
   title,
   token,
   standard,
 }: {
+  address: string;
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -1128,19 +1072,14 @@ const TransferNFTModal = ({
   const router = useRouter();
 
   const { account } = useEthers();
-  const { address: slugOrAddress, tokenId } = router.query;
-
-  const chainId = useChainId();
-  const normalizedAddress = Array.isArray(slugOrAddress)
-    ? slugToAddress(slugOrAddress[0], chainId)
-    : slugToAddress(slugOrAddress ?? AddressZero, chainId);
+  const { tokenId } = router.query;
 
   const normalizedTokenId = Array.isArray(tokenId)
     ? tokenId[0]
     : tokenId ?? "0";
 
   const { send: transfer, state: transferState } = useTransferNFT(
-    normalizedAddress.slice(0, 42),
+    address.slice(0, 42),
     standard
   );
 
@@ -1222,12 +1161,14 @@ const TransferNFTModal = ({
 };
 
 const PurchaseItemModal = ({
+  address,
   isOpen,
   onClose,
   targetNft,
   state,
   send,
 }: {
+  address: string;
   isOpen: boolean;
   onClose: () => void;
   targetNft: targetNftT;
@@ -1246,15 +1187,9 @@ const PurchaseItemModal = ({
   const { metadata, payload } = targetNft;
   const chainId = useChainId();
 
-  const router = useRouter();
-  const { address: slugOrAddress } = router.query;
   const { magicBalance, ethPrice, setSushiModalOpen } = useMagic();
 
-  const normalizedAddress = (
-    Array.isArray(slugOrAddress)
-      ? slugToAddress(slugOrAddress[0], chainId)
-      : slugToAddress(slugOrAddress ?? AddressZero, chainId)
-  ).slice(0, 42);
+  const normalizedAddress = address.slice(0, 42);
 
   const totalPrice =
     quantity * Number(parseFloat(formatEther(targetNft.payload.pricePerItem)));

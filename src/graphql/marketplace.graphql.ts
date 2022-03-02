@@ -251,6 +251,7 @@ export const getTokenExistsInWallet = gql`
 export const getCollections = gql`
   query getCollections {
     collections(orderBy: name, where: { name_not: "Legions" }) {
+      id
       contract
       name
     }

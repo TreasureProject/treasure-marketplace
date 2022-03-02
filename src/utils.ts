@@ -1,23 +1,18 @@
 import { formatEther } from "ethers/lib/utils";
 import { BigNumberish } from "ethers";
-import { ChainId } from "@usedapp/core";
-import { collections } from "./lib/hooks";
-import { utils } from "ethers";
 
 const UNITS = ["", "K", "M", "B", "T", "Q"];
 
 function toFixed(num: number, fixed: number) {
   const formatted = parseFloat(num.toFixed(2));
   const re = new RegExp("^-?\\d+(?:.\\d{0," + (fixed || -1) + "})?");
-
   const numStr = formatted.toString().match(re);
+
   return numStr ? numStr[0] : formatted.toString();
 }
 
 export const generateIpfsLink = (hash: string) => {
-  const removedIpfs = hash.startsWith("ipfs:")
-    ? hash.substring(7)
-    : hash.replace("https://gateway.pinata.cloud/ipfs/", "");
+  const removedIpfs = hash.replace(/.+\/(Qm[^\/]+)/, "$1");
 
   return `https://ipfs.io/ipfs/${removedIpfs}`;
 };
@@ -59,31 +54,13 @@ export const abbreviatePrice = (number: string) => {
   return formatted_number.toFixed(1).replace(/\.0+$/, "") + unit;
 };
 
-export function slugToAddress(slugOrAddress: string, chainId: ChainId) {
-  if (utils.isAddress(slugOrAddress)) {
-    return slugOrAddress;
-  }
-  if (!collections?.[chainId]) {
-    return slugOrAddress;
-  }
-  const tokenAddress = collections?.[chainId]?.find(
-    (t) => slugOrAddress === getCollectionSlugFromName(t.name)
-  );
-  return !!tokenAddress?.address ? tokenAddress.address : slugOrAddress;
-}
 // takes a Collection Name and tries to return a user-friendly slug for routes
 // can return undefined if chainId is missing, or address lookup fails
+// TODO: See if this can be removed?
 export function getCollectionSlugFromName(
   collectionName: string | null | undefined
 ): string | undefined {
   return collectionName?.replace(/\s+/g, "-")?.toLowerCase();
-}
-
-export function getCollectionNameFromAddress(
-  tokenAddress: string,
-  chainId: ChainId
-): string | undefined {
-  return collections?.[chainId]?.find((c) => c.address === tokenAddress)?.name;
 }
 
 type Token = {

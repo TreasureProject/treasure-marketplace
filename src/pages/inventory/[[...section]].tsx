@@ -14,12 +14,13 @@ import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import { ExclamationIcon } from "@heroicons/react/outline";
 import classNames from "clsx";
 import { bridgeworld, client, marketplace, smolverse } from "../../lib/client";
-import { useQuery } from "react-query";
+import { useQueries, useQuery } from "react-query";
 import { addMonths, addWeeks, closestIndexTo, isAfter } from "date-fns";
 import { ethers } from "ethers";
 import {
   useApproveContract,
   useChainId,
+  useCollections,
   useContractApprovals,
   useCreateListing,
   useRemoveListing,
@@ -30,8 +31,8 @@ import { AddressZero } from "@ethersproject/constants";
 import {
   formatNumber,
   generateIpfsLink,
-  getCollectionNameFromAddress,
-  getCollectionSlugFromName,
+  // getCollectionNameFromAddress,
+  // getCollectionSlugFromName,
   getPetsMetadata,
 } from "../../utils";
 import { useRouter } from "next/router";
@@ -800,16 +801,29 @@ const Inventory = () => {
     }
   }, [inventory.data?.user, section]);
 
-  const { tokens, bridgeworldTokens, smolverseTokens } = useMemo(() => {
+  const allCollections = useCollections();
+
+  const {
+    tokens,
+    battleflyTokens,
+    bridgeworldTokens,
+    foundersTokens,
+    smolverseTokens,
+  } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
       (acc, { token }) => {
         const collectionName =
-          getCollectionNameFromAddress(token.collection.id, chainId) ?? "";
+          allCollections.find(({ address }) => address === token.collection.id)
+            ?.name ?? "";
 
         if (BridgeworldItems.includes(collectionName)) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
+        } else if (collectionName === "BattleFly") {
+          acc.battleflyTokens.push(token.id);
+        } else if (collectionName.startsWith("BattleFly")) {
+          acc.foundersTokens.push(token.id);
         } else {
           acc.tokens.push(token.id);
         }
@@ -818,11 +832,13 @@ const Inventory = () => {
       },
       {
         tokens: [] as string[],
+        battleflyTokens: [] as string[],
         bridgeworldTokens: [] as string[],
+        foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
       }
     );
-  }, [chainId, data]);
+  }, [allCollections, data]);
 
   const { data: metadataData } = useQuery(
     ["inventory-metadata", tokens],
@@ -849,6 +865,36 @@ const Inventory = () => {
       enabled: smolverseTokens.length > 0,
       refetchInterval: false,
     }
+  );
+
+  const battleflyMetadatas = useQueries(
+    battleflyTokens.map((id) => ({
+      queryKey: ["inventory-metadata-bf", id],
+      queryFn: () =>
+        fetch(
+          `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/battleflies/${parseInt(
+            id.slice(45),
+            16
+          )}/metadata`
+        ).then((res) => res.json()),
+      select: (data) => ({ id, ...data }),
+      refetchInterval: false as const,
+    }))
+  );
+
+  const foundersMetadatas = useQueries(
+    foundersTokens.map((id) => ({
+      queryKey: ["inventory-metadata-fs", id],
+      queryFn: () =>
+        fetch(
+          `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/specials/${parseInt(
+            id.slice(45),
+            16
+          )}/metadata`
+        ).then((res) => res.json()),
+      select: (data) => ({ id, ...data }),
+      refetchInterval: false as const,
+    }))
   );
 
   const tabs = useMemo(() => {
@@ -958,14 +1004,23 @@ const Inventory = () => {
                   >
                     {data.map(({ id, quantity, token, ...item }) => {
                       const slugOrAddress =
-                        getCollectionSlugFromName(token.collection.name) ??
-                        token.collection.id;
+                        allCollections.find(
+                          ({ name }) => name === token.collection.name
+                        )?.slug ?? token.collection.id;
+
                       const bwMetadata = bridgeworldMetadata?.tokens.find(
                         (item) => item.id === token.id
                       );
                       const smolMetadata = smolverseMetadata?.tokens.find(
                         (item) => item.id === token.id
                       );
+                      const bfMetadata = battleflyMetadatas.find(
+                        (item) => item.data?.id === token.id
+                      )?.data;
+                      const fsMetadata = foundersMetadatas.find(
+                        (item) => item.data?.id === token.id
+                      )?.data;
+
                       const metadata = bwMetadata
                         ? {
                             id: bwMetadata.id,
@@ -985,6 +1040,28 @@ const Inventory = () => {
                             metadata: {
                               image: smolMetadata.image ?? "",
                               name: smolMetadata.name,
+                              description: token.collection.name,
+                            },
+                          }
+                        : bfMetadata
+                        ? {
+                            id: bfMetadata.id,
+                            name: bfMetadata.name,
+                            tokenId: token.tokenId,
+                            metadata: {
+                              image: bfMetadata.image ?? "",
+                              name: bfMetadata.name,
+                              description: token.collection.name,
+                            },
+                          }
+                        : fsMetadata
+                        ? {
+                            id: fsMetadata.id,
+                            name: fsMetadata.name,
+                            tokenId: token.tokenId,
+                            metadata: {
+                              image: fsMetadata.image ?? "",
+                              name: fsMetadata.name,
                               description: token.collection.name,
                             },
                           }

@@ -12,23 +12,21 @@ import {
 } from "@heroicons/react/solid";
 import LargeGridIcon from "../../../components/LargeGridIcon";
 
-import { useInfiniteQuery, useQuery } from "react-query";
+import { useInfiniteQuery, useQueries, useQuery } from "react-query";
 import {
   bridgeworld,
   client,
   marketplace,
   smolverse,
 } from "../../../lib/client";
-import { AddressZero, Zero } from "@ethersproject/constants";
+import { Zero } from "@ethersproject/constants";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
   abbreviatePrice,
   formatNumber,
   formatPercent,
   formatPrice,
-  getCollectionNameFromAddress,
   getPetsMetadata,
-  slugToAddress,
 } from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
 import ImageWrapper from "../../../components/ImageWrapper";
@@ -48,10 +46,9 @@ import { SearchAutocomplete } from "../../../components/SearchAutocomplete";
 import { Item } from "react-stately";
 import Listings from "../../../components/Listings";
 import Button from "../../../components/Button";
-import { useChainId } from "../../../lib/hooks";
+import { useCollection } from "../../../lib/hooks";
 import { EthIcon, MagicIcon, SwapIcon } from "../../../components/Icons";
 import { useMagic } from "../../../context/magicContext";
-import { ChainId } from "@usedapp/core";
 import { BridgeworldItems, smolverseItems } from "../../../const";
 import * as Popover from "@radix-ui/react-popover";
 import { normalizeBridgeworldTokenMetadata } from "../../../utils/metadata";
@@ -95,9 +92,7 @@ const CATEGORY = [
 ];
 const TIERS = LEVELS.slice(0, 5);
 
-const generateDescription = (contract: string, chainId: ChainId) => {
-  const collectionName = getCollectionNameFromAddress(contract, chainId);
-
+const generateDescription = (collectionName: string) => {
   switch (collectionName) {
     case "Unpilgrimaged Legion Genesis":
     case "Unpilgrimaged Legion Auxiliary":
@@ -327,23 +322,20 @@ const Collection = () => {
   const [floorCurrency, setFloorCurrency] = useState<"magic" | "eth">("magic");
   const [toggleGrid, setToggleGrid] = useState(false);
   const filters = getInititalFilters(formattedSearch);
-  const chainId = useChainId();
   const { ethPrice } = useMagic();
 
   const sortParam = Array.isArray(sort) ? sort[0] : sort ?? OrderDirection.asc;
   const activitySortParam = activitySort ?? "time";
-  const formattedAddress = Array.isArray(slugOrAddress)
-    ? slugToAddress(slugOrAddress[0], chainId)
-    : slugToAddress(slugOrAddress?.toLowerCase() ?? AddressZero, chainId);
+  const { id: formattedAddress, name: collectionName } =
+    useCollection(slugOrAddress);
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
-
-  const collectionName =
-    getCollectionNameFromAddress(formattedAddress, chainId) ?? "";
 
   const isBridgeworldItem = BridgeworldItems.includes(collectionName);
   const isSmolverseItem = smolverseItems.includes(collectionName);
   const isTreasure = collectionName === "Treasures";
+  const isBattleflyItem = collectionName === "BattleFly";
+  const isFoundersItem = collectionName.includes("Founders");
 
   // This is a faux collection with only recruits. Which are not sellable. Redirect to Legion Auxiliary collection.
   if (collectionName === "Legions") {
@@ -748,6 +740,40 @@ const Collection = () => {
     }
   );
 
+  const battleflyMetadata = useQueries(
+    isBattleflyItem
+      ? tokenIds?.map((id) => ({
+          queryKey: ["bf-metadata", id],
+          queryFn: () =>
+            fetch(
+              `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/battleflies/${parseInt(
+                id.slice(45),
+                16
+              )}/metadata`
+            ).then((res) => res.json()),
+          select: (data) => ({ id, ...data }),
+          refetchInterval: false as const,
+        })) ?? []
+      : []
+  );
+
+  const foundersMetadata = useQueries(
+    isFoundersItem
+      ? tokenIds?.map((id) => ({
+          queryKey: ["founders-metadata", id],
+          queryFn: () =>
+            fetch(
+              `${process.env.NEXT_PUBLIC_BATTLEFLY_API}/specials/${parseInt(
+                id.slice(45),
+                16
+              )}/metadata`
+            ).then((res) => res.json()),
+          select: (data) => ({ id, ...data }),
+          refetchInterval: false as const,
+        })) ?? []
+      : []
+  );
+
   const isLoading = React.useMemo(
     () =>
       [
@@ -755,12 +781,16 @@ const Collection = () => {
         legacyMetadata.status,
         bridgeworldMetadata.status,
         smolverseMetadata.status,
+        ...battleflyMetadata.map((item) => item.status),
+        ...foundersMetadata.map((item) => item.status),
       ].every((status) => ["idle", "loading"].includes(status)),
     [
       listings.status,
       legacyMetadata.status,
       bridgeworldMetadata.status,
       smolverseMetadata.status,
+      battleflyMetadata,
+      foundersMetadata,
     ]
   );
 
@@ -976,7 +1006,7 @@ const Collection = () => {
               <h1 className="text-xl md:text-5xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                 {statData.collection.name}
               </h1>
-              {generateDescription(formattedAddress, chainId)}
+              {generateDescription(collectionName)}
               <div className="mt-12 overflow-hidden flex flex-col">
                 <dl className="sm:-mx-8 -mt-8 flex divide-x-2">
                   <div className="flex flex-col px-6 sm:px-8 pt-8">
@@ -1389,6 +1419,10 @@ const Collection = () => {
                                 (item) => item.id === token.id
                               );
 
+                            const bfMetadata = battleflyMetadata.find(
+                              (item) => item.data.id === token.id
+                            )?.data;
+
                             const metadata =
                               isBridgeworldItem && legionsMetadata
                                 ? {
@@ -1409,6 +1443,17 @@ const Collection = () => {
                                     metadata: {
                                       image: svMetadata.image ?? "",
                                       name: svMetadata.name,
+                                      description: collectionName,
+                                    },
+                                  }
+                                : isBattleflyItem && bfMetadata
+                                ? {
+                                    id: bfMetadata.id,
+                                    name: bfMetadata.name,
+                                    tokenId: token.tokenId,
+                                    metadata: {
+                                      image: bfMetadata.image ?? "",
+                                      name: bfMetadata.name,
                                       description: collectionName,
                                     },
                                   }
@@ -1466,6 +1511,12 @@ const Collection = () => {
                           })}
                         {/* ERC721 */}
                         {group.listings?.map((listing) => {
+                          const bfMetadata = battleflyMetadata.find(
+                            (item) => item.data?.id === listing.token.id
+                          )?.data;
+                          const fsMetadata = foundersMetadata.find(
+                            (item) => item.data?.id === listing.token.id
+                          )?.data;
                           const legionsMetadata =
                             bridgeworldMetadata.data?.tokens.find(
                               (item) => item.id === listing.token.id
@@ -1539,6 +1590,28 @@ const Collection = () => {
                                   },
                                 }
                               : erc721Metadata
+                            : bfMetadata
+                            ? {
+                                id: bfMetadata.id,
+                                name: bfMetadata.name,
+                                tokenId: listing.token.tokenId,
+                                metadata: {
+                                  image: bfMetadata.image,
+                                  name: bfMetadata.name,
+                                  description: collectionName,
+                                },
+                              }
+                            : fsMetadata
+                            ? {
+                                id: fsMetadata.id,
+                                name: fsMetadata.name,
+                                tokenId: listing.token.tokenId,
+                                metadata: {
+                                  image: fsMetadata.image,
+                                  name: fsMetadata.name,
+                                  description: collectionName,
+                                },
+                              }
                             : getPetsMetadata({
                                 ...listing.token,
                                 collection: collectionData.collection!,
