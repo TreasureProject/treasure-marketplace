@@ -225,7 +225,7 @@ const Header = () => {
                             >
                               <a
                                 className={classNames(
-                                  "flex items-center text-sm font-medium dark:hover:text-gray-200 hover:text-gray-800",
+                                  "flex gap-2 items-center text-sm font-medium dark:hover:text-gray-200 hover:text-gray-800",
                                   {
                                     "dark:text-gray-200 text-red-700": active,
                                     "dark:text-gray-500 text-gray-700": !active,
@@ -233,6 +233,11 @@ const Header = () => {
                                 )}
                               >
                                 {collection.name}
+                                {collection.name === "BattleFly" ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    NEW
+                                  </span>
+                                ) : null}
                               </a>
                             </Link>
                           );

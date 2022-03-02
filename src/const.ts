@@ -17,8 +17,8 @@ export const Contracts = {
 export const coreCollections = [
   "Legion Genesis",
   "Legion Auxiliary",
-  "Treasures",
   "Smol Brains",
+  "BattleFly",
 ];
 
 export const BridgeworldItems = [
