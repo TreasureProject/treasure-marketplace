@@ -68,7 +68,7 @@ type Token = {
     name: string;
   };
   id: string;
-  tokenId: string;
+  tokenId?: string | number;
 };
 
 export function getPetsMetadata(token: Token) {

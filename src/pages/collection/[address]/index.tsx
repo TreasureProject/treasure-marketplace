@@ -813,8 +813,12 @@ const Collection = () => {
     }
   );
 
-  const battleflyMetadata = useBattleflyMetadata(isBattleflyItem ? "1" : "");
-  const foundersMetadata = useFoundersMetadata(isFoundersItem ? "1" : "");
+  const battleflyMetadata = useBattleflyMetadata(
+    isBattleflyItem ? tokenIds ?? [] : []
+  );
+  const foundersMetadata = useFoundersMetadata(
+    isFoundersItem ? tokenIds ?? [] : []
+  );
 
   const isLoading = React.useMemo(
     () =>
@@ -1287,9 +1291,7 @@ const Collection = () => {
                       onClick={() =>
                         router.replace({
                           pathname: `/collection/${slugOrAddress}`,
-                          query: {
-                            search: "",
-                          },
+                          query: {},
                         })
                       }
                     >
@@ -1538,8 +1540,12 @@ const Collection = () => {
                           })}
                         {/* ERC721 */}
                         {group.listings?.map((listing) => {
-                          const bfMetadata = battleflyMetadata.data;
-                          const fsMetadata = foundersMetadata.data;
+                          const bfMetadata = battleflyMetadata.data?.find(
+                            (item) => item.id === listing.token.id
+                          );
+                          const fsMetadata = foundersMetadata.data?.find(
+                            (item) => item.id === listing.token.id
+                          );
                           const legionsMetadata =
                             bridgeworldMetadata.data?.tokens.find(
                               (item) => item.id === listing.token.id
