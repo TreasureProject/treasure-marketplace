@@ -26,7 +26,6 @@ import {
   formatNumber,
   formatPercent,
   formatPrice,
-  getPetsMetadata,
 } from "../../../utils";
 import { formatEther } from "ethers/lib/utils";
 import ImageWrapper from "../../../components/ImageWrapper";
@@ -1554,6 +1553,10 @@ const Collection = () => {
                             legacyMetadata.data?.tokens?.find(
                               (item) => item.tokenId === listing.token.tokenId
                             );
+                          const svMetadata =
+                            smolverseMetadata.data?.tokens.find(
+                              (item) => item.id === listing.token.id
+                            );
 
                           const role =
                             legionsMetadata?.metadata?.__typename ===
@@ -1641,10 +1644,18 @@ const Collection = () => {
                                   description: collectionName,
                                 },
                               }
-                            : getPetsMetadata({
-                                ...listing.token,
-                                collection: collectionData.collection!,
-                              }) ?? erc721Metadata;
+                            : svMetadata
+                            ? {
+                                id: svMetadata.id,
+                                name: svMetadata.name,
+                                tokenId: listing.token.tokenId,
+                                metadata: {
+                                  image: svMetadata.image ?? "",
+                                  name: svMetadata.name,
+                                  description: collectionName,
+                                },
+                              }
+                            : erc721Metadata;
 
                           const normalizedLegion =
                             normalizeBridgeworldTokenMetadata(legionsMetadata);

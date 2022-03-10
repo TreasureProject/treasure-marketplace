@@ -28,7 +28,14 @@ export const BridgeworldItems = [
   "Consumables",
 ];
 
-export const smolverseItems = ["Smol Treasures"];
+export const smolverseItems = [
+  "Smol Bodies",
+  "Smol Bodies Pets",
+  "Smol Brains",
+  "Smol Brains Land",
+  "Smol Brains Pets",
+  "Smol Treasures",
+];
 
 export const FEE = 0.05;
 export const USER_SHARE = 1 - FEE;

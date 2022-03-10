@@ -9,11 +9,7 @@ import { FC, Fragment, useMemo } from "react";
 import { ListingFieldsFragment } from "../../generated/marketplace.graphql";
 import { Menu, Transition } from "@headlessui/react";
 import { formatDistanceToNow } from "date-fns";
-import {
-  formatPrice,
-  getCollectionSlugFromName,
-  getPetsMetadata,
-} from "../utils";
+import { formatPrice, getCollectionSlugFromName } from "../utils";
 import {
   useBattleflyMetadata,
   useCollections,
@@ -314,26 +310,22 @@ const Listings: FC<ListingProps> = ({
                           description: collectionName ?? "",
                         },
                       }
-                    : getPetsMetadata({
-                        ...listing.token,
-                        collection: { name: `${collectionName}` },
-                      }) ??
-                      (legacyMetadata?.metadata
-                        ? {
-                            id: legacyMetadata.id,
-                            name: legacyMetadata.name,
-                            tokenId: listing.token.tokenId,
-                            metadata: {
-                              image: legacyMetadata.metadata.image,
-                              name: legacyMetadata.metadata.name,
-                              description:
-                                legacyMetadata.metadata.description.replace(
-                                  "Legion",
-                                  "Legacy Legion"
-                                ),
-                            },
-                          }
-                        : undefined);
+                    : legacyMetadata?.metadata
+                    ? {
+                        id: legacyMetadata.id,
+                        name: legacyMetadata.name,
+                        tokenId: listing.token.tokenId,
+                        metadata: {
+                          image: legacyMetadata.metadata.image,
+                          name: legacyMetadata.metadata.name,
+                          description:
+                            legacyMetadata.metadata.description.replace(
+                              "Legion",
+                              "Legacy Legion"
+                            ),
+                        },
+                      }
+                    : undefined;
 
                   return (
                     <tr
@@ -479,26 +471,21 @@ const Listings: FC<ListingProps> = ({
                       description: collectionName ?? "",
                     },
                   }
-                : getPetsMetadata({
-                    ...listing.token,
-                    collection: { name: `${collectionName}` },
-                  }) ??
-                  (legacyMetadata?.metadata
-                    ? {
-                        id: legacyMetadata.id,
-                        name: legacyMetadata.name,
-                        tokenId: listing.token.tokenId,
-                        metadata: {
-                          image: legacyMetadata.metadata.image,
-                          name: legacyMetadata.metadata.name,
-                          description:
-                            legacyMetadata.metadata.description.replace(
-                              "Legion",
-                              "Legacy Legion"
-                            ),
-                        },
-                      }
-                    : undefined);
+                : legacyMetadata?.metadata
+                ? {
+                    id: legacyMetadata.id,
+                    name: legacyMetadata.name,
+                    tokenId: listing.token.tokenId,
+                    metadata: {
+                      image: legacyMetadata.metadata.image,
+                      name: legacyMetadata.metadata.name,
+                      description: legacyMetadata.metadata.description.replace(
+                        "Legion",
+                        "Legacy Legion"
+                      ),
+                    },
+                  }
+                : undefined;
 
               return (
                 <Disclosure as="li" key={listing.id}>

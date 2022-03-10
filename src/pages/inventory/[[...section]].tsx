@@ -29,7 +29,7 @@ import {
 } from "../../lib/hooks";
 import { useEthers } from "@usedapp/core";
 import { AddressZero } from "@ethersproject/constants";
-import { formatNumber, generateIpfsLink, getPetsMetadata } from "../../utils";
+import { formatNumber, generateIpfsLink } from "../../utils";
 import { useRouter } from "next/router";
 import Button from "../../components/Button";
 import ImageWrapper from "../../components/ImageWrapper";
@@ -1032,8 +1032,7 @@ const Inventory = () => {
                               description: token.collection.name,
                             },
                           }
-                        : getPetsMetadata(token) ??
-                          metadataData?.tokens.find(
+                        : metadataData?.tokens.find(
                             (item) => item?.id === token.id
                           );
                       const { expires, pricePerItem } = {

@@ -16,7 +16,7 @@ import {
   smolverseItems,
 } from "../const";
 import { Interface } from "@ethersproject/abi";
-import { generateIpfsLink, getPetsMetadata } from "../utils";
+import { generateIpfsLink } from "../utils";
 import { toast } from "react-hot-toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -651,12 +651,6 @@ export function useMetadata(
       smolverseMetadata?: Metadata,
       tokenMetadata?: Metadata
     ) => {
-      const petsMetadata = getPetsMetadata({
-        id: "",
-        ...tokenMetadata,
-        collection: { name: collectionName },
-      });
-
       const metadata = bridgeworldMetadata
         ? normalizeBridgeworldTokenMetadata(bridgeworldMetadata as any)
         : smolverseMetadata
@@ -670,7 +664,6 @@ export function useMetadata(
           legacyMetadata ??
           foundersMetadata ??
           battleflyMetadata ??
-          petsMetadata?.metadata ??
           null;
 
       return metadata;
