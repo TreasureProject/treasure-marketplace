@@ -1084,8 +1084,9 @@ const Inventory = () => {
                               updates[
                                 `${token.collection.contract}-${token.tokenId}`
                               ] ?? {};
-                            const buttonEnabled = false;
-                            // section !== "sold" && bwMetadata?.name !== "Recruit";
+                            const buttonEnabled =
+                              section !== "sold" &&
+                              bwMetadata?.name !== "Recruit";
 
                             return (
                               <li key={id}>

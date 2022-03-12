@@ -411,43 +411,6 @@ const Header = () => {
               </div>
             </div>
           )}
-        <div className="bg-red-600">
-          <div className="py-3 px-3 sm:px-6 lg:px-8">
-            <div className="flex sm:items-center lg:justify-between flex-col space-y-2 sm:space-y-0 sm:flex-row">
-              <div className="flex-1 flex items-center">
-                <span className="flex p-2 rounded-lg bg-red-800">
-                  <SpeakerphoneIcon
-                    className="h-6 w-6 text-white"
-                    aria-hidden="true"
-                  />
-                </span>
-                <p className="ml-3 font-medium text-white">
-                  <span className="lg:hidden">
-                    The Treasure Marketplace has currently been disabled as
-                    we&apos;re patching a critical exploit. Your NFTs are safe.
-                  </span>
-                  <span className="hidden lg:block">
-                    The Treasure Marketplace has currently been disabled as
-                    we&apos;re patching a critical exploit. We aim to have the
-                    marketplace online again in the coming days. Your NFTs are
-                    safe. Follow us on{" "}
-                    <a
-                      className="inline-flex items-center gap-1"
-                      href="https://twitter.com/Treasure_DAO"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Twitter
-                      <ExternalLinkIcon className="w-4 h-4" />
-                    </a>{" "}
-                    and keep an eye on the announcements channel in our Discord
-                    for updates on this matter.
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       <Modal
         title="Convert between ETH and MAGIC"
