@@ -1205,7 +1205,7 @@ const PurchaseItemModal = ({
   const magicAllowance = useTokenAllowance(
     Contracts[chainId].magic,
     account ?? AddressZero,
-    Contracts[chainId].marketplaceBuyer
+    Contracts[chainId].marketplace
   );
 
   const buttonRef = React.useRef() as React.MutableRefObject<HTMLButtonElement>;

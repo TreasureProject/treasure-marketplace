@@ -3,13 +3,11 @@ import { ChainId } from "@usedapp/core";
 export const Contracts = {
   [ChainId.ArbitrumRinkeby]: {
     magic: "0x7693604341fDC5B73c920b8825518Ec9b6bBbb8b",
-    marketplace: "0x2426acC898C5E1241904fCEf6E5643241192272D",
-    marketplaceBuyer: "0x24b7377Bf073E54eC42ec6CC8F4CDA6e3deB32A8",
+    marketplace: "0x48d515a012429d97E27aA8fC84070cF2E45e5036",
   },
   [ChainId.Arbitrum]: {
     magic: "0x539bdE0d7Dbd336b79148AA742883198BBF60342",
-    marketplace: "0x2E3b85F85628301a0Bce300Dee3A6B04195A15Ee",
-    marketplaceBuyer: "0x812cdA2181ed7c45a35a691E0C85E231D218E273",
+    marketplace: "0x09986B4e255B3c548041a30A2Ee312Fe176731c2",
   },
 };
 

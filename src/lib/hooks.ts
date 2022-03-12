@@ -333,7 +333,7 @@ export function useBuyItem() {
   const webhook = useRef<() => void>();
 
   const { send: sendBuy, state } = useContractFunction(
-    new Contract(Contracts[chainId].marketplaceBuyer, abis.marketplaceBuyer),
+    new Contract(Contracts[chainId].marketplace, abis.marketplace),
     "buyItem"
   );
 
@@ -488,8 +488,7 @@ export const useApproveMagic = () => {
   const { send, state } = useContractFunction(contract, "approve");
 
   return {
-    send: () =>
-      send(Contracts[chainId].marketplaceBuyer, MaxUint256.toString()),
+    send: () => send(Contracts[chainId].marketplace, MaxUint256.toString()),
     state,
   };
 };
