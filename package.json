@@ -36,6 +36,7 @@
     "react-intersection-observer": "^8.33.1",
     "react-query": "^3.34.15",
     "react-stately": "^3.11.0",
+    "use-local-storage-state": "^15.0.0",
     "zod": "^3.11.6"
   },
   "devDependencies": {

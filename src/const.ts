@@ -53,7 +53,7 @@ export const BATTLEFLY_METADATA = {
       },
       {
         trait_type: "Class",
-        value: "Edition",
+        value: "Original",
       },
     ],
   },

@@ -6,7 +6,7 @@ import {
   ERC20Interface,
   useContractCalls,
   useContractFunction,
-  useEthers,
+  useEthers as useDappEthers,
 } from "@usedapp/core";
 import { BigNumber, Contract } from "ethers";
 import {
@@ -52,6 +52,15 @@ function callWebhook(
       image: image.replace(/ /g, "%20"),
     }),
   });
+}
+
+/**
+ * Create a wrapper function so we can override account information in one place if needed.
+ */
+export function useEthers() {
+  const data = useDappEthers();
+
+  return data;
 }
 
 export function useChainId() {
