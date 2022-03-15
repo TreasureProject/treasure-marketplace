@@ -1,118 +1,131 @@
 import Image from "next/image";
 
 import logoImg from "../../public/img/logotransparent.png";
-import { useRouter } from "next/router";
-import { useCollections } from "../lib/hooks";
-import { SearchAutocomplete } from "../components/SearchAutocomplete";
-import { Item } from "react-stately";
-import TreasureImg1 from "../../public/img/Beetle-wing.gif";
-import TreasureImg2 from "../../public/img/Donkey.gif";
-import TreasureImg3 from "../../public/img/Divine Hourglass.gif";
-import TreasureImg4 from "../../public/img/Grin.gif";
-import TreasureImg5 from "../../public/img/Honeycomb.gif";
-import TreasureImg6 from "../../public/img/Thread of Divine Silk.gif";
-import LegionsImg1 from "../../public/img/Numeraire 3.png";
-import LegionsImg2 from "../../public/img/Riverman 5.png";
-import LegionsImg3 from "../../public/img/Siege 2.png";
-import LegionsImg4 from "../../public/img/Warlock.png";
-import LegionsImg5 from "../../public/img/Assassin 1.png";
-import LegionsImg6 from "../../public/img/All-Class14.png";
-import SmolImg1 from "../../public/img/smolbrains.png";
-import SmolImg2 from "../../public/img/smolbrains1.png";
-import SmolImg3 from "../../public/img/smolbrains2.png";
-import SmolImg4 from "../../public/img/smolbrains3.png";
-import SmolImg5 from "../../public/img/smolbrains4.png";
-import SmolImg6 from "../../public/img/smolbrains5.png";
 import Link from "next/link";
-import { getCollectionSlugFromName } from "../utils";
 
-const ImageWrapper = ({ image }: { image: StaticImageData }) => (
-  <Image src={image.src} width={image.width} height={image.height} />
-);
+const collections = [
+  {
+    href: "battlefly",
+    name: "BattleFly",
+    image:
+      "https://ipfs.io/ipfs/QmVSMdABd2hahtS74owdeu6nHauaXhWviReyMGch8Ztb6W",
+    description:
+      "BattleFly is an experimental PVP/P2E strategy game, powered by $MAGIC.",
+  },
+  {
+    href: "legion-genesis",
+    name: "Legion Genesis",
+    image: "/img/All-Class14.png",
+    description:
+      "Legions are the primary actors in, and the cornerstone of, Bridgeworld gameplay.",
+  },
+  {
+    href: "treasures",
+    name: "Treasures",
+    image: "/img/Honeycomb.gif",
+    description:
+      "Treasures are composable building blocks in Bridgeworld that will be used inter- and intra-metaverse.",
+  },
+  {
+    href: "smol-bodies",
+    name: "Smol Bodies",
+    image:
+      "https://ipfs.io/ipfs/QmSqwxNFMeFtgdCnjBTTixx46Wi6TH9FtQ5jAp98JnAoeR/3948/0.png",
+    description:
+      "The Smol Bodies inhabit a gym near you, stacking $plates to earn muscle and be not smol.",
+  },
+  {
+    href: "seed-of-life",
+    name: "Seed of Life",
+    image:
+      "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
+    description:
+      "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+  },
+  {
+    href: "smol-treasures",
+    name: "Smol Treasures",
+    image:
+      "https://ipfs.io/ipfs/QmZK1i4y7qn7Fi7mEMgT4KZcb1Etb12yndcTZ5dnhigDPt/2.gif",
+    description:
+      "Smols and Swols are currently farming Smol treasures on the moon.",
+  },
+  {
+    href: "smol-brains",
+    name: "Smol Brains",
+    image:
+      "https://ipfs.io/ipfs/QmY71ban6QoWg9nbNwikk6wVWknj8NFBG8nMGHEuzwfAwf/121/0.png",
+    description:
+      "The Smol Brains are a dynamic PFP of a monkey whose head gets bigger the larger its IQ becomes.",
+  },
+  {
+    href: "consumables",
+    name: "Consumables",
+    image:
+      "https://ipfs.io/ipfs/QmdpMJMTRrGu1Z43RF94WnDRj5QwiLJXo43TwKWPX2cTWE/Medium Prism.gif",
+    description:
+      "Functional items that are crafted from Treasures and give utility in the Metaverse.",
+  },
+  {
+    href: "legion-auxiliary",
+    name: "Legion Auxiliary",
+    image:
+      "https://ipfs.io/ipfs/QmTxcMUqVvrHMrdLUqtSjFSbHZ4ZoQ2bUB6U7CEpA7JDiF/Uncommon Fighter.gif",
+    description:
+      "Legions are the primary actors in, and the cornerstone of, Bridgeworld gameplay.",
+  },
+];
 
 export default function Home() {
-  const Router = useRouter();
-  const data = useCollections();
-
   return (
     <div className="relative">
-      <main className="flex justify-center items-center w-full min-h-screen landing">
-        <div className="flex relative lg:flex-row flex-col-reverse px-8 lg:px-0">
-          <div
-            className="z-10 pl-0 lg:pl-8 xl:pl-0"
-            style={{
-              flexBasis: "70%",
-            }}
-          >
-            <Image
-              src={logoImg.src}
-              width={logoImg.width}
-              height={logoImg.height}
-              className="dark:filter dark:invert"
-            />
-            <p className="text-right font-semibold tracking-wider mt-2 text-lg">
-              MARKETPLACE
-            </p>
-            <div className="mt-4 flex items-center space-x-6 divide-x-[1px]">
-              <Link href="/inventory" passHref>
-                <a className="hover:text-gray-900 text-gray-500 dark:hover:text-gray-200">
-                  Inventory
-                </a>
-              </Link>
-              <div className="w-full pl-6">
-                <SearchAutocomplete
-                  label="Search Collection"
-                  allowsCustomValue
-                  onSelectionChange={(name) => {
-                    const targetCollection = data.find(
-                      (collection) => collection.name === name
-                    );
+      <main className="flex flex-col mt-16 pt-20 w-full min-h-screen landing">
+        <div className="z-10 px-8 lg:max-w-[70%]">
+          <Image
+            alt="Treasure Marketplace Logo"
+            src={logoImg.src}
+            width={logoImg.width}
+            height={logoImg.height}
+            className="dark:filter dark:invert"
+          />
+          <p className="text-right font-semibold tracking-wider mt-2 text-lg">
+            MARKETPLACE
+          </p>
+        </div>
 
-                    if (targetCollection) {
-                      const slugOrAddress =
-                        getCollectionSlugFromName(targetCollection.name) ??
-                        targetCollection.address;
+        <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+          <h2 className="sr-only">Collections</h2>
 
-                      Router.push(`/collection/${slugOrAddress}`);
-                    }
-                  }}
-                >
-                  {data.map((collection) => (
-                    <Item key={collection.name}>{collection.name}</Item>
-                  )) ?? []}
-                </SearchAutocomplete>
+          <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+            {collections.map((product) => (
+              <div
+                key={product.href}
+                className="group relative bg-white border border-gray-200 rounded-lg flex flex-col overflow-hidden"
+              >
+                <div className="relative aspect-w-3 aspect-h-4 bg-gray-200 group-hover:opacity-75 sm:aspect-none sm:h-96">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-center object-cover sm:w-full sm:h-full"
+                  />
+                </div>
+                <div className="flex-1 p-4 space-y-2 flex flex-col">
+                  <h3 className="text-sm font-medium text-gray-900">
+                    <Link href={`/collection/${product.href}`}>
+                      <a>
+                        <span aria-hidden="true" className="absolute inset-0" />
+                        {product.name}
+                      </a>
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-gray-500">{product.description}</p>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="absolute right-0 -top-52 z-0 overflow-hidden">
-            <div className="maskImage">
-              <div className="grid grid-cols-6 grid-rows-3 gap-6 lg:gap-12 px-12 lg:px-0 opacity-30 lg:opacity-80">
-                <ImageWrapper image={TreasureImg1} />
-                <ImageWrapper image={TreasureImg2} />
-                <ImageWrapper image={TreasureImg3} />
-                <ImageWrapper image={TreasureImg4} />
-                <ImageWrapper image={TreasureImg5} />
-                <ImageWrapper image={TreasureImg6} />
-                <ImageWrapper image={LegionsImg1} />
-                <ImageWrapper image={LegionsImg2} />
-                <ImageWrapper image={LegionsImg3} />
-                <ImageWrapper image={LegionsImg4} />
-                <ImageWrapper image={LegionsImg5} />
-                <ImageWrapper image={LegionsImg6} />
-                <ImageWrapper image={SmolImg1} />
-                <ImageWrapper image={SmolImg2} />
-                <ImageWrapper image={SmolImg3} />
-                <ImageWrapper image={SmolImg4} />
-                <ImageWrapper image={SmolImg5} />
-                <ImageWrapper image={SmolImg6} />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </main>
     </div>
   );
 }
-
-Home.disableHeader = true;

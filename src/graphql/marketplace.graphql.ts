@@ -129,8 +129,11 @@ export const getCollectionListings = gql`
 `;
 
 export const getTokensByName = gql`
-  query getTokensByName($name: String!, $ids: [ID!]!) {
-    tokens(first: 1000, where: { name_contains: $name, id_in: $ids }) {
+  query getTokensByName($lower: String!, $start: String!, $ids: [ID!]!) {
+    lower: tokens(first: 1000, where: { name_contains: $lower, id_in: $ids }) {
+      id
+    }
+    start: tokens(first: 1000, where: { name_contains: $start, id_in: $ids }) {
       id
     }
   }
@@ -303,6 +306,40 @@ export const getFloorPrice = gql`
       tokens(where: { tokenId: $tokenId }) {
         floorPrice
       }
+    }
+  }
+`;
+
+export const searchItems = gql`
+  query searchItems($lower: String!, $start: String!) {
+    lowerCollections: collections(first: 5, where: { name_contains: $lower }) {
+      name
+    }
+    startCollections: collections(first: 5, where: { name_contains: $start }) {
+      name
+    }
+    lowerTokens: tokens(first: 5, where: { name_contains: $lower }) {
+      ...TokenSearch
+    }
+    startTokens: tokens(first: 5, where: { name_contains: $start }) {
+      ...TokenSearch
+    }
+  }
+
+  fragment TokenSearch on Token {
+    collection {
+      name
+    }
+    id
+    name
+    tokenId
+    listings(
+      first: 1
+      where: { status: Active }
+      orderBy: pricePerItem
+      orderDirection: asc
+    ) {
+      pricePerItem
     }
   }
 `;

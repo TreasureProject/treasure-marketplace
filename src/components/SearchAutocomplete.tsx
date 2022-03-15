@@ -11,7 +11,6 @@ import {
 import type { Node } from "@react-types/shared";
 import {
   useComboBox,
-  useFilter,
   useButton,
   useSearchField,
   useOverlay,
@@ -22,6 +21,7 @@ import {
   useOption,
 } from "react-aria";
 import { SearchIcon, XIcon } from "@heroicons/react/solid";
+import classNames from "clsx";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
   listBoxRef?: React.RefObject<HTMLUListElement>;
@@ -41,6 +41,7 @@ interface OptionProps {
 interface PopoverProps {
   popoverRef?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
+  hasItems: boolean;
   isOpen?: boolean;
   onClose: () => void;
 }
@@ -108,7 +109,12 @@ function Option({ item, state }: OptionProps) {
     <li
       {...optionProps}
       ref={ref}
-      className="m-1 rounded-md py-2 px-2 text-sm outline-none cursor-default flex items-center justify-between text-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 hover:bg-red-500 hover:text-white"
+      className={classNames(
+        "m-1 rounded-md py-2 px-2 text-sm outline-none cursor-default flex items-center justify-between text-gray-700 dark:text-gray-200",
+        optionProps["aria-disabled"] === true
+          ? null
+          : "dark:hover:bg-gray-800 hover:bg-red-500 hover:text-white"
+      )}
     >
       {item.rendered}
     </li>
@@ -138,7 +144,10 @@ function Popover(props: PopoverProps) {
       <div
         {...overlayProps}
         ref={popoverRef}
-        className="absolute z-10 top-full w-full shadow-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md mt-2"
+        className={classNames(
+          "absolute z-10 top-full w-full shadow-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md mt-2",
+          props.hasItems ? "border" : "border-0"
+        )}
       >
         {children}
         <DismissButton onDismiss={onClose} />
@@ -152,10 +161,9 @@ interface Props<T> extends ComboBoxProps<T> {
 }
 
 export function SearchAutocomplete<T extends object>(props: Props<T>) {
-  const { contains } = useFilter({ sensitivity: "base" });
   const state = useComboBoxState({
     ...props,
-    defaultFilter: contains,
+    allowsEmptyCollection: true,
     menuTrigger: "focus",
   });
 
@@ -217,6 +225,7 @@ export function SearchAutocomplete<T extends object>(props: Props<T>) {
       {state.isOpen && (
         <Popover
           popoverRef={popoverRef}
+          hasItems={state.collection.size > 0}
           isOpen={state.isOpen}
           onClose={state.close}
         >

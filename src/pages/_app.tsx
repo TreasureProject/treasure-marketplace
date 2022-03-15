@@ -169,7 +169,7 @@ const Main = ({ pageProps, Component }) => {
 
   return (
     <div className="min-h-screen relative flex flex-col dark:bg-gray-900">
-      {Component.disableHeader ? null : <Header />}
+      <Header />
       <Component {...pageProps} />
       <Footer />
     </div>
