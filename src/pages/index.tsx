@@ -100,7 +100,7 @@ export default function Home() {
             {collections.map((product) => (
               <div
                 key={product.href}
-                className="group relative bg-white border border-gray-200 rounded-lg flex flex-col overflow-hidden"
+                className="group relative bg-white dark:bg-gray-500 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col overflow-hidden"
               >
                 <div className="relative aspect-w-3 aspect-h-4 bg-gray-200 group-hover:opacity-75 sm:aspect-none sm:h-96">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -111,7 +111,7 @@ export default function Home() {
                   />
                 </div>
                 <div className="flex-1 p-4 space-y-2 flex flex-col">
-                  <h3 className="text-sm font-medium text-gray-900">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">
                     <Link href={`/collection/${product.href}`}>
                       <a>
                         <span aria-hidden="true" className="absolute inset-0" />
@@ -119,7 +119,9 @@ export default function Home() {
                       </a>
                     </Link>
                   </h3>
-                  <p className="text-sm text-gray-500">{product.description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
+                    {product.description}
+                  </p>
                 </div>
               </div>
             ))}
