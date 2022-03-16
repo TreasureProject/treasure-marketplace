@@ -21,6 +21,7 @@ import {
   useOption,
 } from "react-aria";
 import { SearchIcon, XIcon } from "@heroicons/react/solid";
+import { Spinner } from "./Spinner";
 import classNames from "clsx";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
@@ -158,6 +159,7 @@ function Popover(props: PopoverProps) {
 
 interface Props<T> extends ComboBoxProps<T> {
   placeholder?: string;
+  isLoading?: boolean;
 }
 
 export function SearchAutocomplete<T extends object>(props: Props<T>) {
@@ -213,14 +215,22 @@ export function SearchAutocomplete<T extends object>(props: Props<T>) {
           placeholder={props.placeholder ?? "Search Collection..."}
           className="outline-none px-3 py-1 appearance-none w-full dark:bg-black dark:placeholder-gray-400 dark:text-gray-200"
         />
-        <button
-          {...buttonProps}
-          ref={clearButtonRef}
-          style={{ visibility: state.inputValue !== "" ? "visible" : "hidden" }}
-          className="cursor-default text-gray-500 hover:text-gray-600"
-        >
-          <XIcon aria-hidden="true" className="w-4 h-4" />
-        </button>
+        {props.isLoading ? (
+          <button className="cursor-default text-gray-500 hover:text-gray-600">
+            <Spinner aria-hidden="true" className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            {...buttonProps}
+            ref={clearButtonRef}
+            style={{
+              visibility: state.inputValue !== "" ? "visible" : "hidden",
+            }}
+            className="cursor-default text-gray-500 hover:text-gray-600"
+          >
+            <XIcon aria-hidden="true" className="w-4 h-4" />
+          </button>
+        )}
       </div>
       {state.isOpen && (
         <Popover

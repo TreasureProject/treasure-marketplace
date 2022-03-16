@@ -320,6 +320,7 @@ const Header = () => {
                     <div className="bottom-0 inset-x-0 flex-1">
                       <SearchAutocomplete
                         {...(query.data ?? { children: [] })}
+                        isLoading={query.isLoading}
                         label="Search items or collections"
                         placeholder="Search items or collections"
                         allowsCustomValue
