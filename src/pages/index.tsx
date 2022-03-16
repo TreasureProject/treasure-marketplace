@@ -80,17 +80,19 @@ export default function Home() {
   return (
     <div className="relative">
       <main className="flex flex-col mt-16 pt-20 w-full min-h-screen landing">
-        <div className="z-10 px-8 lg:max-w-[70%]">
-          <Image
-            alt="Treasure Marketplace Logo"
-            src={logoImg.src}
-            width={logoImg.width}
-            height={logoImg.height}
-            className="dark:filter dark:invert"
-          />
-          <p className="text-right font-semibold tracking-wider mt-2 text-lg">
-            MARKETPLACE
-          </p>
+        <div className="z-10 px-8 max-w-2xl lg:max-w-7xl mx-auto">
+          <div className="lg:max-w-[70%]">
+            <Image
+              alt="Treasure Marketplace Logo"
+              src={logoImg.src}
+              width={logoImg.width}
+              height={logoImg.height}
+              className="dark:filter dark:invert"
+            />
+            <p className="text-right font-semibold tracking-wider mt-2 text-lg">
+              MARKETPLACE
+            </p>
+          </div>
         </div>
 
         <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
