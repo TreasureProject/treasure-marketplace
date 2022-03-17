@@ -16,8 +16,7 @@ const collections = [
     href: "legion-genesis",
     name: "Legion Genesis",
     image: "/img/All-Class14.png",
-    description:
-      "Legions are the primary actors in, and the cornerstone of, Bridgeworld gameplay.",
+    description: "The Origin Legions of Bridgeworld with a fixed supply.",
   },
   {
     href: "treasures",
@@ -72,7 +71,7 @@ const collections = [
     image:
       "https://ipfs.io/ipfs/QmTxcMUqVvrHMrdLUqtSjFSbHZ4ZoQ2bUB6U7CEpA7JDiF/Uncommon Fighter.gif",
     description:
-      "Legions are the primary actors in, and the cornerstone of, Bridgeworld gameplay.",
+      "Descendants of Genesis Legions that can be summoned in Bridgeworld.",
   },
 ];
 
