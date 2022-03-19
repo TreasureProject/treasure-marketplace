@@ -336,7 +336,7 @@ const Header = () => {
                   </div>
                   <div className="hidden lg:flex items-center mr-4">
                     <Link href="/" passHref>
-                      <a className="hover:text-gray-900 text-gray-500 dark:hover:text-red-500">
+                      <a className="text-red-500">
                         <span className="sr-only">Home</span>
                         <TreasureIcon />
                       </a>
