@@ -114,7 +114,7 @@ function Option({ item, state }: OptionProps) {
         "m-1 rounded-md py-2 px-2 text-sm outline-none cursor-default flex items-center justify-between text-gray-700 dark:text-gray-200",
         optionProps["aria-disabled"] === true
           ? null
-          : "dark:hover:bg-gray-800 hover:bg-red-500 hover:text-white"
+          : "dark:hover:bg-gray-800 hover:bg-red-500 hover:text-white cursor-pointer"
       )}
     >
       {item.rendered}

@@ -562,7 +562,9 @@ function useBattleflyApi(key: "bf" | "founders", input: string[]) {
                   ({ attribute }) => attribute.name === "Edition"
                 )?.attribute.value,
                 value.name,
-              ].join(" "),
+              ]
+                .filter(Boolean)
+                .join(" "),
             };
           }),
         [input]
