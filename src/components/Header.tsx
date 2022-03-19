@@ -576,6 +576,7 @@ const Header = () => {
         onClose={onClose}
         className="md:max-w-3xl sm:max-w-xl"
         hideCloseIcon
+        zIndex="50"
       >
         <div className="grid grid-cols-1 divide-y-[1px] sm:divide-y-0 sm:grid-cols-2">
           <div className="flex justify-center px-4 py-3">
