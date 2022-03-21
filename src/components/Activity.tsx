@@ -27,7 +27,13 @@ import ImageWrapper from "./ImageWrapper";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { useQueries, useQuery } from "react-query";
-import { bridgeworld, client, marketplace, smolverse } from "../lib/client";
+import {
+  bridgeworld,
+  client,
+  marketplace,
+  peekaboo,
+  smolverse,
+} from "../lib/client";
 import { BridgeworldItems, smolverseItems } from "../const";
 import { SortMenu } from "./SortMenu";
 import { CenterLoadingDots } from "./CenterLoadingDots";
@@ -135,6 +141,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
     bridgeworldTokens,
     foundersTokens,
     smolverseTokens,
+    peekabooTokens,
   } = useMemo(() => {
     return activities.reduce(
       (acc, { collection, token }) => {
@@ -145,6 +152,8 @@ export function Activity({ title, includeStatus }: ListingProps) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
+        } else if (collectionName === "Peek-A-Boo") {
+          acc.peekabooTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -161,6 +170,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
         bridgeworldTokens: [] as string[],
         foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
+        peekabooTokens: [] as string[],
       }
     );
   }, [activities, collections]);
@@ -188,6 +198,15 @@ export function Activity({ title, includeStatus }: ListingProps) {
     () => smolverse.getSmolverseMetadata({ ids: smolverseTokens }),
     {
       enabled: smolverseTokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
+  const { data: peekabooMetadata } = useQuery(
+    ["metadata-peekaboo", peekabooTokens],
+    () => peekaboo.getPeekABooMetadata({ ids: peekabooTokens }),
+    {
+      enabled: peekabooTokens.length > 0,
       refetchInterval: false,
     }
   );
@@ -295,6 +314,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
                   const fsMetadata = foundersMetadata.data?.find(
                     (item) => item.id === activity.token.id
                   );
+                  const pabMetadata = peekabooMetadata?.tokens.find(
+                    (item) => item.id === activity.token.id
+                  );
 
                   const metadata = legionsMetadata
                     ? {
@@ -337,6 +359,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                         metadata: {
                           image: fsMetadata.image ?? "",
                           name: fsMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : pabMetadata
+                    ? {
+                        id: pabMetadata.id,
+                        name: pabMetadata.name,
+                        tokenId: activity.token.tokenId,
+                        metadata: {
+                          image: pabMetadata.image ?? "",
+                          name: pabMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -456,6 +489,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
               const fsMetadata = foundersMetadata.data?.find(
                 (item) => item.id === activity.token.id
               );
+              const pabMetadata = peekabooMetadata?.tokens.find(
+                (item) => item.id === activity.token.id
+              );
 
               const metadata = legionsMetadata
                 ? {
@@ -498,6 +534,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                     metadata: {
                       image: fsMetadata.image ?? "",
                       name: fsMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : pabMetadata
+                ? {
+                    id: pabMetadata.id,
+                    name: pabMetadata.name,
+                    tokenId: activity.token.tokenId,
+                    metadata: {
+                      image: pabMetadata.image ?? "",
+                      name: pabMetadata.name,
                       description: collectionName ?? "",
                     },
                   }

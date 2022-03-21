@@ -35,3 +35,10 @@ generates:
       - "typescript"
       - "typescript-operations"
       - "typescript-graphql-request"
+  generated/peek-a-boo.graphql.ts:
+    schema: ${NEXT_PUBLIC_PEEK_A_BOO_SUBGRAPH}
+    documents: "src/graphql/peek-a-boo.graphql.ts"
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"

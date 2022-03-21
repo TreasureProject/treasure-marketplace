@@ -23,7 +23,13 @@ import { useQuery, useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
 import { TokenStandard } from "../../generated/queries.graphql";
-import { bridgeworld, client, marketplace, smolverse } from "./client";
+import {
+  bridgeworld,
+  client,
+  marketplace,
+  peekaboo,
+  smolverse,
+} from "./client";
 import { AddressZero } from "@ethersproject/constants";
 import { normalizeBridgeworldTokenMetadata } from "../utils/metadata";
 
@@ -590,6 +596,7 @@ export function useMetadata(
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
   const isTreasureItem = collectionName === "Treasures";
+  const isPeekABoo = collectionName === "Peek-A-Boo";
 
   const legacyMetadataResult = useQuery(
     ["metadata", ids],
@@ -600,7 +607,8 @@ export function useMetadata(
         !isBridgeworldItem &&
         !isSmolverseItem &&
         !isBattleflyItem &&
-        !isFoundersItem,
+        !isFoundersItem &&
+        !isPeekABoo,
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -616,7 +624,8 @@ export function useMetadata(
         !isTreasureItem &&
         !isSmolverseItem &&
         !isBattleflyItem &&
-        !isFoundersItem,
+        !isFoundersItem &&
+        !isPeekABoo,
       refetchInterval: false,
       keepPreviousData: true,
       select: ({ token }) => {
@@ -649,6 +658,16 @@ export function useMetadata(
     }
   );
 
+  const peekABooMetadataResult = useQuery(
+    ["peekaboo-metadata", ids],
+    () => peekaboo.getPeekABooMetadata({ ids }),
+    {
+      enabled: !!ids && isPeekABoo,
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
   const battleflyMetadataResult = useBattleflyMetadata(
     isBattleflyItem && id ? [id] : []
   );
@@ -662,6 +681,7 @@ export function useMetadata(
     bridgeworld: bridgeworldMetadataResult.data,
     legacy: legacyMetadataResult.data,
     founders: foundersMetadataResult.data?.[0],
+    peekaboo: peekABooMetadataResult.data,
     smolverse: smolverseMetadataResult.data,
     token: tokenMetadataResult.data,
   };
@@ -672,6 +692,7 @@ export function useMetadata(
       bridgeworldMetadata?: Metadata,
       foundersMetadata?: Metadata,
       legacyMetadata?: Metadata,
+      peekabooMetadata?: Metadata,
       smolverseMetadata?: Metadata,
       tokenMetadata?: Metadata
     ) => {
@@ -684,6 +705,16 @@ export function useMetadata(
             image: smolverseMetadata.image,
             name: smolverseMetadata.name,
             attributes: smolverseMetadata.attributes?.map((attribute) => ({
+              attribute,
+            })),
+          }
+        : peekabooMetadata
+        ? {
+            id: peekabooMetadata.id,
+            description: collectionName,
+            image: peekabooMetadata.image,
+            name: peekabooMetadata.name,
+            attributes: peekabooMetadata.attributes?.map((attribute) => ({
               attribute,
             })),
           }
@@ -703,6 +734,8 @@ export function useMetadata(
       ? !bridgeworldMetadataResult.isLoading && !!bridgeworldMetadataResult.data
       : isSmolverseItem
       ? !smolverseMetadataResult.isLoading && !!smolverseMetadataResult.data
+      : isPeekABoo
+      ? !peekABooMetadataResult.isLoading && !!peekABooMetadataResult.data
       : isBattleflyItem
       ? !battleflyMetadataResult.isLoading && !!battleflyMetadataResult.data
       : isFoundersItem

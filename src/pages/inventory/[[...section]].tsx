@@ -13,7 +13,13 @@ import { XIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon, ViewGridIcon } from "@heroicons/react/solid";
 import { ExclamationIcon } from "@heroicons/react/outline";
 import classNames from "clsx";
-import { bridgeworld, client, marketplace, smolverse } from "../../lib/client";
+import {
+  bridgeworld,
+  client,
+  marketplace,
+  peekaboo,
+  smolverse,
+} from "../../lib/client";
 import { useQuery } from "react-query";
 import { addMonths, addWeeks, closestIndexTo, isAfter } from "date-fns";
 import { ethers } from "ethers";
@@ -794,6 +800,7 @@ const Inventory = () => {
     bridgeworldTokens,
     foundersTokens,
     smolverseTokens,
+    peekabooTokens,
   } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
       (acc, { token }) => {
@@ -805,6 +812,8 @@ const Inventory = () => {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
+        } else if (collectionName === "Peek-A-Boo") {
+          acc.peekabooTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -821,6 +830,7 @@ const Inventory = () => {
         bridgeworldTokens: [] as string[],
         foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
+        peekabooTokens: [] as string[],
       }
     );
   }, [allCollections, data]);
@@ -848,6 +858,15 @@ const Inventory = () => {
     () => smolverse.getSmolverseMetadata({ ids: smolverseTokens }),
     {
       enabled: smolverseTokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
+  const { data: peekabooMetadata } = useQuery(
+    ["metadata-peekaboo", peekabooTokens],
+    () => peekaboo.getPeekABooMetadata({ ids: peekabooTokens }),
+    {
+      enabled: peekabooTokens.length > 0,
       refetchInterval: false,
     }
   );
@@ -1022,6 +1041,9 @@ const Inventory = () => {
                             const smolMetadata = smolverseMetadata?.tokens.find(
                               (item) => item.id === token.id
                             );
+                            const pabMetadata = peekabooMetadata?.tokens.find(
+                              (item) => item.id === token.id
+                            );
                             const bfMetadata = battleflyMetadata.data?.find(
                               (item) => item.id === token.id
                             );
@@ -1070,6 +1092,17 @@ const Inventory = () => {
                                   metadata: {
                                     image: fsMetadata.image ?? "",
                                     name: fsMetadata.name,
+                                    description: token.collection.name,
+                                  },
+                                }
+                              : pabMetadata
+                              ? {
+                                  id: pabMetadata.id,
+                                  name: pabMetadata.name,
+                                  tokenId: token.tokenId,
+                                  metadata: {
+                                    image: pabMetadata.image ?? "",
+                                    name: pabMetadata.name,
                                     description: token.collection.name,
                                   },
                                 }

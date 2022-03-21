@@ -295,6 +295,7 @@ export default function TokenDetail() {
 
   const bridgeworldMetadata = metadataData.bridgeworld?.tokens?.[0];
   const smolverseMetadata = metadataData.smolverse?.tokens?.[0];
+  const peekabooMetadata = metadataData.peekaboo?.tokens?.[0];
   const tokenMetadata = metadataData.token?.token?.metadata ?? undefined;
 
   const metadata = getMetadata(
@@ -302,6 +303,7 @@ export default function TokenDetail() {
     bridgeworldMetadata,
     metadataData.founders,
     undefined,
+    peekabooMetadata,
     smolverseMetadata,
     tokenMetadata
       ? { ...tokenInfo, ...tokenMetadata, name: tokenMetadata.name ?? "", id }

@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/solid";
 import { GetCollectionAttributesQuery } from "../../generated/queries.graphql";
 import { GetUserInventoryQuery } from "../../generated/marketplace.graphql";
-import { bridgeworld, client } from "../lib/client";
+import { bridgeworld, client, peekaboo } from "../lib/client";
 import { formatPercent } from "../utils";
 import { useRouter } from "next/router";
 import { useCollection, useEthers } from "../lib/hooks";
@@ -154,6 +154,7 @@ export function useFiltersList() {
 
   const isTreasure = collectionName === "Treasures";
   const isBattleflyItem = collectionName === "BattleFly";
+  const isPeekABoo = collectionName === "Peek-A-Boo";
   const isInventory = router.pathname.startsWith("/inventory/");
 
   const legacyAttributes = useQuery(
@@ -195,6 +196,14 @@ export function useFiltersList() {
 
           return acc.sort((left, right) => left.name.localeCompare(right.name));
         }, []),
+    }
+  );
+  const peekabooAttributes = useQuery(
+    ["peekaboo-attributes"],
+    () => peekaboo.getPeekABooAttributes(),
+    {
+      enabled: isPeekABoo,
+      refetchInterval: false,
     }
   );
 
@@ -262,6 +271,8 @@ export function useFiltersList() {
         };
       case isBattleflyItem:
         return reduceAttributes(battleflyAttributes.data);
+      case isPeekABoo:
+        return reduceAttributes(peekabooAttributes.data?.attributes);
       default:
         return reduceAttributes(legacyAttributes.data?.collection?.attributes);
     }
@@ -271,7 +282,9 @@ export function useFiltersList() {
     inventory?.user?.tokens,
     isBattleflyItem,
     isInventory,
+    isPeekABoo,
     legacyAttributes.data?.collection?.attributes,
+    peekabooAttributes.data?.attributes,
     treasureBoosts.data,
   ]);
 }

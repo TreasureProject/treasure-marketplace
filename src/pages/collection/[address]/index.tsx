@@ -8,6 +8,7 @@ import {
   bridgeworld,
   client,
   marketplace,
+  peekaboo,
   smolverse,
 } from "../../../lib/client";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
@@ -157,6 +158,7 @@ const Collection = () => {
   const isBridgeworldItem = BridgeworldItems.includes(collectionName);
   const isSmolverseItem = smolverseItems.includes(collectionName);
   const isTreasure = collectionName === "Treasures";
+  const isPeekABoo = collectionName === "Peek-A-Boo";
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
 
@@ -229,7 +231,8 @@ const Collection = () => {
         attributeIds.length > 0 &&
         !isBridgeworldItem &&
         !isSmolverseItem &&
-        !isBattleflyItem,
+        !isBattleflyItem &&
+        !isPeekABoo,
       select: React.useCallback(
         ({
           metadataAttributes,
@@ -396,12 +399,53 @@ const Collection = () => {
       ),
     }
   );
+  const filteredPeekABooTokens = useQuery(
+    ["peekaboo-filtered-tokens", listedTokens.data, attributeIds],
+    () =>
+      peekaboo.getFilteredPeekABoos({
+        attributeIds: attributeIds.map((id) => id.replace(/ /g, "-")),
+      }),
+    {
+      enabled:
+        Boolean(listedTokens.data) && attributeIds.length > 0 && isPeekABoo,
+      select: React.useCallback(
+        ({
+          attributes,
+        }: Awaited<ReturnType<typeof peekaboo.getFilteredPeekABoos>>) => {
+          const sections = attributes.reduce<Record<string, string[]>>(
+            (acc, { tokens, id }) => {
+              tokens.forEach((token) => {
+                const [, ...parts] = id.split("-");
+                const key = parts.join("-");
+
+                acc[key] ??= [];
+                acc[key] = [...acc[key], token.id];
+              });
+
+              return acc;
+            },
+            {}
+          );
+
+          return Object.keys(sections).reduce((acc, key) => {
+            const items = sections[key];
+
+            return acc.length > 0
+              ? acc.filter((item) => items.includes(item))
+              : items;
+          }, []);
+        },
+        []
+      ),
+    }
+  );
 
   // Use filtered or listed tokenIds to perform text search
   const searchedTokens = useQuery(
     [
       "searched-token",
       filteredBattleflyTokens.data,
+      filteredPeekABooTokens.data,
       filteredTreasureTokens.data,
       filteredBridgeworldTokens.data,
       filteredSmolTokens.data,
@@ -417,6 +461,7 @@ const Collection = () => {
         start,
         ids:
           filteredBattleflyTokens.data ??
+          filteredPeekABooTokens.data ??
           filteredTreasureTokens.data ??
           filteredBridgeworldTokens.data ??
           filteredSmolTokens.data ??
@@ -449,6 +494,7 @@ const Collection = () => {
     () =>
       searchedTokens.data ??
       filteredBattleflyTokens.data ??
+      filteredPeekABooTokens.data ??
       filteredTreasureTokens.data ??
       filteredBridgeworldTokens.data ??
       filteredSmolTokens.data ??
@@ -456,6 +502,7 @@ const Collection = () => {
     [
       searchedTokens.data,
       filteredBattleflyTokens.data,
+      filteredPeekABooTokens.data,
       filteredTreasureTokens.data,
       filteredBridgeworldTokens.data,
       filteredSmolTokens.data,
@@ -519,6 +566,16 @@ const Collection = () => {
     }
   );
 
+  const peekabooMetadata = useQuery(
+    ["peekaboo-metadata", tokenIds],
+    () => peekaboo.getPeekABooMetadata({ ids: tokenIds ?? [] }),
+    {
+      enabled: !!tokenIds && isPeekABoo,
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
   const battleflyMetadata = useBattleflyMetadata(
     isBattleflyItem ? tokenIds ?? [] : []
   );
@@ -533,12 +590,14 @@ const Collection = () => {
         legacyMetadata.status,
         bridgeworldMetadata.status,
         smolverseMetadata.status,
+        peekabooMetadata.status,
         battleflyMetadata.status,
         foundersMetadata.status,
       ].every((status) => ["idle", "loading"].includes(status)),
     [
       listings.status,
       legacyMetadata.status,
+      peekabooMetadata.status,
       bridgeworldMetadata.status,
       smolverseMetadata.status,
       battleflyMetadata.status,
@@ -893,6 +952,10 @@ const Collection = () => {
                             smolverseMetadata.data?.tokens.find(
                               (item) => item.id === listing.token.id
                             );
+                          const pabMetadata =
+                            peekabooMetadata.data?.tokens.find(
+                              (item) => item.id === listing.token.id
+                            );
 
                           const role =
                             legionsMetadata?.metadata?.__typename ===
@@ -988,6 +1051,17 @@ const Collection = () => {
                                 metadata: {
                                   image: svMetadata.image ?? "",
                                   name: svMetadata.name,
+                                  description: collectionName,
+                                },
+                              }
+                            : pabMetadata
+                            ? {
+                                id: pabMetadata.id,
+                                name: pabMetadata.name,
+                                tokenId: listing.token.tokenId,
+                                metadata: {
+                                  image: pabMetadata.image ?? "",
+                                  name: pabMetadata.name,
                                   description: collectionName,
                                 },
                               }

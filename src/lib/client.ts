@@ -2,6 +2,7 @@ import { GraphQLClient } from "graphql-request";
 import { getSdk as getBridgeworldSdk } from "../../generated/bridgeworld.graphql";
 import { getSdk as getMarketplaceSdk } from "../../generated/marketplace.graphql";
 import { getSdk as getQueriesSdk } from "../../generated/queries.graphql";
+import { getSdk as getPeekABooSdk } from "../../generated/peek-a-boo.graphql";
 import { getSdk as getSmolverseSdk } from "../../generated/smolverse.graphql";
 
 export const bridgeworld = getBridgeworldSdk(
@@ -14,6 +15,10 @@ export const client = getQueriesSdk(
 
 export const marketplace = getMarketplaceSdk(
   new GraphQLClient(`${process.env.NEXT_PUBLIC_MARKETPLACE_SUBGRAPH}`)
+);
+
+export const peekaboo = getPeekABooSdk(
+  new GraphQLClient(`${process.env.NEXT_PUBLIC_PEEK_A_BOO_SUBGRAPH}`)
 );
 
 export const smolverse = getSmolverseSdk(
