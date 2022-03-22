@@ -11,19 +11,12 @@ export const Contracts = {
   },
 };
 
-// TODO: Put this data in the graph
-export const coreCollections = [
-  "Legion Genesis",
-  "Legion Auxiliary",
-  "Smol Brains",
-  "BattleFly",
-];
-
 export const BridgeworldItems = [
   "Legion Auxiliary",
   "Legion Genesis",
   "Legions",
   "Consumables",
+  "Balancer Crystal",
 ];
 
 export const smolverseItems = [
