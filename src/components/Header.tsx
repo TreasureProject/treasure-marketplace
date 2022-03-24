@@ -273,6 +273,13 @@ const Header = () => {
                     </a>
                   </Link>
                 </div>
+                <div className="flow-root">
+                  <Link href="/inventory" passHref>
+                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200 text-right">
+                      Inventory
+                    </a>
+                  </Link>
+                </div>
                 {!account ? (
                   <button
                     className="flow-root"
