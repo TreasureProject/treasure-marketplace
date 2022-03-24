@@ -230,7 +230,7 @@ const Header = () => {
       <Transition.Root show={mobileMenuOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="fixed inset-0 flex z-40 lg:hidden"
+          className="fixed inset-0 flex justify-end z-40 lg:hidden"
           onClose={setMobileMenuOpen}
         >
           <Transition.Child
@@ -248,14 +248,14 @@ const Header = () => {
           <Transition.Child
             as={Fragment}
             enter="transition ease-in-out duration-300 transform"
-            enterFrom="-translate-x-full"
-            enterTo="translate-x-0"
+            enterFrom="translate-x-full"
+            enterTo="-translate-x-0"
             leave="transition ease-in-out duration-300 transform"
-            leaveFrom="translate-x-0"
-            leaveTo="-translate-x-full"
+            leaveFrom="-translate-x-0"
+            leaveTo="translate-x-full"
           >
             <div className="relative max-w-xs w-full bg-white dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto">
-              <div className="px-4 pt-5 pb-2 flex">
+              <div className="px-4 pt-5 pb-2 flex justify-end">
                 <button
                   type="button"
                   className="-m-2 p-2 rounded-md inline-flex items-center justify-center text-gray-400"
@@ -268,7 +268,7 @@ const Header = () => {
               <div className="py-6 px-4 space-y-6 flex-1">
                 <div className="flow-root">
                   <Link href="/" passHref>
-                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200">
+                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200 text-right">
                       Home
                     </a>
                   </Link>
@@ -281,7 +281,7 @@ const Header = () => {
                     Connect Wallet
                   </button>
                 ) : null}
-                <div className="border-b border-gray-200 dark:border-gray-500 pb-4">
+                <div className="border-b border-gray-200 dark:border-gray-500 pb-4 flex justify-end">
                   <button
                     className="flow-root"
                     onClick={() => {
@@ -294,7 +294,7 @@ const Header = () => {
                 </div>
                 <div className="flow-root">
                   <Link href="/activity" passHref>
-                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200">
+                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200 text-right">
                       Activity
                     </a>
                   </Link>
@@ -326,16 +326,6 @@ const Header = () => {
             <div className="bg-white dark:bg-black shadow-sm">
               <div className="mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="h-16 flex items-center justify-between">
-                  <div className="lg:flex-1 flex items-center lg:hidden">
-                    <button
-                      type="button"
-                      className="-ml-2 bg-white dark:bg-transparent p-2 rounded-md text-gray-400"
-                      onClick={() => setMobileMenuOpen(true)}
-                    >
-                      <span className="sr-only">Open menu</span>
-                      <MenuIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
                   <div className="hidden lg:flex items-center mr-4">
                     <Link href="/" passHref>
                       <a className="hover:text-gray-900 text-gray-500 dark:hover:text-red-500">
@@ -445,6 +435,16 @@ const Header = () => {
                             <InboxIcon className="h-6 w-6" />
                           </a>
                         </Link>
+                      </div>
+                      <div className="lg:hidden flex items-center">
+                        <button
+                          type="button"
+                          className="-ml-2 bg-white dark:bg-transparent p-4 rounded-md text-gray-400"
+                          onClick={() => setMobileMenuOpen(true)}
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <MenuIcon className="h-6 w-6" aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
                   </div>
