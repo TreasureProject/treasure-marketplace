@@ -255,7 +255,7 @@ const Header = () => {
             leaveTo="translate-x-full"
           >
             <div className="relative max-w-xs w-full bg-white dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto">
-              <div className="px-4 pt-5 pb-2 flex">
+              <div className="px-4 pt-5 pb-2 flex justify-end">
                 <button
                   type="button"
                   className="-m-2 p-2 rounded-md inline-flex items-center justify-center text-gray-400"
