@@ -255,7 +255,7 @@ const Header = () => {
             leaveTo="translate-x-full"
           >
             <div className="relative max-w-xs w-full bg-white dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto">
-              <div className="px-4 pt-5 pb-2 flex justify-end">
+              <div className="px-4 pt-5 pb-2 flex">
                 <button
                   type="button"
                   className="-m-2 p-2 rounded-md inline-flex items-center justify-center text-gray-400"
@@ -268,14 +268,14 @@ const Header = () => {
               <div className="py-6 px-4 space-y-6 flex-1">
                 <div className="flow-root">
                   <Link href="/" passHref>
-                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200 text-right">
+                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200">
                       Home
                     </a>
                   </Link>
                 </div>
                 <div className="flow-root">
                   <Link href="/inventory" passHref>
-                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200 text-right">
+                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200">
                       Inventory
                     </a>
                   </Link>
@@ -288,7 +288,7 @@ const Header = () => {
                     Connect Wallet
                   </button>
                 ) : null}
-                <div className="border-b border-gray-200 dark:border-gray-500 pb-4 flex justify-end">
+                <div className="border-b border-gray-200 dark:border-gray-500 pb-4">
                   <button
                     className="flow-root"
                     onClick={() => {
@@ -301,7 +301,7 @@ const Header = () => {
                 </div>
                 <div className="flow-root">
                   <Link href="/activity" passHref>
-                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200 text-right">
+                    <a className="-m-2 p-2 block font-medium text-gray-900 dark:text-gray-200">
                       Activity
                     </a>
                   </Link>
