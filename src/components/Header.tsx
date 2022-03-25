@@ -446,7 +446,7 @@ const Header = () => {
                       <div className="lg:hidden flex items-center">
                         <button
                           type="button"
-                          className="-ml-2 bg-white dark:bg-transparent p-4 rounded-md text-gray-400"
+                          className="bg-white dark:bg-transparent p-4 rounded-md text-gray-400"
                           onClick={() => setMobileMenuOpen(true)}
                         >
                           <span className="sr-only">Open menu</span>
