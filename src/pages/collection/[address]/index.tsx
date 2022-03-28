@@ -1274,19 +1274,17 @@ const Collection = () => {
                                       token={metadata}
                                     />
                                     <div
-                                      className="flex flex-col justify-end space-y-2 opacity-0 p-4 group-hover:opacity-100 z-10"
+                                      className="flex flex-col justify-end space-y-2 opacity-0 p-4 group-hover:opacity-100 group-focus-within:opacity-100 z-10"
                                       aria-hidden="true"
                                     >
-                                      <button
-                                        onClick={() => {
-                                          router.push(
-                                            `/collection/${slugOrAddress}/${listing.token.tokenId}`
-                                          );
-                                        }}
-                                        className="w-full bg-white bg-opacity-75 backdrop-filter backdrop-blur py-2 px-4 rounded-md text-sm font-medium text-gray-900 text-center"
+                                      <Link
+                                        href={`/collection/${slugOrAddress}/${listing.token.tokenId}`}
+                                        passHref
                                       >
-                                        View Details
-                                      </button>
+                                        <a className="w-full bg-white bg-opacity-75 backdrop-filter backdrop-blur py-2 px-4 rounded-md text-sm font-medium text-gray-900 text-center">
+                                          View Details
+                                        </a>
+                                      </Link>
                                       <button
                                         onClick={() => {
                                           setModalProps({
