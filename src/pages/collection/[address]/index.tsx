@@ -9,6 +9,7 @@ import {
   client,
   marketplace,
   peekaboo,
+  realm,
   smolverse,
 } from "../../../lib/client";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
@@ -171,6 +172,7 @@ const Collection = () => {
   const isSmolverseItem = smolverseItems.includes(collectionName);
   const isTreasure = collectionName === "Treasures";
   const isPeekABoo = collectionName === "Peek-A-Boo";
+  const isRealm = collectionName === "Realm";
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
 
@@ -249,7 +251,8 @@ const Collection = () => {
         !isBridgeworldItem &&
         !isSmolverseItem &&
         !isBattleflyItem &&
-        !isPeekABoo,
+        !isPeekABoo &&
+        !isRealm,
       select: React.useCallback(
         ({
           metadataAttributes,
@@ -457,6 +460,72 @@ const Collection = () => {
       ),
     }
   );
+  const filteredRealmStructureTokens = useQuery(
+    ["realm-filtered-structure-tokens", listedTokens.data, filters],
+    () =>
+      realm.getFilteredStructures({
+        filters: {
+          id_in: listedTokens.data?.map(
+            (id) => `${parseInt(id.slice(45), 16)}`
+          ),
+          ...Object.entries(filters).reduce((acc, [key, [value]]) => {
+            acc[`total${key.replace(" ", "")}_gte`] = Number(
+              value.split(",")[0].replace(/[^\d]+/, "")
+            );
+
+            return acc;
+          }, {}),
+        },
+      }),
+    {
+      enabled:
+        Boolean(listedTokens.data) &&
+        Object.keys(filters).length >= (filters.Features ? 2 : 1) &&
+        isRealm,
+      select: React.useCallback(
+        (data: Awaited<ReturnType<typeof realm.getFilteredStructures>>) =>
+          data.totalStructures.map(
+            (item) => `${formattedAddress}-0x${Number(item.id).toString(16)}`
+          ),
+        [formattedAddress]
+      ),
+    }
+  );
+  const filteredRealmFeaturesTokens = useQuery(
+    ["realm-filtered-features-tokens", listedTokens.data, filters],
+    () =>
+      realm.getFilteredFeatures({
+        ids:
+          listedTokens.data?.map((id) => `${parseInt(id.slice(45), 16)}`) ?? [],
+        feature: filters.Feature[0]?.split(",") ?? [],
+      }),
+    {
+      enabled:
+        Boolean(listedTokens.data) &&
+        (filters.Features?.length ?? 0) > 0 &&
+        isRealm,
+      select: React.useCallback(
+        ({
+          feature1,
+          feature2,
+          feature3,
+        }: Awaited<ReturnType<typeof realm.getFilteredFeatures>>) =>
+          [...feature1, ...feature2, ...feature3].map(
+            (item) => `${formattedAddress}-0x${Number(item.id).toString(16)}`
+          ),
+        [formattedAddress]
+      ),
+    }
+  );
+  const filteredRealmTokens = React.useMemo(
+    () => ({
+      data: unique([
+        ...(filteredRealmStructureTokens?.data ?? []),
+        ...(filteredRealmFeaturesTokens?.data ?? []),
+      ]),
+    }),
+    [filteredRealmFeaturesTokens?.data, filteredRealmStructureTokens?.data]
+  );
 
   // Use filtered or listed tokenIds to perform text search
   const searchedTokens = useQuery(
@@ -464,6 +533,7 @@ const Collection = () => {
       "searched-token",
       filteredBattleflyTokens.data,
       filteredPeekABooTokens.data,
+      filteredRealmTokens.data,
       filteredTreasureTokens.data,
       filteredBridgeworldTokens.data,
       filteredSmolTokens.data,
@@ -480,6 +550,7 @@ const Collection = () => {
         ids:
           filteredBattleflyTokens.data ??
           filteredPeekABooTokens.data ??
+          filteredRealmTokens.data ??
           filteredTreasureTokens.data ??
           filteredBridgeworldTokens.data ??
           filteredSmolTokens.data ??
@@ -513,6 +584,7 @@ const Collection = () => {
       searchedTokens.data ??
       filteredBattleflyTokens.data ??
       filteredPeekABooTokens.data ??
+      filteredRealmTokens.data ??
       filteredTreasureTokens.data ??
       filteredBridgeworldTokens.data ??
       filteredSmolTokens.data ??
@@ -521,6 +593,7 @@ const Collection = () => {
       searchedTokens.data,
       filteredBattleflyTokens.data,
       filteredPeekABooTokens.data,
+      filteredRealmTokens.data,
       filteredTreasureTokens.data,
       filteredBridgeworldTokens.data,
       filteredSmolTokens.data,
@@ -571,7 +644,12 @@ const Collection = () => {
     ["metadata", listingIds],
     () => client.getCollectionMetadata({ ids: listingIds }),
     {
-      enabled: !!listingIds && !isBridgeworldItem && !isSmolverseItem,
+      enabled:
+        !!listingIds &&
+        !isBridgeworldItem &&
+        !isSmolverseItem &&
+        !isPeekABoo &&
+        !isRealm,
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -607,6 +685,19 @@ const Collection = () => {
     }
   );
 
+  const realmMetadata = useQuery(
+    ["realm-metadata", listingIds],
+    () =>
+      realm.getRealmMetadata({
+        ids: listingIds.map((item) => `${parseInt(item.slice(45), 16)}`),
+      }),
+    {
+      enabled: !!listingIds && isRealm,
+      refetchInterval: false,
+      keepPreviousData: true,
+    }
+  );
+
   const battleflyMetadata = useBattleflyMetadata(
     isBattleflyItem ? listingIds : []
   );
@@ -622,6 +713,7 @@ const Collection = () => {
         bridgeworldMetadata.status,
         smolverseMetadata.status,
         peekabooMetadata.status,
+        realmMetadata.status,
         battleflyMetadata.status,
         foundersMetadata.status,
       ].every((status) => ["idle", "loading"].includes(status)),
@@ -630,6 +722,7 @@ const Collection = () => {
       legacyMetadata.status,
       peekabooMetadata.status,
       bridgeworldMetadata.status,
+      realmMetadata.status,
       smolverseMetadata.status,
       battleflyMetadata.status,
       foundersMetadata.status,
@@ -987,6 +1080,9 @@ const Collection = () => {
                             peekabooMetadata.data?.tokens.find(
                               (item) => item.id === listing.token.id
                             );
+                          const rlmMetadata = realmMetadata.data?.realms.find(
+                            (item) => item.id === listing.token.tokenId
+                          );
 
                           const role =
                             legionsMetadata?.metadata?.__typename ===
@@ -1038,6 +1134,54 @@ const Collection = () => {
                                   crafting: legionsMetadata.metadata.crafting,
                                 }
                               : null;
+                          const REALM_METRIC_NAMES = [
+                            "Gold",
+                            "Food",
+                            "Culture",
+                            "Technology",
+                          ];
+                          const REALM_EMPTY_METRICS = REALM_METRIC_NAMES.map(
+                            (name) => ({
+                              name,
+                              totalAmount: "0",
+                            })
+                          );
+                          const realmStats = rlmMetadata
+                            ? {
+                                features: [
+                                  rlmMetadata.feature1,
+                                  rlmMetadata.feature2,
+                                  rlmMetadata.feature3,
+                                ],
+                                attributes: [
+                                  ...Object.entries(
+                                    rlmMetadata.totalStructures[0]
+                                  ).map(([name, value]) => ({
+                                    name: name
+                                      .replace("total", "")
+                                      .replace("Labs", " Labs"),
+                                    value,
+                                  })),
+                                  ...[
+                                    ...rlmMetadata.metrics,
+                                    ...REALM_EMPTY_METRICS,
+                                  ]
+                                    .filter(
+                                      (metric, index, array) =>
+                                        array.findIndex(
+                                          (item) => item.name === metric.name
+                                        ) === index
+                                    )
+                                    .filter((metric) =>
+                                      REALM_METRIC_NAMES.includes(metric.name)
+                                    )
+                                    .map(({ name, totalAmount: value }) => ({
+                                      name,
+                                      value,
+                                    })),
+                                ].map((attribute) => ({ attribute })),
+                              }
+                            : null;
 
                           const metadata = isBridgeworldItem
                             ? legionsMetadata
@@ -1096,10 +1240,23 @@ const Collection = () => {
                                   description: collectionName,
                                 },
                               }
+                            : rlmMetadata
+                            ? {
+                                id: rlmMetadata.id,
+                                name: rlmMetadata.name,
+                                tokenId: listing.token.tokenId,
+                                metadata: {
+                                  image: "/img/realm.png",
+                                  name: rlmMetadata.name,
+                                  description: collectionName,
+                                },
+                              }
                             : erc721Metadata;
 
                           const normalizedLegion =
                             normalizeBridgeworldTokenMetadata(legionsMetadata);
+
+                          const moreInfo = normalizedLegion ?? realmStats;
 
                           return (
                             <li key={listing.id} className="group">
@@ -1164,7 +1321,7 @@ const Collection = () => {
                                     {metadata?.name}
                                     {role ? ` - ${role}` : ""}
                                   </p>
-                                  {normalizedLegion ? (
+                                  {moreInfo ? (
                                     <div className="flex">
                                       <Popover.Root>
                                         <Popover.Trigger asChild>
@@ -1175,21 +1332,21 @@ const Collection = () => {
                                         <Popover.Anchor />
                                         <Popover.Content className="rounded-md w-60 border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-600 shadow-md text-gray-200 px-2 py-3">
                                           <div className="space-y-2 flex items-center justify-center flex-col">
-                                            {(
-                                              normalizedLegion.attributes ?? []
-                                            ).map((attribute) => (
-                                              <div
-                                                key={attribute.attribute.name}
-                                                className="flex items-center justify-between w-full"
-                                              >
-                                                <p className="text-xs text-gray-600 font-bold dark:text-gray-400 truncate">
-                                                  {attribute.attribute.name}
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-300 truncate">
-                                                  {attribute.attribute.value}
-                                                </p>
-                                              </div>
-                                            ))}
+                                            {(moreInfo.attributes ?? []).map(
+                                              (attribute) => (
+                                                <div
+                                                  key={attribute.attribute.name}
+                                                  className="flex items-center justify-between w-full"
+                                                >
+                                                  <p className="text-xs text-gray-600 font-bold dark:text-gray-400 truncate">
+                                                    {attribute.attribute.name}
+                                                  </p>
+                                                  <p className="text-xs text-gray-500 dark:text-gray-300 truncate">
+                                                    {attribute.attribute.value}
+                                                  </p>
+                                                </div>
+                                              )
+                                            )}
                                           </div>
                                           <Popover.Arrow className="text-gray-100 dark:text-gray-600 fill-current" />
                                         </Popover.Content>
@@ -1207,6 +1364,30 @@ const Collection = () => {
                                     $MAGIC
                                   </span>
                                 </p>
+                                {realmStats?.features ? (
+                                  <p className="xl:text-[0.6rem] text-[0.5rem] ml-auto whitespace-nowrap">
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Feature 1:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {realmStats.features[0]}
+                                    </span>
+                                    <br />
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Feature 2:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {realmStats.features[1]}
+                                    </span>
+                                    <br />
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Feature 3:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {realmStats.features[2]}
+                                    </span>
+                                  </p>
+                                ) : null}
                                 {legionStats?.summons ? (
                                   <p className="xl:text-[0.6rem] text-[0.5rem] ml-auto whitespace-nowrap">
                                     <span className="text-gray-500 dark:text-gray-400">

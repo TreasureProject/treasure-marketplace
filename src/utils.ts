@@ -26,7 +26,7 @@ export const formatPrice = (price: BigNumberish = Zero) =>
 
 export const formattable = (string: BigNumberish) => {
   // TODO: Fix regex, but will work for Head Size for now
-  if (isNaN(Number(string)) || /^\d$/.test(string.toString())) {
+  if (isNaN(Number(string)) || /^\d{1,6}$/.test(string.toString())) {
     return string;
   }
 

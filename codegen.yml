@@ -42,3 +42,10 @@ generates:
       - "typescript"
       - "typescript-operations"
       - "typescript-graphql-request"
+  generated/realm.graphql.ts:
+    schema: ${NEXT_PUBLIC_REALM_SUBGRAPH}
+    documents: "src/graphql/realm.graphql.ts"
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"

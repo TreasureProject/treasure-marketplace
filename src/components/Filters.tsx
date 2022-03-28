@@ -60,6 +60,46 @@ const CATEGORY = [
 ];
 const TIERS = LEVELS.slice(0, 5);
 
+// For Realm
+const FEATURES = [
+  "Basin",
+  "Bay",
+  "Biosphere",
+  "Butte",
+  "Canal",
+  "Canyon",
+  "Cape",
+  "Cave",
+  "Cove",
+  "Desert",
+  "Dune",
+  "Fjord",
+  "Geyser",
+  "Glacier",
+  "Gulf",
+  "Ice shelf",
+  "Island",
+  "Lagoon",
+  "Lake",
+  "Mesa",
+  "Mountain",
+  "Oasis",
+  "Ocean",
+  "Peninsula",
+  "Plateau",
+  "Pond",
+  "Prairie",
+  "Reef",
+  "River",
+  "Sea",
+  "Swamp",
+  "Tundra",
+  "Valley",
+  "Volcano",
+  "Waterfall",
+];
+const STRUCTURES = ["1", "2", "3", "5", "8", "13"];
+
 const combine = (base?: string) =>
   Array.from(new URLSearchParams(base).entries()).reduce<
     Record<string, string[]>
@@ -269,6 +309,20 @@ export function useFiltersList() {
             percentage: null,
           })),
         };
+      case collectionName === "Realm": {
+        const options = STRUCTURES.map((value) => ({
+          value: `>= ${value}`,
+          percentage: null,
+        }));
+
+        return {
+          Aquariums: options,
+          Cities: options,
+          Farms: options,
+          Features: FEATURES.map((value) => ({ value, percentage: null })),
+          "Research Labs": options,
+        };
+      }
       case isBattleflyItem:
         return reduceAttributes(battleflyAttributes.data);
       case isPeekABoo:
@@ -307,8 +361,16 @@ export function Filters() {
         {Object.keys(attributeFilterList).map(
           (attributeKey: keyof typeof attributeFilterList) => {
             const attributes = attributeFilterList[attributeKey]?.sort(
-              (left: { value: string }, right: { value: string }) =>
-                left.value.localeCompare(right.value)
+              (left: { value: string }, right: { value: string }) => {
+                const leftNumber = Number(left.value.replace(/[^\d]+/g, ""));
+                const rightNumber = Number(right.value.replace(/[^\d]+/g, ""));
+
+                if (isNaN(leftNumber) || isNaN(rightNumber)) {
+                  return left.value.localeCompare(right.value);
+                }
+
+                return leftNumber - rightNumber;
+              }
             );
 
             if ((attributes?.length ?? 0) === 0) {

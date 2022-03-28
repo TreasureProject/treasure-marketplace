@@ -18,6 +18,7 @@ import {
   client,
   marketplace,
   peekaboo,
+  realm,
   smolverse,
 } from "../../lib/client";
 import { useQuery } from "react-query";
@@ -801,6 +802,7 @@ const Inventory = () => {
     foundersTokens,
     smolverseTokens,
     peekabooTokens,
+    realmTokens,
   } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
       (acc, { token }) => {
@@ -814,6 +816,8 @@ const Inventory = () => {
           acc.smolverseTokens.push(token.id);
         } else if (collectionName === "Peek-A-Boo") {
           acc.peekabooTokens.push(token.id);
+        } else if (collectionName === "Realm") {
+          acc.realmTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -831,6 +835,7 @@ const Inventory = () => {
         foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
         peekabooTokens: [] as string[],
+        realmTokens: [] as string[],
       }
     );
   }, [allCollections, data]);
@@ -867,6 +872,15 @@ const Inventory = () => {
     () => peekaboo.getPeekABooMetadata({ ids: peekabooTokens }),
     {
       enabled: peekabooTokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
+  const { data: realmMetadata } = useQuery(
+    ["metadata-realm", realmTokens],
+    () => realm.getRealmMetadata({ ids: realmTokens }),
+    {
+      enabled: realmTokens.length > 0,
       refetchInterval: false,
     }
   );
@@ -1044,6 +1058,9 @@ const Inventory = () => {
                             const pabMetadata = peekabooMetadata?.tokens.find(
                               (item) => item.id === token.id
                             );
+                            const rlmMetadata = realmMetadata?.realms.find(
+                              (item) => item.id === token.tokenId
+                            );
                             const bfMetadata = battleflyMetadata.data?.find(
                               (item) => item.id === token.id
                             );
@@ -1103,6 +1120,17 @@ const Inventory = () => {
                                   metadata: {
                                     image: pabMetadata.image ?? "",
                                     name: pabMetadata.name,
+                                    description: token.collection.name,
+                                  },
+                                }
+                              : rlmMetadata
+                              ? {
+                                  id: rlmMetadata.id,
+                                  name: rlmMetadata.name,
+                                  tokenId: token.tokenId,
+                                  metadata: {
+                                    image: "/img/realm.png",
+                                    name: rlmMetadata.name,
                                     description: token.collection.name,
                                   },
                                 }

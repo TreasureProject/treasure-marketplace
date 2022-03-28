@@ -28,6 +28,7 @@ import {
   client,
   marketplace,
   peekaboo,
+  realm,
   smolverse,
 } from "./client";
 import { AddressZero } from "@ethersproject/constants";
@@ -520,6 +521,12 @@ type Metadata = {
   > | null;
 };
 
+const REALM_METRIC_NAMES = ["Gold", "Food", "Culture", "Technology"];
+const REALM_EMPTY_METRICS = REALM_METRIC_NAMES.map((name) => ({
+  name,
+  totalAmount: "0",
+}));
+
 const normalizeAttributes = (data) => ({
   ...data,
   attributes: data.attributes.map(({ attribute, trait_type: name, value }) => ({
@@ -600,6 +607,8 @@ export function useMetadata(
   const isFoundersItem = collectionName.includes("Founders");
   const isTreasureItem = collectionName === "Treasures";
   const isPeekABoo = collectionName === "Peek-A-Boo";
+  const isRealm = collectionName === "Realm";
+  const collection = useCollection(collectionName);
 
   const legacyMetadataResult = useQuery(
     ["metadata", ids],
@@ -611,7 +620,8 @@ export function useMetadata(
         !isSmolverseItem &&
         !isBattleflyItem &&
         !isFoundersItem &&
-        !isPeekABoo,
+        !isPeekABoo &&
+        !isRealm,
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -628,7 +638,8 @@ export function useMetadata(
         !isSmolverseItem &&
         !isBattleflyItem &&
         !isFoundersItem &&
-        !isPeekABoo,
+        !isPeekABoo &&
+        !isRealm,
       refetchInterval: false,
       keepPreviousData: true,
       select: ({ token }) => {
@@ -670,6 +681,58 @@ export function useMetadata(
       keepPreviousData: true,
     }
   );
+  const realmMetadataResult = useQuery(
+    ["realm-metadata", ids],
+    () =>
+      realm.getRealmMetadata({
+        ids: ids.map((item) => `${parseInt(item.slice(45), 16)}`),
+      }),
+    {
+      enabled: !!ids && isRealm,
+      refetchInterval: false,
+      keepPreviousData: true,
+      select: (data) => {
+        return data.realms.map((item) => {
+          const {
+            feature1,
+            feature2,
+            feature3,
+            name,
+            metrics,
+            totalStructures: [
+              {
+                totalAquariums = "0",
+                totalCities = "0",
+                totalFarms = "0",
+                totalResearchLabs = "0",
+              } = {},
+            ],
+          } = item;
+          const image = "/img/realm.png";
+          const id = `${collection.address}-0x${parseInt(item.id, 16)}`;
+          const attributes = [
+            { name: "Name", value: name },
+            { name: "Feature 1", value: feature1 },
+            { name: "Feature 2", value: feature2 },
+            { name: "Feature 3", value: feature3 },
+            { name: "Aquariums", value: totalAquariums },
+            { name: "Cities", value: totalCities },
+            { name: "Farms", value: totalFarms },
+            { name: "Research Labs", value: totalResearchLabs },
+            ...[...metrics, ...REALM_EMPTY_METRICS]
+              .filter(
+                (metric, index, array) =>
+                  array.findIndex((item) => item.name === metric.name) === index
+              )
+              .filter((metric) => REALM_METRIC_NAMES.includes(metric.name))
+              .map(({ name, totalAmount: value }) => ({ name, value })),
+          ];
+
+          return { attributes, id, image, name };
+        });
+      },
+    }
+  );
 
   const battleflyMetadataResult = useBattleflyMetadata(
     isBattleflyItem && id ? [id] : []
@@ -685,6 +748,7 @@ export function useMetadata(
     legacy: legacyMetadataResult.data,
     founders: foundersMetadataResult.data?.[0],
     peekaboo: peekABooMetadataResult.data,
+    realm: realmMetadataResult.data,
     smolverse: smolverseMetadataResult.data,
     token: tokenMetadataResult.data,
   };
@@ -696,6 +760,7 @@ export function useMetadata(
       foundersMetadata?: Metadata,
       legacyMetadata?: Metadata,
       peekabooMetadata?: Metadata,
+      realmMetadata?: Metadata,
       smolverseMetadata?: Metadata,
       tokenMetadata?: Metadata
     ) => {
@@ -721,6 +786,16 @@ export function useMetadata(
               attribute,
             })),
           }
+        : realmMetadata
+        ? {
+            id: realmMetadata.id,
+            description: collectionName,
+            image: realmMetadata.image,
+            name: realmMetadata.name,
+            attributes: realmMetadata.attributes?.map((attribute) => ({
+              attribute,
+            })),
+          }
         : tokenMetadata ??
           legacyMetadata ??
           foundersMetadata ??
@@ -739,6 +814,8 @@ export function useMetadata(
       ? !smolverseMetadataResult.isLoading && !!smolverseMetadataResult.data
       : isPeekABoo
       ? !peekABooMetadataResult.isLoading && !!peekABooMetadataResult.data
+      : isRealm
+      ? !realmMetadataResult.isLoading && !!realmMetadataResult.data
       : isBattleflyItem
       ? !battleflyMetadataResult.isLoading && !!battleflyMetadataResult.data
       : isFoundersItem

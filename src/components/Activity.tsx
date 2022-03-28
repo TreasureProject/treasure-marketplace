@@ -32,6 +32,7 @@ import {
   client,
   marketplace,
   peekaboo,
+  realm,
   smolverse,
 } from "../lib/client";
 import { BridgeworldItems, smolverseItems } from "../const";
@@ -142,6 +143,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
     foundersTokens,
     smolverseTokens,
     peekabooTokens,
+    realmTokens,
   } = useMemo(() => {
     return activities.reduce(
       (acc, { collection, token }) => {
@@ -154,6 +156,8 @@ export function Activity({ title, includeStatus }: ListingProps) {
           acc.smolverseTokens.push(token.id);
         } else if (collectionName === "Peek-A-Boo") {
           acc.peekabooTokens.push(token.id);
+        } else if (collectionName === "Realm") {
+          acc.realmTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -171,6 +175,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
         foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
         peekabooTokens: [] as string[],
+        realmTokens: [] as string[],
       }
     );
   }, [activities, collections]);
@@ -207,6 +212,15 @@ export function Activity({ title, includeStatus }: ListingProps) {
     () => peekaboo.getPeekABooMetadata({ ids: peekabooTokens }),
     {
       enabled: peekabooTokens.length > 0,
+      refetchInterval: false,
+    }
+  );
+
+  const { data: realmMetadata } = useQuery(
+    ["metadata-realm", realmTokens],
+    () => realm.getRealmMetadata({ ids: realmTokens }),
+    {
+      enabled: realmTokens.length > 0,
       refetchInterval: false,
     }
   );
@@ -317,6 +331,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
                   const pabMetadata = peekabooMetadata?.tokens.find(
                     (item) => item.id === activity.token.id
                   );
+                  const rlmMetadata = realmMetadata?.realms.find(
+                    (item) => item.id === activity.token.tokenId
+                  );
 
                   const metadata = legionsMetadata
                     ? {
@@ -370,6 +387,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                         metadata: {
                           image: pabMetadata.image ?? "",
                           name: pabMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : rlmMetadata
+                    ? {
+                        id: rlmMetadata.id,
+                        name: rlmMetadata.name,
+                        tokenId: activity.token.tokenId,
+                        metadata: {
+                          image: "/img/realm.png",
+                          name: rlmMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -492,6 +520,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
               const pabMetadata = peekabooMetadata?.tokens.find(
                 (item) => item.id === activity.token.id
               );
+              const rlmMetadata = realmMetadata?.realms.find(
+                (item) => item.id === activity.token.tokenId
+              );
 
               const metadata = legionsMetadata
                 ? {
@@ -545,6 +576,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                     metadata: {
                       image: pabMetadata.image ?? "",
                       name: pabMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : rlmMetadata
+                ? {
+                    id: rlmMetadata.id,
+                    name: rlmMetadata.name,
+                    tokenId: activity.token.tokenId,
+                    metadata: {
+                      image: "/img/realm.png",
+                      name: rlmMetadata.name,
                       description: collectionName ?? "",
                     },
                   }
