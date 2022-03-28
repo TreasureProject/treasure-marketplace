@@ -519,12 +519,18 @@ const Collection = () => {
   );
   const filteredRealmTokens = React.useMemo(
     () => ({
-      data: unique([
-        ...(filteredRealmStructureTokens?.data ?? []),
-        ...(filteredRealmFeaturesTokens?.data ?? []),
-      ]),
+      data: isRealm
+        ? unique([
+            ...(filteredRealmStructureTokens?.data ?? []),
+            ...(filteredRealmFeaturesTokens?.data ?? []),
+          ])
+        : undefined,
     }),
-    [filteredRealmFeaturesTokens?.data, filteredRealmStructureTokens?.data]
+    [
+      filteredRealmFeaturesTokens?.data,
+      filteredRealmStructureTokens?.data,
+      isRealm,
+    ]
   );
 
   // Use filtered or listed tokenIds to perform text search
