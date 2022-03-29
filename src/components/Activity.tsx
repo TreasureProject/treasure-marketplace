@@ -5,7 +5,7 @@ import {
   ShoppingCartIcon,
 } from "@heroicons/react/solid";
 import { CurrencyDollarIcon } from "@heroicons/react/outline";
-import { Fragment, useMemo } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   ListingFieldsFragment,
   Listing_OrderBy,
@@ -36,8 +36,8 @@ import {
   smolverse,
 } from "../lib/client";
 import { BridgeworldItems, smolverseItems } from "../const";
-import { SortMenu } from "./SortMenu";
 import { CenterLoadingDots } from "./CenterLoadingDots";
+import BinaryOptionToggle from "./BinaryOptionToggle";
 
 const sortOptions = [
   {
@@ -61,6 +61,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
   const router = useRouter();
   const { address: slugOrAddress } = router.query;
   const { account } = useEthers();
+  const [toggleChecked, setToggleChecked] = useState(false);
 
   const { id: collection } = useCollection(slugOrAddress);
   const [orderBy, orderDirection] = (
@@ -73,13 +74,30 @@ export function Activity({ title, includeStatus }: ListingProps) {
   const isMyActivity = router.pathname.startsWith("/inventory");
   const wallet = account?.toLowerCase();
 
+  const includeToColumn =
+    (isMyActivity && toggleChecked) || (!isMyActivity && !toggleChecked);
+
   const queries = useQueries([
     {
-      queryKey: ["activity", collection, orderBy, orderDirection],
+      queryKey: ["activity-sold", collection, orderBy, orderDirection],
       queryFn: () =>
         marketplace.getActivity({
           filter: {
             status: Status.Sold,
+            ...(collection ? { collection } : {}),
+          },
+          first: 100,
+          orderBy,
+          orderDirection,
+        }),
+      enabled: isAllActivity ? !isMyActivity : !!collection,
+    },
+    {
+      queryKey: ["activity-active", collection, orderBy, orderDirection],
+      queryFn: () =>
+        marketplace.getActivity({
+          filter: {
+            status: Status.Active,
             ...(collection ? { collection } : {}),
           },
           first: 100,
@@ -122,17 +140,21 @@ export function Activity({ title, includeStatus }: ListingProps) {
 
   const activities: ListingFieldsFragment[] = useMemo(() => {
     if (!isMyActivity) {
-      return queries[0].data?.listings ?? [];
+      const soldListings = queries[0].data?.listings ?? [];
+      const activeListings = queries[1].data?.listings ?? [];
+
+      if (!soldListings && !activeListings) {
+        return [];
+      }
+
+      return !toggleChecked ? soldListings : activeListings;
     }
 
-    return (
-      queries
-        .slice(1)
-        .flatMap((query) => query.data?.listings ?? [])
-        // We have to re-sort to handle the merging of bought and sold.
-        .sort((left, right) => right[orderBy] - left[orderBy])
-    );
-  }, [isMyActivity, orderBy, queries]);
+    const buyActivity = queries[2].data?.listings ?? [];
+    const sellActivity = queries[3].data?.listings ?? [];
+
+    return !toggleChecked ? sellActivity : buyActivity;
+  }, [isMyActivity, queries, toggleChecked]);
 
   const collections = useCollections();
 
@@ -246,14 +268,18 @@ export function Activity({ title, includeStatus }: ListingProps) {
             <h1 className="flex text-2xl font-bold text-gray-900 dark:text-gray-200">
               {title}
             </h1>
-            <section aria-labelledby="filter-heading">
+            <section
+              aria-labelledby="filter-heading"
+              className="flex align-center leading-tight"
+            >
               <h2 id="filter-heading" className="sr-only">
                 Product filters
               </h2>
-
-              <div className="flex items-center">
-                <SortMenu options={sortOptions} />
-              </div>
+              <BinaryOptionToggle
+                options={["Sold", isMyActivity ? "Bought" : "Listed"]}
+                checked={toggleChecked}
+                onChange={setToggleChecked}
+              />
             </section>
           </div>
 
@@ -293,12 +319,14 @@ export function Activity({ title, includeStatus }: ListingProps) {
                   >
                     From
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                  >
-                    To
-                  </th>
+                  {includeToColumn ? (
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      To
+                    </th>
+                  ) : null}
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
@@ -468,13 +496,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
                         {shortenAddress(activity.seller.id)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
-                        {shortenAddress(activity.buyer?.id ?? "")}
-                      </td>
+                      {activity.buyer ? (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-700">
+                            {shortenAddress(activity.buyer?.id ?? "")}
+                          </td>
+                        </>
+                      ) : null}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-red-500 dark:text-gray-700">
                         <a
                           className="flex flex-1 items-center"
-                          href={activity.transactionLink ?? ""}
+                          href={activity.transactionLink ?? undefined}
                           rel="noreferrer"
                           target="_blank"
                         >
@@ -482,7 +514,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
                             new Date(Number(activity.blockTimestamp) * 1000),
                             { addSuffix: true }
                           )}
-                          <ExternalLinkIcon className="h-5 pl-2" />
+                          {activity.transactionLink ? (
+                            <ExternalLinkIcon className="h-5 pl-2" />
+                          ) : null}
                         </a>
                       </td>
                     </tr>
@@ -686,17 +720,23 @@ export function Activity({ title, includeStatus }: ListingProps) {
                               </p>
                               <p>{shortenAddress(activity.seller.id)}</p>
                             </div>
-                            <div className="sm:px-8 space-y-1">
-                              <p className="text-xs dark:text-gray-500">To:</p>
-                              <p>{shortenAddress(activity.buyer?.id ?? "")}</p>
-                            </div>
+                            {activity.buyer ? (
+                              <div className="sm:px-8 space-y-1">
+                                <p className="text-xs dark:text-gray-500">
+                                  To:
+                                </p>
+                                <p>
+                                  {shortenAddress(activity.buyer?.id ?? "")}
+                                </p>
+                              </div>
+                            ) : null}
                             <div className="sm:pl-8 space-y-1">
                               <p className="text-xs dark:text-gray-500">
                                 Time:
                               </p>
                               <a
                                 className="flex items-center"
-                                href={activity.transactionLink ?? ""}
+                                href={activity.transactionLink ?? undefined}
                                 rel="noreferrer"
                                 target="_blank"
                               >
@@ -708,7 +748,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
                                     addSuffix: true,
                                   }
                                 )}
-                                <ExternalLinkIcon className="h-4 m-[0.125rem] pl-1" />
+                                {activity.transactionLink ? (
+                                  <ExternalLinkIcon className="h-4 m-[0.125rem] pl-1" />
+                                ) : null}
                               </a>
                             </div>
                           </div>
