@@ -36,6 +36,7 @@ import {
   smolverse,
 } from "../lib/client";
 import { BridgeworldItems, smolverseItems } from "../const";
+import { SortMenu } from "./SortMenu";
 import { CenterLoadingDots } from "./CenterLoadingDots";
 import BinaryOptionToggle from "./BinaryOptionToggle";
 
@@ -275,6 +276,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
               <h2 id="filter-heading" className="sr-only">
                 Product filters
               </h2>
+              <div className="flex items-center px-2 sm:px-6">
+                <SortMenu options={sortOptions} />
+              </div>
               <BinaryOptionToggle
                 options={["Sold", isMyActivity ? "Bought" : "Listed"]}
                 checked={toggleChecked}
