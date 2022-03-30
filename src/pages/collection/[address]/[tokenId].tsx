@@ -17,22 +17,13 @@ import {
   shortenIfAddress,
   useEthers,
   addressEqual,
-  useTokenAllowance,
-  TransactionStatus,
 } from "@usedapp/core";
 import Link from "next/link";
 import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { useRouter } from "next/router";
 import { marketplace } from "../../../lib/client";
 import { AddressZero } from "@ethersproject/constants";
-import {
-  useApproveMagic,
-  useBuyItem,
-  useChainId,
-  useCollection,
-  useMetadata,
-  useTransferNFT,
-} from "../../../lib/hooks";
+import { useCollection, useMetadata, useTransferNFT } from "../../../lib/hooks";
 import { CenterLoadingDots } from "../../../components/CenterLoadingDots";
 import {
   formatNumber,
@@ -264,7 +255,7 @@ export default function TokenDetail() {
 
   const bridgeworldMetadata = metadataData.bridgeworld?.tokens?.[0];
   const smolverseMetadata = metadataData.smolverse?.tokens?.[0];
-  const peekabooMetadata = metadataData.peekaboo?.tokens?.[0];
+  const peekabooMetadata = metadataData.shared?.tokens?.[0];
   const realmMetadata = metadataData.realm?.[0];
   const tokenMetadata = metadataData.token?.token?.metadata ?? undefined;
 
@@ -417,7 +408,8 @@ export default function TokenDetail() {
                                       pathname: `/collection/${slugOrAddress}`,
                                       query: {
                                         search: new URLSearchParams({
-                                          [attribute.name]: attribute.value,
+                                          [attribute.name]:
+                                            attribute.value.replace(/\/.+/, ""),
                                         }).toString(),
                                       },
                                     }}
@@ -828,7 +820,8 @@ export default function TokenDetail() {
                                       pathname: `/collection/${slugOrAddress}`,
                                       query: {
                                         search: new URLSearchParams({
-                                          [attribute.name]: attribute.value,
+                                          [attribute.name]:
+                                            attribute.value.replace(/\/.+/, ""),
                                         }).toString(),
                                       },
                                     }}

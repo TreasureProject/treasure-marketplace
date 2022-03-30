@@ -1,8 +1,9 @@
 import gql from "graphql-tag";
 
-export const getPeekABooAttributes = gql`
-  query getPeekABooAttributes {
-    attributes(first: 1000) {
+export const getCollectionAttributes = gql`
+  query getCollectionAttributes {
+    attributes(first: 1000, where: { name_not_contains: "Max" }) {
+      id
       name
       percentage
       value
@@ -10,8 +11,8 @@ export const getPeekABooAttributes = gql`
   }
 `;
 
-export const getPeekABooMetadata = gql`
-  query getPeekABooMetadata($ids: [ID!]!) {
+export const getTokenMetadata = gql`
+  query getTokenMetadata($ids: [ID!]!) {
     tokens(first: 1000, where: { id_in: $ids }) {
       id
       attributes {
@@ -26,8 +27,8 @@ export const getPeekABooMetadata = gql`
   }
 `;
 
-export const getFilteredPeekABoos = gql`
-  query getFilteredPeekABoos($attributeIds: [ID!]!, $tokenIds: [ID!]!) {
+export const getFilteredTokens = gql`
+  query getFilteredTokens($attributeIds: [ID!]!, $tokenIds: [ID!]!) {
     attributes(where: { id_in: $attributeIds }) {
       id
       tokens(first: 1000, where: { id_in: $tokenIds }) {

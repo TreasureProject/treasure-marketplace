@@ -31,11 +31,15 @@ import {
   bridgeworld,
   client,
   marketplace,
-  peekaboo,
+  metadata,
   realm,
   smolverse,
 } from "../lib/client";
-import { BridgeworldItems, smolverseItems } from "../const";
+import {
+  BridgeworldItems,
+  METADATA_COLLECTIONS,
+  smolverseItems,
+} from "../const";
 import { SortMenu } from "./SortMenu";
 import { CenterLoadingDots } from "./CenterLoadingDots";
 
@@ -142,7 +146,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
     bridgeworldTokens,
     foundersTokens,
     smolverseTokens,
-    peekabooTokens,
+    metadataTokens,
     realmTokens,
   } = useMemo(() => {
     return activities.reduce(
@@ -154,8 +158,8 @@ export function Activity({ title, includeStatus }: ListingProps) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
-        } else if (collectionName === "Peek-A-Boo") {
-          acc.peekabooTokens.push(token.id);
+        } else if (METADATA_COLLECTIONS.includes(collectionName)) {
+          acc.metadataTokens.push(token.id);
         } else if (collectionName === "Realm") {
           acc.realmTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
@@ -174,7 +178,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
         bridgeworldTokens: [] as string[],
         foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
-        peekabooTokens: [] as string[],
+        metadataTokens: [] as string[],
         realmTokens: [] as string[],
       }
     );
@@ -207,11 +211,11 @@ export function Activity({ title, includeStatus }: ListingProps) {
     }
   );
 
-  const { data: peekabooMetadata } = useQuery(
-    ["metadata-peekaboo", peekabooTokens],
-    () => peekaboo.getPeekABooMetadata({ ids: peekabooTokens }),
+  const { data: sharedMetadata } = useQuery(
+    ["metadata-shared", metadataTokens],
+    () => metadata.getTokenMetadata({ ids: metadataTokens }),
     {
-      enabled: peekabooTokens.length > 0,
+      enabled: metadataTokens.length > 0,
       refetchInterval: false,
     }
   );
@@ -331,7 +335,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
                   const fsMetadata = foundersMetadata.data?.find(
                     (item) => item.id === activity.token.id
                   );
-                  const pabMetadata = peekabooMetadata?.tokens.find(
+                  const shrdMetadata = sharedMetadata?.tokens.find(
                     (item) => item.id === activity.token.id
                   );
                   const rlmMetadata = realmMetadata?.realms.find(
@@ -382,14 +386,14 @@ export function Activity({ title, includeStatus }: ListingProps) {
                           description: collectionName ?? "",
                         },
                       }
-                    : pabMetadata
+                    : shrdMetadata
                     ? {
-                        id: pabMetadata.id,
-                        name: pabMetadata.name,
+                        id: shrdMetadata.id,
+                        name: shrdMetadata.name,
                         tokenId: activity.token.tokenId,
                         metadata: {
-                          image: pabMetadata.image ?? "",
-                          name: pabMetadata.name,
+                          image: shrdMetadata.image ?? "",
+                          name: shrdMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -520,7 +524,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
               const fsMetadata = foundersMetadata.data?.find(
                 (item) => item.id === activity.token.id
               );
-              const pabMetadata = peekabooMetadata?.tokens.find(
+              const shrdMetadata = sharedMetadata?.tokens.find(
                 (item) => item.id === activity.token.id
               );
               const rlmMetadata = realmMetadata?.realms.find(
@@ -571,14 +575,14 @@ export function Activity({ title, includeStatus }: ListingProps) {
                       description: collectionName ?? "",
                     },
                   }
-                : pabMetadata
+                : shrdMetadata
                 ? {
-                    id: pabMetadata.id,
-                    name: pabMetadata.name,
+                    id: shrdMetadata.id,
+                    name: shrdMetadata.name,
                     tokenId: activity.token.tokenId,
                     metadata: {
-                      image: pabMetadata.image ?? "",
-                      name: pabMetadata.name,
+                      image: shrdMetadata.image ?? "",
+                      name: shrdMetadata.name,
                       description: collectionName ?? "",
                     },
                   }

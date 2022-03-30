@@ -17,7 +17,7 @@ import {
   bridgeworld,
   client,
   marketplace,
-  peekaboo,
+  metadata,
   realm,
   smolverse,
 } from "../../lib/client";
@@ -43,7 +43,13 @@ import Link from "next/link";
 import { CenterLoadingDots } from "../../components/CenterLoadingDots";
 import { formatEther } from "ethers/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { BridgeworldItems, FEE, smolverseItems, USER_SHARE } from "../../const";
+import {
+  BridgeworldItems,
+  FEE,
+  METADATA_COLLECTIONS,
+  smolverseItems,
+  USER_SHARE,
+} from "../../const";
 import { TokenStandard } from "../../../generated/queries.graphql";
 import { useMagic } from "../../context/magicContext";
 import { Activity } from "../../components/Activity";
@@ -801,7 +807,7 @@ const Inventory = () => {
     bridgeworldTokens,
     foundersTokens,
     smolverseTokens,
-    peekabooTokens,
+    metadataTokens,
     realmTokens,
   } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
@@ -814,8 +820,8 @@ const Inventory = () => {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
-        } else if (collectionName === "Peek-A-Boo") {
-          acc.peekabooTokens.push(token.id);
+        } else if (METADATA_COLLECTIONS.includes(collectionName)) {
+          acc.metadataTokens.push(token.id);
         } else if (collectionName === "Realm") {
           acc.realmTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
@@ -834,7 +840,7 @@ const Inventory = () => {
         bridgeworldTokens: [] as string[],
         foundersTokens: [] as string[],
         smolverseTokens: [] as string[],
-        peekabooTokens: [] as string[],
+        metadataTokens: [] as string[],
         realmTokens: [] as string[],
       }
     );
@@ -867,11 +873,11 @@ const Inventory = () => {
     }
   );
 
-  const { data: peekabooMetadata } = useQuery(
-    ["metadata-peekaboo", peekabooTokens],
-    () => peekaboo.getPeekABooMetadata({ ids: peekabooTokens }),
+  const { data: sharedMetadata } = useQuery(
+    ["metadata-shared", metadataTokens],
+    () => metadata.getTokenMetadata({ ids: metadataTokens }),
     {
-      enabled: peekabooTokens.length > 0,
+      enabled: metadataTokens.length > 0,
       refetchInterval: false,
     }
   );
@@ -1058,7 +1064,7 @@ const Inventory = () => {
                             const smolMetadata = smolverseMetadata?.tokens.find(
                               (item) => item.id === token.id
                             );
-                            const pabMetadata = peekabooMetadata?.tokens.find(
+                            const shrdMetadata = sharedMetadata?.tokens.find(
                               (item) => item.id === token.id
                             );
                             const rlmMetadata = realmMetadata?.realms.find(
@@ -1115,14 +1121,14 @@ const Inventory = () => {
                                     description: token.collection.name,
                                   },
                                 }
-                              : pabMetadata
+                              : shrdMetadata
                               ? {
-                                  id: pabMetadata.id,
-                                  name: pabMetadata.name,
+                                  id: shrdMetadata.id,
+                                  name: shrdMetadata.name,
                                   tokenId: token.tokenId,
                                   metadata: {
-                                    image: pabMetadata.image ?? "",
-                                    name: pabMetadata.name,
+                                    image: shrdMetadata.image ?? "",
+                                    name: shrdMetadata.name,
                                     description: token.collection.name,
                                   },
                                 }

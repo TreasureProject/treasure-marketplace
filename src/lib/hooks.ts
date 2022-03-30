@@ -13,6 +13,7 @@ import {
   BATTLEFLY_METADATA,
   BridgeworldItems,
   Contracts,
+  METADATA_COLLECTIONS,
   smolverseItems,
 } from "../const";
 import { Interface } from "@ethersproject/abi";
@@ -27,7 +28,7 @@ import {
   bridgeworld,
   client,
   marketplace,
-  peekaboo,
+  metadata,
   realm,
   smolverse,
 } from "./client";
@@ -597,6 +598,17 @@ export function useFoundersMetadata(input: string[]) {
   return useBattleflyApi("founders", input);
 }
 
+type Attribute = Awaited<
+  ReturnType<typeof metadata.getTokenMetadata>
+>["tokens"][number]["attributes"][number];
+
+function formatCurrentMaxAttribute([current, max]: [Attribute, Attribute]) {
+  return {
+    ...current,
+    value: `${current.value}/${max.value}`,
+  };
+}
+
 export function useMetadata(
   collectionName: string,
   { id = "", ids = [] }: Partial<{ id: string; ids: string[] }>
@@ -606,7 +618,7 @@ export function useMetadata(
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
   const isTreasureItem = collectionName === "Treasures";
-  const isPeekABoo = collectionName === "Peek-A-Boo";
+  const isShared = METADATA_COLLECTIONS.includes(collectionName);
   const isRealm = collectionName === "Realm";
   const collection = useCollection(collectionName);
 
@@ -620,7 +632,7 @@ export function useMetadata(
         !isSmolverseItem &&
         !isBattleflyItem &&
         !isFoundersItem &&
-        !isPeekABoo &&
+        !isShared &&
         !isRealm,
       refetchInterval: false,
       keepPreviousData: true,
@@ -638,7 +650,7 @@ export function useMetadata(
         !isSmolverseItem &&
         !isBattleflyItem &&
         !isFoundersItem &&
-        !isPeekABoo &&
+        !isShared &&
         !isRealm,
       refetchInterval: false,
       keepPreviousData: true,
@@ -672,13 +684,47 @@ export function useMetadata(
     }
   );
 
-  const peekABooMetadataResult = useQuery(
-    ["peekaboo-metadata", ids],
-    () => peekaboo.getPeekABooMetadata({ ids }),
+  const sharedMetadataResult = useQuery(
+    ["shared-metadata", ids],
+    () => metadata.getTokenMetadata({ ids }),
     {
-      enabled: !!ids && isPeekABoo,
+      enabled: !!ids && isShared,
       refetchInterval: false,
       keepPreviousData: true,
+      select: (data) => {
+        switch (collectionName) {
+          case "Tales of Elleria": {
+            return {
+              tokens: data.tokens.map((token) => {
+                const attributes = token.attributes.reduce((acc, attribute) => {
+                  acc[attribute.name.replace(" ", "")] = attribute;
+
+                  return acc;
+                }, {} as Record<string, Attribute>);
+
+                return {
+                  ...token,
+                  attributes: [
+                    attributes.Class,
+                    attributes.Rarity,
+                    attributes.Level,
+                    ...[
+                      [attributes.Strength, attributes.MaxStrength],
+                      [attributes.Agility, attributes.MaxAgility],
+                      [attributes.Vitality, attributes.MaxVitality],
+                      [attributes.Endurance, attributes.MaxEndurance],
+                      [attributes.Intelligence, attributes.MaxIntelligence],
+                      [attributes.Will, attributes.MaxWill],
+                    ].map(formatCurrentMaxAttribute),
+                  ],
+                };
+              }),
+            };
+          }
+          default:
+            return data;
+        }
+      },
     }
   );
   const realmMetadataResult = useQuery(
@@ -746,8 +792,8 @@ export function useMetadata(
     bridgeworld: bridgeworldMetadataResult.data,
     legacy: legacyMetadataResult.data,
     founders: foundersMetadataResult.data?.[0],
-    peekaboo: peekABooMetadataResult.data,
     realm: realmMetadataResult.data,
+    shared: sharedMetadataResult.data,
     smolverse: smolverseMetadataResult.data,
     token: tokenMetadataResult.data,
   };
@@ -758,7 +804,7 @@ export function useMetadata(
       bridgeworldMetadata?: Metadata,
       foundersMetadata?: Metadata,
       legacyMetadata?: Metadata,
-      peekabooMetadata?: Metadata,
+      sharedMetadata?: Metadata,
       realmMetadata?: Metadata,
       smolverseMetadata?: Metadata,
       tokenMetadata?: Metadata
@@ -775,13 +821,13 @@ export function useMetadata(
               attribute,
             })),
           }
-        : peekabooMetadata
+        : sharedMetadata
         ? {
-            id: peekabooMetadata.id,
+            id: sharedMetadata.id,
             description: collectionName,
-            image: peekabooMetadata.image,
-            name: peekabooMetadata.name,
-            attributes: peekabooMetadata.attributes?.map((attribute) => ({
+            image: sharedMetadata.image,
+            name: sharedMetadata.name,
+            attributes: sharedMetadata.attributes?.map((attribute) => ({
               attribute,
             })),
           }
@@ -811,8 +857,8 @@ export function useMetadata(
       ? !bridgeworldMetadataResult.isLoading && !!bridgeworldMetadataResult.data
       : isSmolverseItem
       ? !smolverseMetadataResult.isLoading && !!smolverseMetadataResult.data
-      : isPeekABoo
-      ? !peekABooMetadataResult.isLoading && !!peekABooMetadataResult.data
+      : isShared
+      ? !sharedMetadataResult.isLoading && !!sharedMetadataResult.data
       : isRealm
       ? !realmMetadataResult.isLoading && !!realmMetadataResult.data
       : isBattleflyItem

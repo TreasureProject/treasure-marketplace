@@ -8,7 +8,7 @@ import {
   bridgeworld,
   client,
   marketplace,
-  peekaboo,
+  metadata,
   realm,
   smolverse,
 } from "../../../lib/client";
@@ -37,7 +37,11 @@ import {
 } from "../../../lib/hooks";
 import { EthIcon, MagicIcon, SwapIcon } from "../../../components/Icons";
 import { useMagic } from "../../../context/magicContext";
-import { BridgeworldItems, smolverseItems } from "../../../const";
+import {
+  BridgeworldItems,
+  METADATA_COLLECTIONS,
+  smolverseItems,
+} from "../../../const";
 import * as Popover from "@radix-ui/react-popover";
 import { normalizeBridgeworldTokenMetadata } from "../../../utils/metadata";
 import {
@@ -98,6 +102,13 @@ const sortOptions = [
   },
 ];
 
+function range(value: number) {
+  return new Array(101 - value)
+    .fill("")
+    .map((_, index) => index + value)
+    .map(String);
+}
+
 const formatSearchFilter = (search: string | undefined) => {
   if (!search) return [];
 
@@ -108,7 +119,30 @@ const formatSearchFilter = (search: string | undefined) => {
     return an array like this: ["Background,red", "Background,blue"]
   */
   return searchParams.reduce<string[]>((acc, [key, value]) => {
-    const values = value.split(",");
+    let values: string[] = [];
+
+    switch (key) {
+      case "Agility":
+      case "Endurance":
+      case "Intelligence":
+      case "Strength":
+      case "Vitality":
+      case "Will":
+        values = range(
+          Number(
+            value
+              .split(",")
+              .map((item) => item.replace(/[^\d]+/g, ""))
+              .sort()[0]
+          )
+        );
+
+        break;
+      default:
+        values = value.split(",");
+    }
+
+    console.log({ values, key });
     return [...acc, ...values.map((v) => `${key},${v}`)];
   }, []);
 };
@@ -171,7 +205,7 @@ const Collection = () => {
   const isBridgeworldItem = BridgeworldItems.includes(collectionName);
   const isSmolverseItem = smolverseItems.includes(collectionName);
   const isTreasure = collectionName === "Treasures";
-  const isPeekABoo = collectionName === "Peek-A-Boo";
+  const isShared = METADATA_COLLECTIONS.includes(collectionName);
   const isRealm = collectionName === "Realm";
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
@@ -251,7 +285,7 @@ const Collection = () => {
         !isBridgeworldItem &&
         !isSmolverseItem &&
         !isBattleflyItem &&
-        !isPeekABoo &&
+        !isShared &&
         !isRealm,
       select: React.useCallback(
         ({
@@ -419,20 +453,20 @@ const Collection = () => {
       ),
     }
   );
-  const filteredPeekABooTokens = useQuery(
-    ["peekaboo-filtered-tokens", listedTokens.data, attributeIds],
+  const filteredSharedTokens = useQuery(
+    ["shared-filtered-tokens", listedTokens.data, attributeIds],
     () =>
-      peekaboo.getFilteredPeekABoos({
+      metadata.getFilteredTokens({
         attributeIds: attributeIds.map((id) => id.replace(/ /g, "-")),
         tokenIds: listedTokens.data ?? [],
       }),
     {
       enabled:
-        Boolean(listedTokens.data) && attributeIds.length > 0 && isPeekABoo,
+        Boolean(listedTokens.data) && attributeIds.length > 0 && isShared,
       select: React.useCallback(
         ({
           attributes,
-        }: Awaited<ReturnType<typeof peekaboo.getFilteredPeekABoos>>) => {
+        }: Awaited<ReturnType<typeof metadata.getFilteredTokens>>) => {
           const sections = attributes.reduce<Record<string, string[]>>(
             (acc, { tokens, id }) => {
               tokens.forEach((token) => {
@@ -540,7 +574,7 @@ const Collection = () => {
     [
       "searched-token",
       filteredBattleflyTokens.data,
-      filteredPeekABooTokens.data,
+      filteredSharedTokens.data,
       filteredRealmTokens.data,
       filteredTreasureTokens.data,
       filteredBridgeworldTokens.data,
@@ -557,7 +591,7 @@ const Collection = () => {
         start,
         ids:
           filteredBattleflyTokens.data ??
-          filteredPeekABooTokens.data ??
+          filteredSharedTokens.data ??
           filteredRealmTokens.data ??
           filteredTreasureTokens.data ??
           filteredBridgeworldTokens.data ??
@@ -590,7 +624,7 @@ const Collection = () => {
     () =>
       searchedTokens.data ??
       filteredBattleflyTokens.data ??
-      filteredPeekABooTokens.data ??
+      filteredSharedTokens.data ??
       filteredRealmTokens.data ??
       filteredTreasureTokens.data ??
       filteredBridgeworldTokens.data ??
@@ -599,7 +633,7 @@ const Collection = () => {
     [
       searchedTokens.data,
       filteredBattleflyTokens.data,
-      filteredPeekABooTokens.data,
+      filteredSharedTokens.data,
       filteredRealmTokens.data,
       filteredTreasureTokens.data,
       filteredBridgeworldTokens.data,
@@ -655,7 +689,7 @@ const Collection = () => {
         !!listingIds &&
         !isBridgeworldItem &&
         !isSmolverseItem &&
-        !isPeekABoo &&
+        !isShared &&
         !isRealm,
       refetchInterval: false,
       keepPreviousData: true,
@@ -682,11 +716,11 @@ const Collection = () => {
     }
   );
 
-  const peekabooMetadata = useQuery(
-    ["peekaboo-metadata", listingIds],
-    () => peekaboo.getPeekABooMetadata({ ids: listingIds }),
+  const sharedMetadata = useQuery(
+    ["shared-metadata", listingIds],
+    () => metadata.getTokenMetadata({ ids: listingIds }),
     {
-      enabled: !!listingIds && isPeekABoo,
+      enabled: !!listingIds && isShared,
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -719,7 +753,7 @@ const Collection = () => {
         legacyMetadata.status,
         bridgeworldMetadata.status,
         smolverseMetadata.status,
-        peekabooMetadata.status,
+        sharedMetadata.status,
         realmMetadata.status,
         battleflyMetadata.status,
         foundersMetadata.status,
@@ -727,7 +761,7 @@ const Collection = () => {
     [
       listings.status,
       legacyMetadata.status,
-      peekabooMetadata.status,
+      sharedMetadata.status,
       bridgeworldMetadata.status,
       realmMetadata.status,
       smolverseMetadata.status,
@@ -1083,10 +1117,9 @@ const Collection = () => {
                             smolverseMetadata.data?.tokens.find(
                               (item) => item.id === listing.token.id
                             );
-                          const pabMetadata =
-                            peekabooMetadata.data?.tokens.find(
-                              (item) => item.id === listing.token.id
-                            );
+                          const shrdMetadata = sharedMetadata.data?.tokens.find(
+                            (item) => item.id === listing.token.id
+                          );
                           const rlmMetadata = realmMetadata.data?.realms.find(
                             (item) => item.id === listing.token.tokenId
                           );
@@ -1189,6 +1222,42 @@ const Collection = () => {
                                 ].map((attribute) => ({ attribute })),
                               }
                             : null;
+                          const elleriaStats =
+                            collectionName === "Tales of Elleria" &&
+                            shrdMetadata
+                              ? {
+                                  attributes: [
+                                    shrdMetadata.attributes.find(
+                                      (item) => item.name === "Class"
+                                    ),
+                                    shrdMetadata.attributes.find(
+                                      (item) => item.name === "Rarity"
+                                    ),
+                                    shrdMetadata.attributes.find(
+                                      (item) => item.name === "Level"
+                                    ),
+                                    ...[
+                                      "Agility",
+                                      "Endurance",
+                                      "Intelligence",
+                                      "Strength",
+                                      "Vitality",
+                                      "Will",
+                                    ].map((name) => ({
+                                      name,
+                                      value: `${
+                                        shrdMetadata.attributes.find(
+                                          (item) => item.name === name
+                                        )?.value
+                                      }/${
+                                        shrdMetadata.attributes.find(
+                                          (item) => item.name === `Max ${name}`
+                                        )?.value
+                                      }`,
+                                    })),
+                                  ].map((attribute) => ({ attribute })),
+                                }
+                              : null;
 
                           const metadata = isBridgeworldItem
                             ? legionsMetadata
@@ -1236,14 +1305,14 @@ const Collection = () => {
                                   description: collectionName,
                                 },
                               }
-                            : pabMetadata
+                            : shrdMetadata
                             ? {
-                                id: pabMetadata.id,
-                                name: pabMetadata.name,
+                                id: shrdMetadata.id,
+                                name: shrdMetadata.name,
                                 tokenId: listing.token.tokenId,
                                 metadata: {
-                                  image: pabMetadata.image ?? "",
-                                  name: pabMetadata.name,
+                                  image: shrdMetadata.image ?? "",
+                                  name: shrdMetadata.name,
                                   description: collectionName,
                                 },
                               }
@@ -1263,7 +1332,8 @@ const Collection = () => {
                           const normalizedLegion =
                             normalizeBridgeworldTokenMetadata(legionsMetadata);
 
-                          const moreInfo = normalizedLegion ?? realmStats;
+                          const moreInfo =
+                            normalizedLegion ?? realmStats ?? elleriaStats;
 
                           return (
                             <li key={listing.id} className="group">
@@ -1390,6 +1460,39 @@ const Collection = () => {
                                     </span>{" "}
                                     <span className="font-bold text-gray-700 dark:text-gray-300">
                                       {realmStats.features[2]}
+                                    </span>
+                                  </p>
+                                ) : null}
+                                {elleriaStats?.attributes ? (
+                                  <p className="xl:text-[0.6rem] text-[0.5rem] ml-auto whitespace-nowrap">
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Class:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {
+                                        elleriaStats.attributes[0]?.attribute
+                                          ?.value
+                                      }
+                                    </span>
+                                    <br />
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Rarity:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {
+                                        elleriaStats.attributes[1]?.attribute
+                                          ?.value
+                                      }
+                                    </span>
+                                    <br />
+                                    <span className="text-gray-500 dark:text-gray-400">
+                                      Level:
+                                    </span>{" "}
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                      {
+                                        elleriaStats.attributes[2]?.attribute
+                                          ?.value
+                                      }
                                     </span>
                                   </p>
                                 ) : null}

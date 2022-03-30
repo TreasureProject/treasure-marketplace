@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/solid";
 import { GetCollectionAttributesQuery } from "../../generated/queries.graphql";
 import { GetUserInventoryQuery } from "../../generated/marketplace.graphql";
-import { bridgeworld, client, peekaboo } from "../lib/client";
+import { bridgeworld, client, metadata } from "../lib/client";
 import { formatPercent } from "../utils";
 import { useRouter } from "next/router";
 import { useCollection, useEthers } from "../lib/hooks";
@@ -16,6 +16,7 @@ import Button from "./Button";
 import React from "react";
 import classNames from "clsx";
 import useLocalStorage from "use-local-storage-state";
+import { METADATA_COLLECTIONS } from "../const";
 
 type Attribute = {
   name: string;
@@ -157,22 +158,35 @@ const reduceAttributes = (
     ? attributes.reduce<{
         [key: string]: { value: string; percentage: string }[];
       }>((acc, attribute) => {
-        if (!acc[attribute.name]) {
-          acc[attribute.name] = [
-            {
-              value: attribute.value,
-              percentage: attribute.percentage ? `${attribute.percentage}` : "",
-            },
-          ];
-          return acc;
+        // TODO: Review, but works for now
+        switch (true) {
+          case [
+            "Agility",
+            "Endurance",
+            "Intelligence",
+            "Strength",
+            "Vitality",
+            "Will",
+          ].includes(attribute.name):
+            acc[attribute.name] = [10, 20, 30, 40, 50, 60, 70, 80, 90].map(
+              (value) => ({ percentage: "", value: `>= ${value}` })
+            );
+
+            break;
+          default:
+            acc[attribute.name] = [
+              ...(acc[attribute.name] ?? []),
+              {
+                value: attribute.value,
+                percentage: attribute.percentage
+                  ? `${attribute.percentage}`
+                  : "",
+              },
+            ];
+
+            break;
         }
-        acc[attribute.name] = [
-          ...acc[attribute.name],
-          {
-            value: attribute.value,
-            percentage: attribute.percentage ? `${attribute.percentage}` : "",
-          },
-        ];
+
         return acc;
       }, {})
     : null;
@@ -194,7 +208,7 @@ export function useFiltersList() {
 
   const isTreasure = collectionName === "Treasures";
   const isBattleflyItem = collectionName === "BattleFly";
-  const isPeekABoo = collectionName === "Peek-A-Boo";
+  const isShared = METADATA_COLLECTIONS.includes(collectionName);
   const isInventory = router.pathname.startsWith("/inventory/");
 
   const legacyAttributes = useQuery(
@@ -238,12 +252,19 @@ export function useFiltersList() {
         }, []),
     }
   );
-  const peekabooAttributes = useQuery(
-    ["peekaboo-attributes"],
-    () => peekaboo.getPeekABooAttributes(),
+  const sharedAttributes = useQuery(
+    ["shared-attributes", formattedAddress],
+    () => metadata.getCollectionAttributes(),
     {
-      enabled: isPeekABoo,
+      enabled: isShared,
       refetchInterval: false,
+      select: (data) => {
+        return {
+          attributes: data.attributes.filter((attribute) =>
+            attribute.id.startsWith(formattedAddress)
+          ),
+        };
+      },
     }
   );
 
@@ -325,8 +346,8 @@ export function useFiltersList() {
       }
       case isBattleflyItem:
         return reduceAttributes(battleflyAttributes.data);
-      case isPeekABoo:
-        return reduceAttributes(peekabooAttributes.data?.attributes);
+      case isShared:
+        return reduceAttributes(sharedAttributes.data?.attributes);
       default:
         return reduceAttributes(legacyAttributes.data?.collection?.attributes);
     }
@@ -336,9 +357,9 @@ export function useFiltersList() {
     inventory?.user?.tokens,
     isBattleflyItem,
     isInventory,
-    isPeekABoo,
+    isShared,
     legacyAttributes.data?.collection?.attributes,
-    peekabooAttributes.data?.attributes,
+    sharedAttributes.data?.attributes,
     treasureBoosts.data,
   ]);
 }
@@ -440,6 +461,7 @@ export function Filters() {
                                           key: attributeKey,
                                           value,
                                         });
+                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                     const { search: _search, ...query } =
                                       router.query;
 
@@ -483,6 +505,7 @@ export function Filters() {
         <div className="mt-4 mx-4 lg:mx-1">
           <Button
             onClick={() => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const { search: _search, ...query } = router.query;
 
               router.replace({
