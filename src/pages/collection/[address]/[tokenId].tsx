@@ -267,6 +267,7 @@ export default function TokenDetail() {
     sharedMetadata,
     realmMetadata,
     smolverseMetadata,
+    metadataData.smithonia,
     tokenMetadata
       ? { ...tokenInfo, ...tokenMetadata, name: tokenMetadata.name ?? "", id }
       : undefined

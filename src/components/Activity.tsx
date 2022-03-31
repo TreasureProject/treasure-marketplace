@@ -20,6 +20,7 @@ import {
   useCollection,
   useCollections,
   useFoundersMetadata,
+  useSmithoniaWeaponsMetadata,
 } from "../lib/hooks";
 import { shortenAddress, useEthers } from "@usedapp/core";
 import { useRouter } from "next/router";
@@ -148,6 +149,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
     smolverseTokens,
     metadataTokens,
     realmTokens,
+    smithoniaTokens,
   } = useMemo(() => {
     return activities.reduce(
       (acc, { collection, token }) => {
@@ -162,6 +164,8 @@ export function Activity({ title, includeStatus }: ListingProps) {
           acc.metadataTokens.push(token.id);
         } else if (collectionName === "Realm") {
           acc.realmTokens.push(token.id);
+        } else if (collectionName === "Smithonia Weapons") {
+          acc.smithoniaTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -180,6 +184,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
         smolverseTokens: [] as string[],
         metadataTokens: [] as string[],
         realmTokens: [] as string[],
+        smithoniaTokens: [] as string[],
       }
     );
   }, [activities, collections]);
@@ -234,6 +239,7 @@ export function Activity({ title, includeStatus }: ListingProps) {
 
   const battleflyMetadata = useBattleflyMetadata(battleflyTokens);
   const foundersMetadata = useFoundersMetadata(foundersTokens);
+  const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(smithoniaTokens);
 
   if (
     (isMyActivity && queries.slice(1).some((query) => query.isLoading)) ||
@@ -335,6 +341,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
                   const fsMetadata = foundersMetadata.data?.find(
                     (item) => item.id === activity.token.id
                   );
+                  const swMetadata = smithoniaWeaponsMetadata.data?.find(
+                    (item) => item.id === activity.token.id
+                  );
                   const shrdMetadata = sharedMetadata?.tokens.find(
                     (item) => item.id === activity.token.id
                   );
@@ -383,6 +392,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                         metadata: {
                           image: fsMetadata.image ?? "",
                           name: fsMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : swMetadata
+                    ? {
+                        id: swMetadata.id,
+                        name: swMetadata.name,
+                        tokenId: activity.token.tokenId,
+                        metadata: {
+                          image: swMetadata.image ?? "",
+                          name: swMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -524,6 +544,9 @@ export function Activity({ title, includeStatus }: ListingProps) {
               const fsMetadata = foundersMetadata.data?.find(
                 (item) => item.id === activity.token.id
               );
+              const swMetadata = smithoniaWeaponsMetadata.data?.find(
+                (item) => item.id === activity.token.id
+              );
               const shrdMetadata = sharedMetadata?.tokens.find(
                 (item) => item.id === activity.token.id
               );
@@ -572,6 +595,17 @@ export function Activity({ title, includeStatus }: ListingProps) {
                     metadata: {
                       image: fsMetadata.image ?? "",
                       name: fsMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : swMetadata
+                ? {
+                    id: swMetadata.id,
+                    name: swMetadata.name,
+                    tokenId: activity.token.tokenId,
+                    metadata: {
+                      image: swMetadata.image ?? "",
+                      name: swMetadata.name,
                       description: collectionName ?? "",
                     },
                   }

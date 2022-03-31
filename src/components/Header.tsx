@@ -40,6 +40,7 @@ const NEW_COLLECTIONS = [
   "Balancer Crystal",
   "Peek-A-Boo",
   "Realm",
+  "Smithonia Weapons",
   "Tales of Elleria",
 ];
 

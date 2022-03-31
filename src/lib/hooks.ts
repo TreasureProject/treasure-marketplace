@@ -20,7 +20,7 @@ import { Interface } from "@ethersproject/abi";
 import { generateIpfsLink } from "../utils";
 import { toast } from "react-hot-toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useQueries, useQuery, useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
 import { TokenStandard } from "../../generated/queries.graphql";
@@ -598,6 +598,50 @@ export function useFoundersMetadata(input: string[]) {
   return useBattleflyApi("founders", input);
 }
 
+export function useSmithoniaWeaponsMetadata(input: string[]) {
+  return useQueries(
+    input.map((tokenId) => ({
+      queryKey: ["smithonia-weapons-metadata", tokenId],
+      queryFn: () =>
+        fetch(
+          `${process.env.NEXT_PUBLIC_SMITHONIA_WEAPONS_API}/${parseInt(
+            tokenId.slice(45),
+            16
+          )}`
+        ).then((res) => res.json()),
+      enabled: tokenId.length > 0,
+      refetchInterval: false as const,
+      keepPreviousData: true,
+      // initialData,
+      select: (value: Metadata) => [
+        {
+          ...value,
+          id:
+            input.find((item) =>
+              item.endsWith(
+                `-0x${parseInt(
+                  value.name.replace("Smithonia Weapon #", ""),
+                  16
+                )}`
+              )
+            ) ?? "",
+        },
+      ],
+    }))
+  ).reduce<{ data: Metadata[]; isLoading: boolean }>(
+    (acc, query) => {
+      if (query.data) {
+        acc.data.push(...query.data);
+      }
+
+      acc.isLoading = query.isLoading;
+
+      return acc;
+    },
+    { data: [], isLoading: false }
+  );
+}
+
 type Attribute = Awaited<
   ReturnType<typeof metadata.getTokenMetadata>
 >["tokens"][number]["attributes"][number];
@@ -620,6 +664,7 @@ export function useMetadata(
   const isTreasureItem = collectionName === "Treasures";
   const isShared = METADATA_COLLECTIONS.includes(collectionName);
   const isRealm = collectionName === "Realm";
+  const isSmithonia = (collectionName = "Smithonia Weapons");
   const collection = useCollection(collectionName);
 
   const legacyMetadataResult = useQuery(
@@ -633,7 +678,8 @@ export function useMetadata(
         !isBattleflyItem &&
         !isFoundersItem &&
         !isShared &&
-        !isRealm,
+        !isRealm &&
+        !isSmithonia,
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -651,7 +697,8 @@ export function useMetadata(
         !isBattleflyItem &&
         !isFoundersItem &&
         !isShared &&
-        !isRealm,
+        !isRealm &&
+        !isSmithonia,
       refetchInterval: false,
       keepPreviousData: true,
       select: ({ token }) => {
@@ -788,6 +835,10 @@ export function useMetadata(
     isFoundersItem && id ? [id] : []
   );
 
+  const smithoniaMetadataResult = useSmithoniaWeaponsMetadata(
+    isSmithonia && id ? [id] : []
+  );
+
   const data = {
     battlefly: battleflyMetadataResult.data?.[0],
     bridgeworld: bridgeworldMetadataResult.data,
@@ -795,6 +846,7 @@ export function useMetadata(
     founders: foundersMetadataResult.data?.[0],
     realm: realmMetadataResult.data,
     shared: sharedMetadataResult.data,
+    smithonia: smithoniaMetadataResult.data?.[0],
     smolverse: smolverseMetadataResult.data,
     token: tokenMetadataResult.data,
   };
@@ -808,6 +860,7 @@ export function useMetadata(
       sharedMetadata?: Metadata,
       realmMetadata?: Metadata,
       smolverseMetadata?: Metadata,
+      smithoniaMetadata?: Metadata,
       tokenMetadata?: Metadata
     ) => {
       const metadata = bridgeworldMetadata
@@ -846,6 +899,7 @@ export function useMetadata(
           legacyMetadata ??
           foundersMetadata ??
           battleflyMetadata ??
+          smithoniaMetadata ??
           null;
 
       return metadata;
@@ -865,7 +919,9 @@ export function useMetadata(
       : isBattleflyItem
       ? !battleflyMetadataResult.isLoading && !!battleflyMetadataResult.data
       : isFoundersItem
-      ? !foundersMetadataResult.isLoading && !!foundersMetadataResult.data
+      ? !battleflyMetadataResult.isLoading && !!battleflyMetadataResult.data
+      : isSmithonia
+      ? !smithoniaMetadataResult.isLoading && !!smithoniaMetadataResult.data
       : !legacyMetadataResult.isLoading && !!legacyMetadataResult.data && !!id
       ? !tokenMetadataResult.isLoading && !!tokenMetadataResult.data
       : true;

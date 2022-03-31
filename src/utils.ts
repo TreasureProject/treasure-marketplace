@@ -13,7 +13,9 @@ function toFixed(num: number, fixed: number) {
 }
 
 export const generateIpfsLink = (hash: string) => {
-  const removedIpfs = hash.replace(/.+\/(Qm[^\/]+)/, "$1");
+  const removedIpfs = hash
+    .replace(/.+\/(Qm[^\/]+)/, "$1")
+    .replace(/https:\/\/([^\.]+)\.ipfs\.nftstorage\.link\/?/, "$1");
 
   return `https://ipfs.io/ipfs/${removedIpfs}`;
 };

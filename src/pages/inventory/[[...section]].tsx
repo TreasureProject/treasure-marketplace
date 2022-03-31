@@ -32,6 +32,7 @@ import {
   useCreateListing,
   useFoundersMetadata,
   useRemoveListing,
+  useSmithoniaWeaponsMetadata,
   useUpdateListing,
 } from "../../lib/hooks";
 import { AddressZero } from "@ethersproject/constants";
@@ -809,6 +810,7 @@ const Inventory = () => {
     smolverseTokens,
     metadataTokens,
     realmTokens,
+    smithoniaTokens,
   } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
       (acc, { token }) => {
@@ -824,6 +826,8 @@ const Inventory = () => {
           acc.metadataTokens.push(token.id);
         } else if (collectionName === "Realm") {
           acc.realmTokens.push(token.id);
+        } else if (collectionName === "Smithonia Weapons") {
+          acc.smithoniaTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -842,6 +846,7 @@ const Inventory = () => {
         smolverseTokens: [] as string[],
         metadataTokens: [] as string[],
         realmTokens: [] as string[],
+        smithoniaTokens: [] as string[],
       }
     );
   }, [allCollections, data]);
@@ -896,6 +901,7 @@ const Inventory = () => {
 
   const battleflyMetadata = useBattleflyMetadata(battleflyTokens);
   const foundersMetadata = useFoundersMetadata(foundersTokens);
+  const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(smithoniaTokens);
 
   const tabs = useMemo(() => {
     if (inventory.data?.user?.inactive.length) {
@@ -1076,6 +1082,10 @@ const Inventory = () => {
                             const fsMetadata = foundersMetadata.data?.find(
                               (item) => item.id === token.id
                             );
+                            const swMetadata =
+                              smithoniaWeaponsMetadata.data?.find(
+                                (item) => item.id === token.id
+                              );
 
                             const metadata = bwMetadata
                               ? {
@@ -1129,6 +1139,17 @@ const Inventory = () => {
                                   metadata: {
                                     image: shrdMetadata.image ?? "",
                                     name: shrdMetadata.name,
+                                    description: token.collection.name,
+                                  },
+                                }
+                              : swMetadata
+                              ? {
+                                  id: swMetadata.id,
+                                  name: swMetadata.name,
+                                  tokenId: token.tokenId,
+                                  metadata: {
+                                    image: swMetadata.image ?? "",
+                                    name: swMetadata.name,
                                     description: token.collection.name,
                                   },
                                 }

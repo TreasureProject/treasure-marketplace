@@ -34,6 +34,7 @@ import {
   useBattleflyMetadata,
   useCollection,
   useFoundersMetadata,
+  useSmithoniaWeaponsMetadata,
 } from "../../../lib/hooks";
 import { EthIcon, MagicIcon, SwapIcon } from "../../../components/Icons";
 import { useMagic } from "../../../context/magicContext";
@@ -68,7 +69,7 @@ const generateSubDescription = (collectionName: string): string | null => {
     "Legion Auxiliary":
       "Descendants of Genesis Legions that can be summoned in Bridgeworld.",
     "Smol Brains":
-      "The Smol Brains are a dynamic PFP of a monkeywhose head gets bigger the larger its IQ becomes.",
+      "The Smol Brains are a dynamic PFP of a monkey whose head gets bigger the larger its IQ becomes.",
     "Smol Brains Pets":
       "The Smol Brains Pets are cute companions to accompany your Smol Brain in Smolverse.",
     "Seed of Life":
@@ -83,6 +84,8 @@ const generateSubDescription = (collectionName: string): string | null => {
       "Functional items that are crafted from Treasures and give utility in the Metaverse.",
     Realm:
       "Realm is a decentralized world-building experience. Enjoy $MAGIC emissions and Loot from across the Metaverse.",
+    "Smithonia Weapons":
+      "Smithonia is a SmithyDAO project. It's a world of staking and adventure which supports a hybrid economy where the primary objective of the game is to build the rarity of your weapon through gameplay.",
     "Tales of Elleria":
       "Tales of Elleria is an immersive three-dimensional role-playing GameFi project built on Arbitrum One. Summon heroes, take on assignments, go on quests and epic adventures to battle dangerous monsters earn tremendous rewards.",
   } as const;
@@ -219,6 +222,7 @@ const Collection = () => {
   const isRealm = collectionName === "Realm";
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
+  const isSmithonia = collectionName === "Smithonia Weapons";
 
   // This is a faux collection with only recruits. Which are not sellable. Redirect to Legion Auxiliary collection.
   if (collectionName === "Legions") {
@@ -656,16 +660,6 @@ const Collection = () => {
       listedTokens.data,
     ]
   );
-  console.log(tokenIds, [
-    searchedTokens.data,
-    filteredBattleflyTokens.data,
-    filteredSharedTokens.data,
-    filteredRealmTokens.data,
-    filteredTreasureTokens.data,
-    filteredBridgeworldTokens.data,
-    filteredSmolTokens.data,
-    listedTokens.data,
-  ]);
   const listings = useInfiniteQuery(
     ["listings", isERC1155, erc721Ordering, orderDirection, tokenIds],
     ({ pageParam = 0 }) =>
@@ -769,6 +763,9 @@ const Collection = () => {
   );
   const foundersMetadata = useFoundersMetadata(
     isFoundersItem ? listingIds : []
+  );
+  const smithoniaMetadata = useSmithoniaWeaponsMetadata(
+    isSmithonia ? listingIds : []
   );
 
   const isLoading = React.useMemo(
@@ -1137,6 +1134,9 @@ const Collection = () => {
                           const fsMetadata = foundersMetadata.data?.find(
                             (item) => item.id === listing.token.id
                           );
+                          const swMetadata = smithoniaMetadata.data?.find(
+                            (item) => item.id === listing.token.id
+                          );
                           const legionsMetadata = isBridgeworldItem
                             ? bridgeworldMetadata.data?.tokens.find(
                                 (item) => item.id === listing.token.id
@@ -1340,6 +1340,17 @@ const Collection = () => {
                                 metadata: {
                                   image: svMetadata.image ?? "",
                                   name: svMetadata.name,
+                                  description: collectionName,
+                                },
+                              }
+                            : swMetadata
+                            ? {
+                                id: swMetadata.id,
+                                name: swMetadata.name,
+                                tokenId: listing.token.tokenId,
+                                metadata: {
+                                  image: swMetadata.image ?? "",
+                                  name: swMetadata.name,
                                   description: collectionName,
                                 },
                               }
