@@ -697,7 +697,7 @@ export function useMetadata(
             return {
               tokens: data.tokens.map((token) => {
                 const attributes = token.attributes.reduce((acc, attribute) => {
-                  acc[attribute.name.replace(" ", "")] = attribute;
+                  acc[attribute.name.replace(/ /g, "")] = attribute;
 
                   return acc;
                 }, {} as Record<string, Attribute>);
@@ -715,6 +715,7 @@ export function useMetadata(
                       [attributes.Endurance, attributes.MaxEndurance],
                       [attributes.Intelligence, attributes.MaxIntelligence],
                       [attributes.Will, attributes.MaxWill],
+                      [attributes.TotalStats, attributes.MaxTotalStats],
                     ].map(formatCurrentMaxAttribute),
                   ],
                 };

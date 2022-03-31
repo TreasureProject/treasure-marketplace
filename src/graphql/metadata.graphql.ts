@@ -1,8 +1,11 @@
 import gql from "graphql-tag";
 
 export const getCollectionAttributes = gql`
-  query getCollectionAttributes {
-    attributes(first: 1000, where: { name_not_contains: "Max" }) {
+  query getCollectionAttributes($collection: String!) {
+    attributes(
+      first: 1000
+      where: { collection: $collection, name_not_contains: "Max" }
+    ) {
       id
       name
       percentage
@@ -28,8 +31,8 @@ export const getTokenMetadata = gql`
 `;
 
 export const getFilteredTokens = gql`
-  query getFilteredTokens($attributeIds: [ID!]!, $tokenIds: [ID!]!) {
-    attributes(where: { id_in: $attributeIds }) {
+  query getFilteredTokens($filter: Attribute_filter!, $tokenIds: [ID!]!) {
+    attributes(where: $filter) {
       id
       tokens(first: 1000, where: { id_in: $tokenIds }) {
         id

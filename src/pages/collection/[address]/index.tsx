@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { InformationCircleIcon, ViewGridIcon } from "@heroicons/react/solid";
 import LargeGridIcon from "../../../components/LargeGridIcon";
 
-import { useInfiniteQuery, useQuery } from "react-query";
+import { useInfiniteQuery, useQueries, useQuery } from "react-query";
 import {
   bridgeworld,
   client,
@@ -136,8 +136,8 @@ const sortOptions = [
   },
 ];
 
-function range(value: number) {
-  return new Array(101 - value)
+function range(value: number, start: number) {
+  return new Array(start - value)
     .fill("")
     .map((_, index) => index + value)
     .map(String);
@@ -153,30 +153,7 @@ const formatSearchFilter = (search: string | undefined) => {
     return an array like this: ["Background,red", "Background,blue"]
   */
   return searchParams.reduce<string[]>((acc, [key, value]) => {
-    let values: string[] = [];
-
-    switch (key) {
-      case "Agility":
-      case "Endurance":
-      case "Intelligence":
-      case "Strength":
-      case "Vitality":
-      case "Will":
-        values = range(
-          Number(
-            value
-              .split(",")
-              .map((item) => item.replace(/[^\d]+/g, ""))
-              .sort()[0]
-          )
-        );
-
-        break;
-      default:
-        values = value.split(",");
-    }
-
-    return [...acc, ...values.map((v) => `${key},${v}`)];
+    return [...acc, ...value.split(",").map((v) => `${key},${v}`)];
   }, []);
 };
 
@@ -486,52 +463,51 @@ const Collection = () => {
       ),
     }
   );
-  const filteredSharedTokens = useQuery(
-    ["shared-filtered-tokens", listedTokens.data, attributeIds],
-    () =>
-      metadata.getFilteredTokens({
-        attributeIds: attributeIds.map((id) => id.replace(/ /g, "-")),
-        tokenIds: listedTokens.data ?? [],
-      }),
-    {
+  const filteredSharedTokensQueries = useQueries(
+    Object.entries(filters).map(([name, value]) => ({
+      queryKey: ["shared-filtered-tokens", listedTokens.data, name, value],
+      queryFn: () => {
+        const onlyNumbers = value[0].replace(/[^\d]+/g, "");
+        const isNumber = onlyNumbers !== "";
+        const filter = {
+          value_gte: isNumber ? onlyNumbers : undefined,
+          value_in: isNumber ? undefined : value,
+        };
+
+        return metadata.getFilteredTokens({
+          filter: { name, ...filter },
+          tokenIds: listedTokens.data ?? [],
+        });
+      },
       enabled:
-        Boolean(listedTokens.data) && attributeIds.length > 0 && isShared,
-      select: React.useCallback(
-        ({
-          attributes,
-        }: Awaited<ReturnType<typeof metadata.getFilteredTokens>>) => {
-          const sections = attributes.reduce<Record<string, string[]>>(
-            (acc, { tokens, id }) => {
-              tokens.forEach((token) => {
-                const [, ...parts] = id.split("-");
-                const key = parts
-                  .join("-")
-                  .replace(
-                    /(agility|endurance|intelligence|strength|vitality|will)-\d+/,
-                    "$1"
-                  );
-
-                acc[key] ??= [];
-                acc[key] = [...acc[key], token.id];
-              });
-
-              return acc;
-            },
-            {}
-          );
-
-          return Object.keys(sections).reduce((acc, key) => {
-            const items = sections[key];
-
-            return acc.length > 0
-              ? acc.filter((item) => items.includes(item))
-              : items;
-          }, []);
-        },
-        []
-      ),
-    }
+        Boolean(listedTokens.data) &&
+        Object.keys(filters).length > 0 &&
+        isShared,
+    }))
   );
+  const filteredSharedTokens = React.useMemo(() => {
+    if (filteredSharedTokensQueries.length === 0) {
+      return { data: undefined };
+    }
+
+    const data = filteredSharedTokensQueries
+      .map(
+        ({ data }) =>
+          data?.attributes.flatMap((attribute) =>
+            attribute.tokens.map((token) => token.id)
+          ) ?? []
+      )
+      .filter((item): item is string[] => item.length > 0);
+
+    return {
+      data:
+        data.length > 0
+          ? data.reduce((acc, result) =>
+              acc.filter((item) => result.includes(item))
+            )
+          : [],
+    };
+  }, [filteredSharedTokensQueries]);
   const filteredRealmStructureTokens = useQuery(
     ["realm-filtered-structure-tokens", listedTokens.data, filters],
     () =>
@@ -1150,10 +1126,11 @@ const Collection = () => {
                           const fsMetadata = foundersMetadata.data?.find(
                             (item) => item.id === listing.token.id
                           );
-                          const legionsMetadata =
-                            bridgeworldMetadata.data?.tokens.find(
-                              (item) => item.id === listing.token.id
-                            );
+                          const legionsMetadata = isBridgeworldItem
+                            ? bridgeworldMetadata.data?.tokens.find(
+                                (item) => item.id === listing.token.id
+                              )
+                            : undefined;
                           const erc721Metadata =
                             legacyMetadata.data?.tokens?.find(
                               (item) => item.tokenId === listing.token.tokenId
@@ -1162,12 +1139,16 @@ const Collection = () => {
                             smolverseMetadata.data?.tokens.find(
                               (item) => item.id === listing.token.id
                             );
-                          const shrdMetadata = sharedMetadata.data?.tokens.find(
-                            (item) => item.id === listing.token.id
-                          );
-                          const rlmMetadata = realmMetadata.data?.realms.find(
-                            (item) => item.id === listing.token.tokenId
-                          );
+                          const shrdMetadata = isShared
+                            ? sharedMetadata.data?.tokens.find(
+                                (item) => item.id === listing.token.id
+                              )
+                            : null;
+                          const rlmMetadata = isRealm
+                            ? realmMetadata.data?.realms.find(
+                                (item) => item.id === listing.token.tokenId
+                              )
+                            : null;
 
                           const role =
                             legionsMetadata?.metadata?.__typename ===
@@ -1288,6 +1269,7 @@ const Collection = () => {
                                       "Strength",
                                       "Vitality",
                                       "Will",
+                                      "Total Stats",
                                     ].map((name) => ({
                                       name,
                                       value: `${
