@@ -98,7 +98,7 @@ export const getCollectionListings = gql`
       }
     }
     listings(
-      first: 42
+      first: 48
       orderBy: $erc721Ordering
       orderDirection: $orderDirection
       skip: $skip
