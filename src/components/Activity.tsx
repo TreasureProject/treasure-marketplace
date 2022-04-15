@@ -78,52 +78,54 @@ export function Activity({ title, includeStatus }: ListingProps) {
   const isMyActivity = router.pathname.startsWith("/inventory");
   const wallet = account?.toLowerCase();
 
-  const queries = useQueries([
-    {
-      queryKey: ["activity", collection, orderBy, orderDirection],
-      queryFn: () =>
-        marketplace.getActivity({
-          filter: {
-            status: Status.Sold,
-            ...(collection ? { collection } : {}),
-          },
-          first: 100,
-          orderBy,
-          orderDirection,
-        }),
-      enabled: isAllActivity ? !isMyActivity : !!collection,
-    },
-    {
-      queryKey: ["my-buy-activity", wallet],
-      queryFn: () =>
-        marketplace.getActivity({
-          filter: {
-            status: Status.Sold,
-            buyer: wallet,
-          },
-          first: 50,
-          orderBy,
-          orderDirection,
-        }),
-      enabled: isMyActivity ? !!account : false,
-      refetchInterval: 30_000,
-    },
-    {
-      queryKey: ["my-sold-activity", wallet],
-      queryFn: () =>
-        marketplace.getActivity({
-          filter: {
-            status: Status.Sold,
-            seller: wallet,
-          },
-          first: 50,
-          orderBy,
-          orderDirection,
-        }),
-      enabled: isMyActivity ? !!account : false,
-      refetchInterval: 30_000,
-    },
-  ]);
+  const queries = useQueries({
+    queries: [
+      {
+        queryKey: ["activity", collection, orderBy, orderDirection],
+        queryFn: () =>
+          marketplace.getActivity({
+            filter: {
+              status: Status.Sold,
+              ...(collection ? { collection } : {}),
+            },
+            first: 100,
+            orderBy,
+            orderDirection,
+          }),
+        enabled: isAllActivity ? !isMyActivity : !!collection,
+      },
+      {
+        queryKey: ["my-buy-activity", wallet],
+        queryFn: () =>
+          marketplace.getActivity({
+            filter: {
+              status: Status.Sold,
+              buyer: wallet,
+            },
+            first: 50,
+            orderBy,
+            orderDirection,
+          }),
+        enabled: isMyActivity ? !!account : false,
+        refetchInterval: 30_000,
+      },
+      {
+        queryKey: ["my-sold-activity", wallet],
+        queryFn: () =>
+          marketplace.getActivity({
+            filter: {
+              status: Status.Sold,
+              seller: wallet,
+            },
+            first: 50,
+            orderBy,
+            orderDirection,
+          }),
+        enabled: isMyActivity ? !!account : false,
+        refetchInterval: 30_000,
+      },
+    ],
+  });
 
   const activities: ListingFieldsFragment[] = useMemo(() => {
     if (!isMyActivity) {

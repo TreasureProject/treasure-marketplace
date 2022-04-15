@@ -55,7 +55,7 @@ import { SortMenu } from "../../../components/SortMenu";
 import { targetNftT } from "../../../types";
 import { PurchaseItemModal } from "../../../components/PurchaseItemModal";
 
-const MAX_ITEMS_PER_PAGE = 42;
+const MAX_ITEMS_PER_PAGE = 48;
 
 const generateSubDescription = (collectionName: string): string | null => {
   const collectionMapper = {
@@ -558,8 +558,8 @@ const Collection = () => {
       ),
     }
   );
-  const filteredSharedTokensQueries = useQueries(
-    Object.entries(filters).map(([name, value]) => ({
+  const filteredSharedTokensQueries = useQueries({
+    queries: Object.entries(filters).map(([name, value]) => ({
       queryKey: ["shared-filtered-tokens", listedTokens.data, name, value],
       queryFn: () => {
         const onlyNumbers = value[0].replace(/[^\d]+/g, "");
@@ -578,8 +578,8 @@ const Collection = () => {
         Boolean(listedTokens.data) &&
         Object.keys(filters).length > 0 &&
         isShared,
-    }))
-  ).filter((query) => query.status !== "idle");
+    })),
+  }).filter((query) => query.status !== "loading");
   const filteredSharedTokens = React.useMemo(() => {
     if (filteredSharedTokensQueries.length === 0) {
       return { data: undefined };

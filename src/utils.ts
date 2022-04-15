@@ -33,7 +33,7 @@ export const formattable = (string: BigNumberish) => {
     isNaN(Number(string)) ||
     /^\d{1,6}$/.test(string.toString())
   ) {
-    return string;
+    return `${string}`;
   }
 
   return formatPrice(string);

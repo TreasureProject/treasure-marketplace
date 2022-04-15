@@ -710,7 +710,7 @@ const Inventory = () => {
   const [section] = router.query.section ?? [""];
 
   const inventory = useQuery(
-    "inventory",
+    ["inventory"],
     () =>
       marketplace.getUserInventory({
         id: account?.toLowerCase() ?? AddressZero,

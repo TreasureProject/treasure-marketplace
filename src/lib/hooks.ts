@@ -21,7 +21,7 @@ import { Interface } from "@ethersproject/abi";
 import { generateIpfsLink } from "../utils";
 import { toast } from "react-hot-toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQueries, useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { MaxUint256 } from "@ethersproject/constants";
 import plur from "plur";
 import { TokenStandard } from "../../generated/queries.graphql";
@@ -35,6 +35,7 @@ import {
 } from "./client";
 import { AddressZero } from "@ethersproject/constants";
 import { normalizeBridgeworldTokenMetadata } from "../utils/metadata";
+import { GetBridgeworldMetadataQuery } from "../../generated/bridgeworld.graphql";
 
 type WebhookBody = {
   collection: string;
@@ -250,7 +251,7 @@ export function useCreateListing() {
           `Successfully listed ${quantity} ${plur(name, quantity)} for sale!`
         );
 
-        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+        queryClient.invalidateQueries(["inventory"], { refetchType: "all" });
 
         webhook.current?.();
         webhook.current = undefined;
@@ -318,7 +319,7 @@ export function useRemoveListing() {
       case "Success":
         toast.success(`Successfully removed the listing for ${name}!`);
 
-        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+        queryClient.invalidateQueries(["inventory"], { refetchType: "all" });
 
         break;
     }
@@ -432,7 +433,7 @@ export function useUpdateListing() {
           `Successfully listed ${quantity} ${plur(name, quantity)} for sale!`
         );
 
-        queryClient.invalidateQueries("inventory", { refetchInactive: true });
+        queryClient.invalidateQueries(["inventory"], { refetchType: "all" });
 
         webhook.current?.();
         webhook.current = undefined;
@@ -863,7 +864,9 @@ export function useMetadata(
       tokenMetadata?: Metadata
     ) => {
       const metadata = bridgeworldMetadata
-        ? normalizeBridgeworldTokenMetadata(bridgeworldMetadata as any)
+        ? normalizeBridgeworldTokenMetadata(
+            bridgeworldMetadata as GetBridgeworldMetadataQuery["tokens"][number]
+          )
         : smolverseMetadata
         ? {
             id: smolverseMetadata.id,

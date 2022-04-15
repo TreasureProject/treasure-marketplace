@@ -46,12 +46,9 @@ import { useMagic } from "../../../context/magicContext";
 import { formatEther } from "ethers/lib/utils";
 import Button from "../../../components/Button";
 import { Modal } from "../../../components/Modal";
-import { BigNumber } from "@ethersproject/bignumber";
-import { Contracts } from "../../../const";
 import { NormalizedMetadata, targetNftT } from "../../../types";
 import { Tooltip } from "../../../components/Tooltip";
 import { utils } from "ethers";
-import { EthIcon, SwapIcon, UsdIcon } from "../../../components/Icons";
 import { useDebounce } from "use-debounce";
 import { SortMenu } from "../../../components/SortMenu";
 import { PurchaseItemModal } from "../../../components/PurchaseItemModal";
@@ -138,7 +135,7 @@ export default function TokenDetail() {
     slug,
   } = useCollection(slugOrAddress);
 
-  const { data, isLoading, isIdle } = useQuery(
+  const { data, status } = useQuery(
     ["details", formattedAddress, formattedTokenId],
     () =>
       marketplace.getTokenDetails({
@@ -152,7 +149,12 @@ export default function TokenDetail() {
   );
 
   const { data: tokenExistance } = useQuery(
-    "tokenExistance",
+    [
+      "tokenExistance",
+      formattedAddress,
+      formattedTokenId,
+      account?.toLowerCase(),
+    ],
     () =>
       marketplace.getTokenExistsInWallet({
         collectionId: formattedAddress,
@@ -222,8 +224,8 @@ export default function TokenDetail() {
   React.useEffect(() => {
     // Removing cache because old image remains in the cache, so a blink of the image is seen when doing client-side routing
     const handleRouteChange = () => {
-      queryClient.removeQueries("details");
-      queryClient.removeQueries("erc1155Listings");
+      queryClient.removeQueries(["details"]);
+      queryClient.removeQueries(["erc1155Listings"]);
     };
 
     router.events.on("routeChangeStart", handleRouteChange);
@@ -286,7 +288,7 @@ export default function TokenDetail() {
       : []
     : [];
 
-  const loading = isLoading || isIdle || !allMetadataLoaded;
+  const loading = status === "loading" || !allMetadataLoaded;
 
   const isYourListing =
     data?.collection?.standard === TokenStandard.ERC721 &&

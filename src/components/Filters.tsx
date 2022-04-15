@@ -291,8 +291,9 @@ export function useFiltersList() {
   );
 
   const queryClient = useQueryClient();
-  const inventory =
-    queryClient.getQueryData<GetUserInventoryQuery>("inventory");
+  const inventory = queryClient.getQueryData<GetUserInventoryQuery>([
+    "inventory",
+  ]);
 
   return React.useMemo(() => {
     if (isInventory) {
