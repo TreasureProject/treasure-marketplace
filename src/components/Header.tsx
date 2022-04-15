@@ -368,7 +368,7 @@ const Header = () => {
                             </Section>
                           ),
                         })}
-                        isLoading={query.isLoading}
+                        isLoading={query.fetchStatus === "fetching"}
                         label="Search items or collections"
                         placeholder="Search items or collections"
                         allowsCustomValue
