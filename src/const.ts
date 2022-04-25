@@ -295,8 +295,8 @@ export const ALL_COLLECTION_METADATA = [
   UNPILGRIMAGED_LEGION_GENESIS,
 ] as const;
 
-export const FEE = 0.05;
-export const USER_SHARE = 1 - FEE;
+export const DAO_FEE = "0.025";
+export const DEFAULT_COLLECTION_FEE = "0.025";
 
 export const BATTLEFLY_METADATA = {
   battleflies: {

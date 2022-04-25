@@ -13,6 +13,7 @@ import {
   BATTLEFLY_METADATA,
   BridgeworldItems,
   Contracts,
+  DEFAULT_COLLECTION_FEE,
   METADATA_COLLECTIONS,
   SMITHONIA_WEAPONS_METADATA,
   smolverseItems,
@@ -94,7 +95,7 @@ export type Collections = {
   [key: number]: CollectionItem[];
 };
 
-type Collection = Record<"address" | "id" | "name" | "slug", string>;
+type Collection = Record<"address" | "fee" | "id" | "name" | "slug", string>;
 
 export function useCollections(): Collection[] {
   const { data } = useQuery(
@@ -106,6 +107,7 @@ export function useCollections(): Collection[] {
   return (
     data?.collections.map((item) => ({
       address: item.contract,
+      fee: item.fee?.fee ?? DEFAULT_COLLECTION_FEE,
       id: item.id,
       name: item.name,
       slug: item.name.replace(/\s+/g, "-")?.toLowerCase(),
@@ -121,7 +123,13 @@ export function useCollection(input?: string | string[]) {
 
   const collection = collections.find(({ address, slug }) =>
     [address, slug].includes(slugOrAddress)
-  ) ?? { id: "", address: AddressZero, name: "", slug: "" };
+  ) ?? {
+    id: "",
+    address: AddressZero,
+    fee: DEFAULT_COLLECTION_FEE,
+    name: "",
+    slug: "",
+  };
 
   return collection;
 }

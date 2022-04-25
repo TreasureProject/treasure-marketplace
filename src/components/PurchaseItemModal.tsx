@@ -1,17 +1,23 @@
 import * as React from "react";
 import { shortenAddress, useEthers, useTokenAllowance } from "@usedapp/core";
 import { targetNftT } from "../types";
-import { useApproveMagic, useBuyItem, useChainId } from "../lib/hooks";
+import {
+  useApproveMagic,
+  useBuyItem,
+  useChainId,
+  useCollection,
+} from "../lib/hooks";
 import { useMagic } from "../context/magicContext";
 import ImageWrapper from "./ImageWrapper";
 import { Modal } from "./Modal";
-import { Contracts } from "../const";
+import { Contracts, DAO_FEE } from "../const";
 import { TokenStandard } from "../../generated/marketplace.graphql";
 import Button from "./Button";
 import { formatEther } from "ethers/lib/utils";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 import { CurrencySwitcher } from "./CurrencySwitcher";
+import { formatPercent } from "../utils";
 
 export const PurchaseItemModal = ({
   address,
@@ -38,6 +44,7 @@ export const PurchaseItemModal = ({
   }, [onClose, state.status]);
 
   const normalizedAddress = address.slice(0, 42);
+  const { fee } = useCollection(normalizedAddress);
 
   const totalPrice =
     quantity * Number(parseFloat(formatEther(targetNft.payload.pricePerItem)));
@@ -151,7 +158,17 @@ export const PurchaseItemModal = ({
           </ul>
           <dl className="py-6 px-4 space-y-6 sm:px-6">
             <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-              <dt className="text-base font-medium">Total</dt>
+              <dt className="text-base font-medium">
+                <ul>
+                  <li>Total</li>
+                  <li className="text-gray-400 text-sm">
+                    Creator fee ({formatPercent(fee)})
+                  </li>
+                  <li className="text-gray-400 text-sm">
+                    DAO fee ({formatPercent(DAO_FEE)})
+                  </li>
+                </ul>
+              </dt>
               <dd className="text-base font-medium text-gray-900 dark:text-gray-100 flex flex-col items-end">
                 <p>{totalPrice} $MAGIC</p>
                 <p className="text-gray-500 text-sm mt-1">

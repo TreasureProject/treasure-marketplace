@@ -27,6 +27,7 @@ import { ethers } from "ethers";
 import {
   useApproveContract,
   useBattleflyMetadata,
+  useCollection,
   useCollections,
   useContractApprovals,
   useCreateListing,
@@ -36,7 +37,7 @@ import {
   useUpdateListing,
 } from "../../lib/hooks";
 import { AddressZero } from "@ethersproject/constants";
-import { formatNumber, generateIpfsLink } from "../../utils";
+import { formatNumber, formatPercent, generateIpfsLink } from "../../utils";
 import { useRouter } from "next/router";
 import Button from "../../components/Button";
 import ImageWrapper from "../../components/ImageWrapper";
@@ -46,10 +47,9 @@ import { formatEther } from "ethers/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import {
   BridgeworldItems,
-  FEE,
+  DAO_FEE,
   METADATA_COLLECTIONS,
   smolverseItems,
-  USER_SHARE,
 } from "../../const";
 import { TokenStandard } from "../../../generated/queries.graphql";
 import { useMagic } from "../../context/magicContext";
@@ -130,6 +130,43 @@ function WarningModal({
   );
 }
 
+function Breakdown({
+  children,
+  ethPrice,
+  fee,
+  price,
+  quantity,
+}: {
+  children: string;
+  ethPrice?: string;
+  fee: string;
+  price: string;
+  quantity: string | number;
+}) {
+  const floatPrice = parseFloat(price || "0");
+
+  return (
+    <div className="flex justify-between px-2">
+      <p className="text-gray-400">
+        {children} ({formatPercent(fee)})
+      </p>
+      <div className="flex">
+        <p>
+          ≈{" "}
+          {formatNumber(floatPrice * parseFloat(fee) * parseInt(`${quantity}`))}{" "}
+          $MAGIC
+        </p>
+        {ethPrice ? (
+          <>
+            <p className="mx-1 text-gray-400">/</p>
+            <p>{formatNumber(floatPrice * parseFloat(ethPrice))} ETH</p>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 const Drawer = ({
   actions,
   needsContractApproval,
@@ -163,6 +200,8 @@ const Drawer = ({
   const removeListing = useRemoveListing();
   const updateListing = useUpdateListing();
   const { ethPrice } = useMagic();
+
+  const { fee } = useCollection(nft.address);
 
   const isFormDisabled =
     needsContractApproval ||
@@ -565,42 +604,24 @@ const Drawer = ({
                               }
                             )}
                           >
-                            <div className="flex justify-between px-2">
-                              <p className="text-gray-400">
-                                Royalties ({FEE * 100 + "%"})
-                              </p>
-                              <p>
-                                ≈{" "}
-                                {formatNumber(
-                                  parseFloat(price || "0") * FEE * +quantity
-                                )}{" "}
-                                $MAGIC
-                              </p>
-                            </div>
-                            <div className="flex justify-between px-2">
-                              <p className="text-gray-400">
-                                Your share ({USER_SHARE * 100 + "%"})
-                              </p>
-                              <div className="flex">
-                                <p>
-                                  ≈{" "}
-                                  {formatNumber(
-                                    parseFloat(price || "0") *
-                                      USER_SHARE *
-                                      +quantity
-                                  )}{" "}
-                                  $MAGIC
-                                </p>
-                                <p className="mx-1 text-gray-400">/</p>
-                                <p>
-                                  {formatNumber(
-                                    parseFloat(price || "0") *
-                                      parseFloat(ethPrice)
-                                  )}{" "}
-                                  ETH
-                                </p>
-                              </div>
-                            </div>
+                            <Breakdown {...{ fee, price, quantity }}>
+                              Creator fee
+                            </Breakdown>
+                            <Breakdown {...{ fee: DAO_FEE, price, quantity }}>
+                              DAO fee
+                            </Breakdown>
+                            <Breakdown
+                              {...{
+                                fee: `${
+                                  1 - parseFloat(fee) - parseFloat(DAO_FEE)
+                                }`,
+                                ethPrice,
+                                price,
+                                quantity,
+                              }}
+                            >
+                              Your share
+                            </Breakdown>
                           </div>
                           <div>
                             {actions.map((action, idx) => {
