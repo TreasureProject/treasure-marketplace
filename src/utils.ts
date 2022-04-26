@@ -17,7 +17,7 @@ export const generateIpfsLink = (hash: string) => {
     .replace(/.+\/(Qm[^\/]+)/, "$1")
     .replace(/https:\/\/([^\.]+)\.ipfs\.nftstorage\.link\/?/, "$1");
 
-  return `https://treasure-marketplace.mypinata.cloud/ipfs/${removedIpfs}`;
+  return `https://ipfs.io/ipfs/${removedIpfs}`;
 };
 
 export const formatNumber = (number: number) =>

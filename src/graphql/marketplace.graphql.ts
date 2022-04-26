@@ -242,6 +242,9 @@ export const getCollections = gql`
     collections(orderBy: name, where: { name_not: "Legions" }) {
       id
       contract
+      fee {
+        fee
+      }
       name
     }
   }
