@@ -33,6 +33,7 @@ export default function ImageWrapper({
           ? generateIpfsLink(token.metadata.image)
           : token.metadata?.image ?? "")
       }
+      objectFit="contain"
       layout={Boolean(props.width) ? undefined : "fill"}
       {...props}
     />

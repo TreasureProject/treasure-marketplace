@@ -17,7 +17,7 @@ export const generateIpfsLink = (hash: string) => {
     .replace(/.+\/(Qm[^\/]+)/, "$1")
     .replace(/https:\/\/([^\.]+)\.ipfs\.nftstorage\.link\/?/, "$1");
 
-  return `https://ipfs.io/ipfs/${removedIpfs}`;
+  return `https://treasure-marketplace.mypinata.cloud/ipfs/${removedIpfs}`;
 };
 
 export const formatNumber = (number: number) =>
@@ -78,5 +78,7 @@ export function getCollectionNameFromSlug(slug: string): string {
     .replace(" Of ", " of ")
     .replace("Peek A Boo", "Peek-A-Boo")
     .replace("Battlefly", "BattleFly")
-    .replace("Nft", "NFT");
+    .replace("Nft", "NFT")
+    .replace("Samurise", "SamuRise")
+    .replace("Kote ", "KOTE ");
 }
