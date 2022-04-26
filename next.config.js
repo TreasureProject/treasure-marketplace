@@ -1,6 +1,10 @@
 module.exports = {
   images: {
-    domains: ["treasure-marketplace.mypinata.cloud", "ipfs.io"],
+    domains: [
+      "ipfs.io",
+      "storage.googleapis.com",
+      "treasure-marketplace.mypinata.cloud",
+    ],
   },
   async redirects() {
     return [

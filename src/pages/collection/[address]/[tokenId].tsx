@@ -1363,7 +1363,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   const imageUrl = await getImageForToken(collection, tokenId);
-  const image = imageUrl.includes("ipfs")
+  const image = imageUrl?.includes("ipfs")
     ? generateIpfsLink(imageUrl)
     : imageUrl;
   const { description } = metadata;

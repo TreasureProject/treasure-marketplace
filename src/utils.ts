@@ -78,5 +78,7 @@ export function getCollectionNameFromSlug(slug: string): string {
     .replace(" Of ", " of ")
     .replace("Peek A Boo", "Peek-A-Boo")
     .replace("Battlefly", "BattleFly")
-    .replace("Nft", "NFT");
+    .replace("Nft", "NFT")
+    .replace("Samurise", "SamuRise")
+    .replace("Kote ", "KOTE ");
 }
