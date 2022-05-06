@@ -1,6 +1,9 @@
 import Router, { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { InformationCircleIcon } from "@heroicons/react/solid";
+import {
+  ChevronRightIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/solid";
 import { useInfiniteQuery, useQueries, useQuery } from "react-query";
 import {
   bridgeworld,
@@ -960,10 +963,10 @@ const Collection = ({ og }: { og: MetadataProps }) => {
               <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                 {collectionName}
               </h1>
-              <div className="mt-12 overflow-hidden relative">
+              <div className="mt-10 md:mt-12 overflow-hidden relative">
                 <dl className="-mx-4 -mt-4 md:-mt-8 grid grid-cols-2 md:grid-cols-4 divide-y-2 divide-x-2 md:divide-y-0 dark:divide-gray-800 text-center md:text-left">
                   <div className="flex flex-col px-6 sm:px-8 py-4 md:pb-0 md:pt-8">
-                    <dt className="order-2 font-medium text-gray-500 dark:text-gray-400 mt-4 flex">
+                    <dt className="order-2 font-medium text-sm md:text-base text-gray-500 dark:text-gray-400 mt-4 flex justify-center md:justify-start">
                       <span className="capsize">Floor Price</span>
                       <button
                         className="inline-flex self-end items-center ml-2"
@@ -981,7 +984,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                         )}
                       </button>
                     </dt>
-                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-3xl flex justify-center md:justify-start">
+                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-2xl md:text-3xl flex justify-center md:justify-start">
                       {floorCurrency === "eth" ? (
                         <EthIcon className="h-4 w-4 self-end mr-2" />
                       ) : (
@@ -1006,15 +1009,16 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                     {isERC1155 &&
                       (listings.data?.pages?.[0].tokens?.length ?? 0) > 12 && (
                         <button
-                          className="order-3 text-xs block underline place-self-start mt-2 dark:text-gray-300"
+                          className="order-3 text-xs block underline hover:no-underline place-self-start mt-2 dark:text-gray-300 flex items-center justify-center"
                           onClick={() => setDetailedFloorPriceModalOpen(true)}
                         >
-                          Compare floor prices &gt;
+                          Compare floor prices
+                          <ChevronRightIcon className="w-4 h-4" />
                         </button>
                       )}
                   </div>
                   <div className="flex flex-col px-6 sm:px-8 py-4 md:pb-0 md:pt-8">
-                    <dt className="order-2 text-base font-medium text-gray-500 dark:text-gray-400 mt-4 flex justify-center md:justify-start">
+                    <dt className="order-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400 mt-4 flex justify-center md:justify-start">
                       <span className="capsize">Listed</span>
                       <button
                         className="inline-flex self-end items-center ml-2"
@@ -1032,7 +1036,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                         )}
                       </button>
                     </dt>
-                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-3xl capsize">
+                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-2xl md:text-3xl capsize">
                       {listedDisplay === "number"
                         ? formatNumber(statData.collection.stats.listings)
                         : formatPercent(
@@ -1046,18 +1050,18 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                     className="md:hidden absolute top-[calc(50%-1.5rem)] left-[calc(50%-1rem)] !border-0 bg-white dark:bg-gray-900 h-8 w-8"
                   />
                   <div className="flex flex-col px-6 sm:px-8 py-4 md:pb-0 md:pt-8 -ml-1 md:ml-0">
-                    <dt className="order-2 text-base font-medium text-gray-500 dark:text-gray-400 mt-4">
+                    <dt className="order-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400 mt-4">
                       Volume ($MAGIC)
                     </dt>
-                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-3xl capsize">
+                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-2xl md:text-3xl capsize">
                       {abbreviatePrice(statData.collection.stats.volume)}
                     </dd>
                   </div>
                   <div className="flex flex-col px-6 sm:px-8 py-4 md:pb-0 md:pt-8">
-                    <dt className="order-2 text-base font-medium text-gray-500 dark:text-gray-400 mt-4">
+                    <dt className="order-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400 mt-4">
                       Items
                     </dt>
-                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-3xl capsize">
+                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-2xl md:text-3xl capsize">
                       {abbreviatePrice(statData.collection.stats.items)}
                     </dd>
                   </div>
