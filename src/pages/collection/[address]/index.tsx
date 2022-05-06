@@ -961,7 +961,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                 {collectionName}
               </h1>
               <div className="mt-12 overflow-hidden relative">
-                <dl className="-mx-4 -mt-4 md:-mt-8 grid grid-cols-2 md:grid-cols-4 divide-y-2 divide-x-2 md:divide-y-0">
+                <dl className="-mx-4 -mt-4 md:-mt-8 grid grid-cols-2 md:grid-cols-4 divide-y-2 divide-x-2 md:divide-y-0 dark:divide-gray-800 text-center md:text-left">
                   <div className="flex flex-col px-6 sm:px-8 py-4 md:pb-0 md:pt-8">
                     <dt className="order-2 font-medium text-gray-500 dark:text-gray-400 mt-4 flex">
                       <span className="capsize">Floor Price</span>
@@ -981,7 +981,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                         )}
                       </button>
                     </dt>
-                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-3xl flex">
+                    <dd className="order-1 font-extrabold text-red-600 dark:text-gray-200 text-3xl flex justify-center md:justify-start">
                       {floorCurrency === "eth" ? (
                         <EthIcon className="h-4 w-4 self-end mr-2" />
                       ) : (
@@ -1014,7 +1014,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                       )}
                   </div>
                   <div className="flex flex-col px-6 sm:px-8 py-4 md:pb-0 md:pt-8">
-                    <dt className="order-2 text-base font-medium text-gray-500 dark:text-gray-400 mt-4 flex">
+                    <dt className="order-2 text-base font-medium text-gray-500 dark:text-gray-400 mt-4 flex justify-center md:justify-start">
                       <span className="capsize">Listed</span>
                       <button
                         className="inline-flex self-end items-center ml-2"
