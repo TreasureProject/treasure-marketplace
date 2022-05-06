@@ -2,6 +2,7 @@ import Router, { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import {
   ChevronRightIcon,
+  HashtagIcon,
   InformationCircleIcon,
 } from "@heroicons/react/solid";
 import { useInfiniteQuery, useQueries, useQuery } from "react-query";
@@ -47,7 +48,6 @@ import {
 import {
   EthIcon,
   MagicIcon,
-  NumberIcon,
   PercentIcon,
   SwapIcon,
 } from "../../../components/Icons";
@@ -1032,7 +1032,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                         {listedDisplay === "number" ? (
                           <PercentIcon className="h-4 w-4" />
                         ) : (
-                          <NumberIcon className="h-4 w-4" />
+                          <HashtagIcon className="h-4 w-4" />
                         )}
                       </button>
                     </dt>
