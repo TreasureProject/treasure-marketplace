@@ -28,11 +28,15 @@ const ROLES = [
   "Siege",
   "Fighter",
   "Assassin",
-  "Ranged",
+  "Ranger",
   "Spellcaster",
   "Riverman",
   "Numeraire",
-  "All-Class",
+  "Ashen Kingsguard",
+  "Clockwork Marine",
+  "Executioner",
+  "Reaper",
+  "Shadowguard",
   "Origin",
 ];
 
