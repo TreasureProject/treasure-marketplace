@@ -1,7 +1,7 @@
 import "../css/tailwind.css";
 
 import { Fragment } from "react";
-import { ChainId, DAppProvider } from "@usedapp/core";
+import { ChainId, Config, DAppProvider, NodeUrls } from "@usedapp/core";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { resolveValue, Toaster } from "react-hot-toast";
@@ -28,36 +28,31 @@ const queryClient = new QueryClient({
   },
 });
 
-function createProvider(url: string) {
-  const provider = new ethers.providers.JsonRpcProvider(url);
+const createConfig = () => {
+  const readOnlyUrls: NodeUrls = {};
+  const config: Config = {};
 
+  if (process.env.NEXT_PUBLIC_ENABLE_TESTNET) {
+    config.readOnlyChainId = ChainId.ArbitrumRinkeby;
+    const testnetProvider = new ethers.providers.AlchemyProvider(
+      "arbitrum-rinkeby",
+      process.env.NEXT_PUBLIC_ALCHEMY_KEY_DEV
+    );
+    testnetProvider.pollingInterval = 12_000;
+    readOnlyUrls[ChainId.ArbitrumRinkeby] = testnetProvider;
+  } else {
+    config.readOnlyChainId = ChainId.Arbitrum;
+  }
+
+  const provider = new ethers.providers.AlchemyProvider(
+    "arbitrum",
+    process.env.NEXT_PUBLIC_ALCHEMY_KEY
+  );
   provider.pollingInterval = 12_000;
+  readOnlyUrls[ChainId.Arbitrum] = provider;
 
-  return provider;
-}
-
-const arbitrumProvider = createProvider(
-  `https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
-);
-
-const arbitrumRinkebyProvider = createProvider(
-  "https://arb-rinkeby.g.alchemy.com/v2/PDUCdHLoNrdDJwgVvCNPTx7MrHuQ0uBg"
-);
-
-const providers = {
-  [ChainId.Arbitrum]: arbitrumProvider,
-  [ChainId.ArbitrumRinkeby]: arbitrumRinkebyProvider,
-};
-
-// TODO: Fix this
-// Change if running in dev mode
-const chainId = ChainId.Arbitrum;
-
-const config = {
-  readOnlyChainId: chainId,
-  readOnlyUrls: {
-    [chainId]: providers[chainId],
-  },
+  config.readOnlyUrls = readOnlyUrls;
+  return config;
 };
 
 function MyApp({ Component, pageProps }) {
@@ -65,7 +60,7 @@ function MyApp({ Component, pageProps }) {
     <>
       <ThemeProvider attribute="class">
         <SSRProvider>
-          <DAppProvider config={config}>
+          <DAppProvider config={createConfig()}>
             <MagicProvider>
               <QueryClientProvider client={queryClient}>
                 <Main Component={Component} pageProps={pageProps} />
