@@ -259,6 +259,7 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
     description:
       "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+    cartridge: "bridgeworld",
     docs: "https://drive.google.com/file/d/1HwV-90u5TwffAvk83DIxfCKKLHfBAdmo/view",
     game: "https://life.treasure.lol",
     twitter: "LifeNFT_",
