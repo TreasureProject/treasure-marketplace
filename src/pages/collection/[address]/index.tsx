@@ -845,7 +845,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
     ["metadata", listingIds],
     () => client.getCollectionMetadata({ ids: listingIds }),
     {
-      enabled: listingIds.length > 0 && (isLegacy || isTreasure),
+      enabled: listingIds.length > 0 && isLegacy,
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -855,7 +855,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
     ["bw-metadata", listingIds],
     () => bridgeworld.getBridgeworldMetadata({ ids: listingIds }),
     {
-      enabled: listingIds.length > 0 && isBridgeworldItem,
+      enabled: listingIds.length > 0 && (isBridgeworldItem || isTreasure),
       refetchInterval: false,
       keepPreviousData: true,
     }
@@ -1242,7 +1242,8 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                               : null;
 
                             const metadata =
-                              isBridgeworldItem && legionsMetadata
+                              (isBridgeworldItem || isTreasure) &&
+                              legionsMetadata
                                 ? {
                                     id: legionsMetadata.id,
                                     name: legionsMetadata.name,
