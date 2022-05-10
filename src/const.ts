@@ -1,6 +1,7 @@
 import { ChainId } from "@usedapp/core";
 import smolBodiesImg from "../public/img/smolbodies.png";
 import toadstoolzImg from "../public/img/toadstoolz.jpg";
+import toadstoolzItemzImg from "../public/img/toadstoolz-itemz.svg";
 import peekabooImg from "../public/img/peekaboo.svg";
 import realmImg from "../public/img/realm.jpg";
 
@@ -10,6 +11,7 @@ type CollectionData = Record<
 > & {
   imageContain?: boolean;
   imageBgColor?: string;
+  cartridge: "battlefly" | "bridgeworld" | "ecosystem" | "smolverse";
   docs?: string;
   discord?: string;
   game?: string;
@@ -54,6 +56,7 @@ export const METADATA_COLLECTIONS = [
 ];
 
 const BRIDGEWORLD_DATA = {
+  cartridge: "bridgeworld",
   docs: "https://docs.treasure.lol",
   game: "https://bridgeworld.treasure.lol",
   twitter: "playbridgeworld",
@@ -61,6 +64,7 @@ const BRIDGEWORLD_DATA = {
 } as const;
 
 const BATTLEFLY_DATA = {
+  cartridge: "battlefly",
   docs: "https://docs.battlefly.game/overview/welcome-to-battlefly",
   game: "https://mint.battlefly.game/mission-control",
   discord: "YzpajBfRNX ",
@@ -74,6 +78,7 @@ export const TOADSTOOLZ = {
   image: toadstoolzImg.src,
   description:
     "Toadstoolz is an on-chain toad life simulation game. Toadz love to hunt for $BUGZ and go on adventures.",
+  cartridge: "ecosystem",
   related: ["toadstoolz-itemz"],
   discord: "toadstoolz",
   docs: "https://toadstoolznft.gitbook.io/guide",
@@ -144,9 +149,10 @@ const SMOL_BODIES_PETS = {
   href: "smol-bodies-pets",
   name: "Smol Bodies Pets",
   image:
-    "https://ipfs.io/ipfs/QmdRyjjv6suTcS9E1aNnKRhvL2McYynrzLbg5VwXH8cCQB/614.gif",
+    "https://ipfs.io/ipfs/Qmak8RVrMWWLEsGtTgVqUJ5a7kkouM2atjyynWT5qQCP2N/614.gif",
   description:
     "The Smol Bodies Pets are cute companions to accompany your Smol Body in Smolverse.",
+  cartridge: "smolverse",
   related: ["smol-bodies", "smol-treasures"],
   tools: "smol-bodies-pets",
   website: "https://smolverse.lol",
@@ -159,6 +165,7 @@ const SMOL_BRAINS_LAND = {
     "https://ipfs.io/ipfs/QmUcEoYHwye65tsncGAtoz2bQLjQtrE2GiCa6L1PYNcbh7/0.png",
   description:
     "The Smol Brains Land was developed collectively while staking your Smol Brain.",
+  cartridge: "smolverse",
   related: ["smol-brains", "smol-brains-pets", "smol-cars", "smol-treasures"],
   website: "https://smolverse.lol",
 } as const;
@@ -187,6 +194,7 @@ const SAMURISE_LAND = {
   image: "https://storage.googleapis.com/samurise/land/land.gif",
   description:
     "The Lost SamuRise is a faction based strategy game played in the fictional world of Tengoku (heaven) that has borrowed lore and stylistic elements from Samurai culture in classical Japan.",
+  cartridge: "ecosystem",
   discord: "samurise",
   docs: "https://docs.samurise.xyz/docs/washipaper/prologue",
   twitter: "SamuRiseNFT",
@@ -200,6 +208,7 @@ const KOTE_SQUIRES = {
     "https://ipfs.io/ipfs/QmYZXbjHrKSoy5ZPutJPnnuZURr6NLbVpd323HZ3G3sX9D/strengthG.png",
   description:
     "The support characters for Knights of the Ether, these 3,999 Squires quest on Arbitrum in search of $FIEF, potions, trinkets and rings. Each Squire comes in 1 of 4 classes, Strength, Wisdom, Luck or Faith. (You must own at least 1 Knight on L1 to send Squires out on Quests)",
+  cartridge: "ecosystem",
   discord: "kote",
   game: "https://knightsoftheether.com/squires",
   twitter: "KnightsOfTheEth",
@@ -231,6 +240,7 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/QmY71ban6QoWg9nbNwikk6wVWknj8NFBG8nMGHEuzwfAwf/121/0.png",
     description:
       "The Smol Brains are a dynamic PFP of a monkey whose head gets bigger the larger its IQ becomes.",
+    cartridge: "smolverse",
     related: [
       "smol-brains-land",
       "smol-brains-pets",
@@ -302,6 +312,7 @@ export const COLLECTION_METADATA = [
     image: smolBodiesImg.src,
     description:
       "The Smol Bodies inhabit a gym near you, stacking $plates to earn muscle and be not smol.",
+    cartridge: "smolverse",
     related: ["smol-bodies-pets", "smol-treasures"],
     discord: "smolbrains",
     tools: "smol-bodies",
@@ -309,16 +320,17 @@ export const COLLECTION_METADATA = [
     website: "https://smolverse.lol",
   },
   {
-    href: "smithonia-weapons",
-    name: "Smithonia Weapons",
-    image:
-      "https://ipfs.io/ipfs/bafkreibzmyesy7amoir273ckdcnpndkaz4b3ljdpc6lgexv2abzfnuieq4",
+    href: "realm",
+    name: "Realm",
+    image: realmImg.src,
     description:
-      "Smithonia is a SmithyDAO project. It's a world of staking and adventure which supports a hybrid economy where the primary objective of the game is to build the rarity of your weapon through gameplay.",
-    docs: "https://assets.smithydao.lol/SmithoniaWhitePaper.pdf",
-    discord: "smithydao",
-    twitter: "SmithyDAO",
-    website: "https://smithydao.lol",
+      "Realm is a decentralized world-building experience. Enjoy $MAGIC emissions and Loot from across the Metaverse.",
+    cartridge: "ecosystem",
+    docs: "https://docs.rlm.land",
+    discord: "realmdao",
+    game: "https://rlm.land/app",
+    twitter: "RealmDao",
+    website: "https://rlm.land",
   },
   {
     href: "tales-of-elleria",
@@ -327,6 +339,7 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/Qmd66PRkYUWN78VUSzYyxmZeP4zLpC8Wroif3QNCyofvj7",
     description:
       "Tales of Elleria is an immersive three-dimensional role-playing GameFi project. Summon heroes, take on assignments, go on quests and epic adventures to battle dangerous monsters earn tremendous rewards.",
+    cartridge: "ecosystem",
     docs: "https://docs.talesofelleria.com",
     discord: "talesofelleria",
     game: "https://app.talesofelleria.com",
@@ -334,28 +347,30 @@ export const COLLECTION_METADATA = [
     website: "https://talesofelleria.com",
   },
   {
+    href: "smithonia-weapons",
+    name: "Smithonia Weapons",
+    image:
+      "https://ipfs.io/ipfs/bafkreibzmyesy7amoir273ckdcnpndkaz4b3ljdpc6lgexv2abzfnuieq4",
+    description:
+      "Smithonia is a SmithyDAO project. It's a world of staking and adventure which supports a hybrid economy where the primary objective of the game is to build the rarity of your weapon through gameplay.",
+    cartridge: "ecosystem",
+    docs: "https://assets.smithydao.lol/SmithoniaWhitePaper.pdf",
+    discord: "smithydao",
+    twitter: "SmithyDAO",
+    website: "https://smithydao.lol",
+  },
+  {
     href: "peek-a-boo",
     name: "Peek-A-Boo",
     image: peekabooImg.src,
     description:
       "Peek-A-Boo is a collection of 10,000 adorable NFTs. There are two types, Ghosts and Busters.",
+    cartridge: "ecosystem",
     docs: "https://www.peekaboonft.io/ghostpaper",
     discord: "peekaboo",
     game: "https://www.peekaboonft.io/hide-n-seek",
     twitter: "PeekABooGameNFT",
     website: "https://www.peekaboonft.io",
-  },
-  {
-    href: "realm",
-    name: "Realm",
-    image: realmImg.src,
-    description:
-      "Realm is a decentralized world-building experience. Enjoy $MAGIC emissions and Loot from across the Metaverse.",
-    docs: "https://docs.rlm.land",
-    discord: "realmdao",
-    game: "https://rlm.land/app",
-    twitter: "RealmDao",
-    website: "https://rlm.land",
   },
   {
     href: "smol-brains-pets",
@@ -364,6 +379,7 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/QmdRyjjv6suTcS9E1aNnKRhvL2McYynrzLbg5VwXH8cCQB/614.gif",
     description:
       "The Smol Brains Pets are cute companions to accompany your Smol Brain in Smolverse.",
+    cartridge: "smolverse",
     related: ["smol-brains", "smol-brains-land", "smol-cars", "smol-treasures"],
     tools: "smol-brains-pets",
     website: "https://smolverse.lol",
@@ -375,6 +391,7 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/QmVjjJJ7XQKRbM5uBmDtTP9r22UZC1Wv55AT9p4yGecHpP/30.png",
     description:
       "The Smol Cars are here to get you around in Smolverse. Vroom vroom.",
+    cartridge: "smolverse",
     related: [
       "smol-brains",
       "smol-brains-land",
@@ -391,22 +408,26 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/QmZK1i4y7qn7Fi7mEMgT4KZcb1Etb12yndcTZ5dnhigDPt/2.gif",
     description:
       "Smols and Swols are currently farming Smol treasures on the moon.",
+    cartridge: "smolverse",
     related: ["smol-brains", "smol-bodies"],
     website: "https://smolverse.lol",
   },
 ] as Array<CollectionData>;
 
 export const ALL_COLLECTION_METADATA = [
-  ...COLLECTION_METADATA,
-  BATTLEFLY,
   TOADSTOOLZ,
   {
     ...TOADSTOOLZ,
+    image: toadstoolzItemzImg.src,
     href: "toadstoolz-itemz",
     name: "Toadstoolz Itemz",
     related: ["toadstoolz"],
     tools: undefined,
   },
+  ...COLLECTION_METADATA,
+  SAMURISE_LAND,
+  KOTE_SQUIRES,
+  BATTLEFLY,
   EXTRA_LIFE,
   BALANCER_CRYSTAL,
   BATTLEFLY_FOUNDERS_V1,
@@ -416,8 +437,6 @@ export const ALL_COLLECTION_METADATA = [
   SMOL_BRAINS_LAND,
   UNPILGRIMAGED_LEGION_AUXILIARY,
   UNPILGRIMAGED_LEGION_GENESIS,
-  SAMURISE_LAND,
-  KOTE_SQUIRES,
 ] as Array<CollectionData>;
 
 // Used on collection detail page

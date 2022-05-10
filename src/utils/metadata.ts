@@ -134,37 +134,37 @@ export function normalizeBridgeworldTokenMetadata(
       },
       {
         attribute: {
-          name: "Contstellation: Dark",
+          name: "Constellation: Dark",
           value: metadata.constellation?.dark ?? 0,
         },
       },
       {
         attribute: {
-          name: "Contstellation: Earth",
+          name: "Constellation: Earth",
           value: metadata.constellation?.earth ?? 0,
         },
       },
       {
         attribute: {
-          name: "Contstellation: Fire",
+          name: "Constellation: Fire",
           value: metadata.constellation?.fire ?? 0,
         },
       },
       {
         attribute: {
-          name: "Contstellation: Light",
+          name: "Constellation: Light",
           value: metadata.constellation?.light ?? 0,
         },
       },
       {
         attribute: {
-          name: "Contstellation: Water",
+          name: "Constellation: Water",
           value: metadata.constellation?.water ?? 0,
         },
       },
       {
         attribute: {
-          name: "Contstellation: Wind",
+          name: "Constellation: Wind",
           value: metadata.constellation?.wind ?? 0,
         },
       },

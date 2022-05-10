@@ -1,10 +1,36 @@
-import clsx from "clsx";
+import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
 import logoImg from "../../public/img/logotransparent.png";
+import battlefly from "../../public/img/Battlefly.jpg";
+import bridgeworld from "../../public/img/Bridgeworld.jpg";
+import ecosystem from "../../public/img/Ecosystem.jpg";
+import smolverse from "../../public/img/Smolverse.jpg";
 import { Metadata } from "../components/Metadata";
-import { BATTLEFLY, COLLECTION_METADATA, TOADSTOOLZ } from "../const";
+
+type CardProps = {
+  image: StaticImageData;
+  name: string;
+};
+
+function Card({ image, name }: CardProps) {
+  return (
+    <Link href={`/cartridge/${name.toLowerCase()}`} passHref>
+      <a className="hover:opacity-60 transition-opacity duration-300">
+        <div className="bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-100 p-3 rounded-md">
+          <Image
+            alt={name}
+            src={image.src}
+            width={image.width}
+            height={image.height}
+          />
+          <div className="text-center text-lg p-3">{name}</div>
+        </div>
+      </a>
+    </Link>
+  );
+}
 
 export default function Home() {
   return (
@@ -32,56 +58,11 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-          <h2 className="sr-only">Collections</h2>
-
-          <div className="grid gap-4 grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
-            {COLLECTION_METADATA.slice(0, 3)
-              .concat(TOADSTOOLZ)
-              .concat(COLLECTION_METADATA.slice(3, 7))
-              .concat(BATTLEFLY)
-              .concat(COLLECTION_METADATA.slice(7))
-              .map((product) => (
-                <div
-                  key={product.href}
-                  className="group relative bg-white dark:bg-gray-500 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col overflow-hidden"
-                >
-                  <div
-                    className={clsx(
-                      "relative aspect-none group-hover:opacity-75",
-                      product.imageBgColor
-                        ? `bg-[${product.imageBgColor}]`
-                        : "bg-gray-200"
-                    )}
-                  >
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      layout="responsive"
-                      width={400}
-                      height={400}
-                      objectFit={product.imageContain ? "contain" : "fill"}
-                    />
-                  </div>
-                  <div className="flex-1 p-4 space-y-2 flex flex-col">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">
-                      <Link href={`/collection/${product.href}`}>
-                        <a>
-                          <span
-                            aria-hidden="true"
-                            className="absolute inset-0"
-                          />
-                          {product.name}
-                        </a>
-                      </Link>
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
-                      {product.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+          <Card image={bridgeworld} name="Bridgeworld" />
+          <Card image={smolverse} name="Smolverse" />
+          <Card image={battlefly} name="BattleFly" />
+          <Card image={ecosystem} name="Ecosystem" />
         </div>
       </main>
     </div>
