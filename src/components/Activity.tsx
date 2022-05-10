@@ -226,7 +226,10 @@ export function Activity({ title }: ActivityProps) {
         const collectionName =
           collections.find(({ id }) => id === collection.id)?.name ?? "";
 
-        if (BridgeworldItems.includes(collectionName)) {
+        if (
+          BridgeworldItems.includes(collectionName) ||
+          collectionName === "Treasures"
+        ) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);

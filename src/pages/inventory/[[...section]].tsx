@@ -799,7 +799,10 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
           allCollections.find(({ id }) => id === token.collection.id)?.name ??
           "";
 
-        if (BridgeworldItems.includes(collectionName)) {
+        if (
+          BridgeworldItems.includes(collectionName) ||
+          collectionName === "Treasures"
+        ) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
