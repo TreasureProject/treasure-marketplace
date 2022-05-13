@@ -65,6 +65,7 @@ import {
   useFoundersMetadata,
   useGridSizeState,
   useRemoveListing,
+  useSmithoniaResourcesMetadata,
   useSmithoniaWeaponsMetadata,
   useUpdateListing,
 } from "../../lib/hooks";
@@ -791,7 +792,8 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
     smolverseTokens,
     metadataTokens,
     realmTokens,
-    smithoniaTokens,
+    srTokens,
+    swTokens,
   } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
       (acc, { token }) => {
@@ -799,7 +801,10 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
           allCollections.find(({ id }) => id === token.collection.id)?.name ??
           "";
 
-        if (BridgeworldItems.includes(collectionName)) {
+        if (
+          BridgeworldItems.includes(collectionName) ||
+          collectionName === "Treasures"
+        ) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
@@ -807,8 +812,10 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
           acc.metadataTokens.push(token.id);
         } else if (collectionName === "Realm") {
           acc.realmTokens.push(token.id);
+        } else if (collectionName === "Smithonia Resources") {
+          acc.srTokens.push(token.id);
         } else if (collectionName === "Smithonia Weapons") {
-          acc.smithoniaTokens.push(token.id);
+          acc.swTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -827,7 +834,8 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
         smolverseTokens: [] as string[],
         metadataTokens: [] as string[],
         realmTokens: [] as string[],
-        smithoniaTokens: [] as string[],
+        srTokens: [] as string[],
+        swTokens: [] as string[],
       }
     );
   }, [allCollections, data]);
@@ -882,7 +890,8 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
 
   const battleflyMetadata = useBattleflyMetadata(battleflyTokens);
   const foundersMetadata = useFoundersMetadata(foundersTokens);
-  const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(smithoniaTokens);
+  const smithoniaResourcesMetadata = useSmithoniaResourcesMetadata(srTokens);
+  const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(swTokens);
 
   const tabs = useMemo(() => {
     if (inventory.data?.user?.inactive.length) {
@@ -1059,6 +1068,10 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
                             const fsMetadata = foundersMetadata.data?.find(
                               (item) => item.id === token.id
                             );
+                            const srMetadata =
+                              smithoniaResourcesMetadata.data?.find(
+                                (item) => item.id === token.tokenId
+                              );
                             const swMetadata =
                               smithoniaWeaponsMetadata.data?.find(
                                 (item) => item.id === token.tokenId
@@ -1116,6 +1129,17 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
                                   metadata: {
                                     image: shrdMetadata.image ?? "",
                                     name: shrdMetadata.name,
+                                    description: token.collection.name,
+                                  },
+                                }
+                              : srMetadata
+                              ? {
+                                  id: srMetadata.id,
+                                  name: srMetadata.name,
+                                  tokenId: token.tokenId,
+                                  metadata: {
+                                    image: srMetadata.image ?? "",
+                                    name: srMetadata.name,
                                     description: token.collection.name,
                                   },
                                 }

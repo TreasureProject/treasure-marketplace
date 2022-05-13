@@ -44,6 +44,7 @@ export const smolverseItems = [
   "Smol Bodies Pets",
   "Smol Brains Pets",
   "Smol Treasures",
+  "Swolercycles",
 ];
 
 export const METADATA_COLLECTIONS = [
@@ -70,6 +71,15 @@ const BATTLEFLY_DATA = {
   discord: "YzpajBfRNX ",
   twitter: "BattleFlyGame",
   website: "https://battlefly.game",
+} as const;
+
+const SMITHONIA_DATA = {
+  description:
+    "Smithonia is a SmithyDAO project. It's a world of staking and adventure which supports a hybrid economy where the primary objective of the game is to build the rarity of your weapon through gameplay.",
+  docs: "https://assets.smithydao.lol/SmithoniaWhitePaper.pdf",
+  discord: "smithydao",
+  twitter: "SmithyDAO",
+  website: "https://smithydao.lol",
 } as const;
 
 export const TOADSTOOLZ = {
@@ -215,6 +225,16 @@ const KOTE_SQUIRES = {
   website: "https://knightsoftheether.com",
 } as const;
 
+const SWOLERCYCLES = {
+  href: "swolercycles",
+  name: "Swolercycles",
+  image:
+    "https://ipfs.io/ipfs/QmUqm5andJ4u6HMTuvtMmhMKs6oskGceRgXruRnt19CNR4/1.png",
+  description: "Swols go vroom vroom.",
+  related: ["smol-bodies", "smol-bodies-pets", "smol-cars", "smol-treasures"],
+  website: "https://smolverse.lol",
+} as const;
+
 // Used for homepage and opengraph
 export const COLLECTION_METADATA = [
   {
@@ -314,7 +334,7 @@ export const COLLECTION_METADATA = [
     description:
       "The Smol Bodies inhabit a gym near you, stacking $plates to earn muscle and be not smol.",
     cartridge: "smolverse",
-    related: ["smol-bodies-pets", "smol-treasures"],
+    related: ["smol-bodies-pets", "swolercycles", "smol-treasures"],
     discord: "smolbrains",
     tools: "smol-bodies",
     twitter: "SmolBodies",
@@ -332,6 +352,14 @@ export const COLLECTION_METADATA = [
     game: "https://rlm.land/app",
     twitter: "RealmDao",
     website: "https://rlm.land",
+  },
+  {
+    href: "smithonia-weapons",
+    name: "Smithonia Weapons",
+    image:
+      "https://ipfs.io/ipfs/bafkreibzmyesy7amoir273ckdcnpndkaz4b3ljdpc6lgexv2abzfnuieq4",
+    ...SMITHONIA_DATA,
+    related: ["smithonia-resources"],
   },
   {
     href: "tales-of-elleria",
@@ -429,6 +457,14 @@ export const ALL_COLLECTION_METADATA = [
   SAMURISE_LAND,
   KOTE_SQUIRES,
   BATTLEFLY,
+  {
+    href: "smithonia-resources",
+    name: "Smithonia Resources",
+    image:
+      "https://ipfs.io/ipfs/bafkreiellqodl7qzr57fizmzxxtsuwx72tnatpkeniecjdpp2ld73ezwu4",
+    ...SMITHONIA_DATA,
+    related: ["smithonia-weapons"],
+  },
   EXTRA_LIFE,
   BALANCER_CRYSTAL,
   BATTLEFLY_FOUNDERS_V1,
@@ -438,6 +474,7 @@ export const ALL_COLLECTION_METADATA = [
   SMOL_BRAINS_LAND,
   UNPILGRIMAGED_LEGION_AUXILIARY,
   UNPILGRIMAGED_LEGION_GENESIS,
+  SWOLERCYCLES,
 ] as Array<CollectionData>;
 
 // Used on collection detail page
@@ -476,7 +513,7 @@ export const COLLECTION_DESCRIPTIONS = {
   "toadstoolz-itemz":
     "Toadstoolz is an on-chain toad life simulation NFT game. Toadz love to hunt for $BUGZ, go on adventures and are obsessed with collecting NFTs.",
   ...ALL_COLLECTION_METADATA.filter((item) =>
-    ["SamuRise Land", "KOTE Squires"].includes(item.name)
+    ["SamuRise Land", "KOTE Squires", "Swolercycles"].includes(item.name)
   ).reduce((acc, item) => {
     acc[item.href] = item.description;
 
@@ -512,12 +549,4 @@ export const BATTLEFLY_METADATA = {
       "https://ipfs.infura.io/ipfs/QmXsiziZsoYEz5sqz7rHCYdtuqaBPrpQbn7UnuUpcf2n6Z",
     attributes: [],
   },
-};
-
-export const SMITHONIA_WEAPONS_METADATA = {
-  name: "Smithonia Weapon",
-  description: "Smithonia Weapons",
-  image:
-    "https://bafkreibzmyesy7amoir273ckdcnpndkaz4b3ljdpc6lgexv2abzfnuieq4.ipfs.nftstorage.link/",
-  attributes: [],
 };

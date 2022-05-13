@@ -15,7 +15,6 @@ import {
   Contracts,
   DEFAULT_COLLECTION_FEE,
   METADATA_COLLECTIONS,
-  SMITHONIA_WEAPONS_METADATA,
   smolverseItems,
 } from "../const";
 import { Interface } from "@ethersproject/abi";
@@ -609,26 +608,17 @@ export function useFoundersMetadata(input: string[]) {
   return useBattleflyApi("founders", input);
 }
 
-export function useSmithoniaWeaponsMetadata(input: string[]) {
-  const initialData = useCallback(() => {
-    if (input.length === 0) {
-      return undefined;
-    }
-
-    return input.map((id) => ({
-      ...SMITHONIA_WEAPONS_METADATA,
-      id: `${parseInt(id.slice(45), 16)}`,
-      name: `${SMITHONIA_WEAPONS_METADATA.name} #${parseInt(id.slice(45), 16)}`,
-    }));
-  }, [input]);
+export function useSmithoniaApi(key: "resources" | "weapons", input: string[]) {
+  const [slug, param] =
+    key === "weapons" ? ["nft/metadata", "id"] : ["resources", "ids"];
 
   return useQuery(
-    ["smithonia-weapons-metadata", input],
+    [`smithonia-${key}-metadata`, input],
     () =>
       fetch(
         `${
           process.env.NEXT_PUBLIC_SMITHONIA_WEAPONS_API
-        }/nft/metadata?id=${input
+        }/${slug}?${param}=${input
           .map((tokenId) => parseInt(tokenId.slice(45), 16))
           .join(",")}`
       ).then((res) => res.json()),
@@ -636,7 +626,6 @@ export function useSmithoniaWeaponsMetadata(input: string[]) {
       enabled: input.filter(Boolean).length > 0,
       refetchInterval: false,
       keepPreviousData: true,
-      initialData,
       select: (values: Metadata[]) =>
         values.map((value) => {
           const data =
@@ -644,11 +633,19 @@ export function useSmithoniaWeaponsMetadata(input: string[]) {
 
           return {
             ...data,
-            id: value.name.replace("Smithonia Weapon #", ""),
+            id: value.name.replace(/^[^#]+#/, ""),
           };
         }),
     }
   );
+}
+
+export function useSmithoniaResourcesMetadata(input: string[]) {
+  return useSmithoniaApi("resources", input);
+}
+
+export function useSmithoniaWeaponsMetadata(input: string[]) {
+  return useSmithoniaApi("weapons", input);
 }
 
 type Attribute = Awaited<
@@ -673,7 +670,9 @@ export function useMetadata(
   const isTreasureItem = collectionName === "Treasures";
   const isShared = METADATA_COLLECTIONS.includes(collectionName);
   const isRealm = collectionName === "Realm";
-  const isSmithonia = collectionName === "Smithonia Weapons";
+  const isSmithoniaResources = collectionName === "Smithonia Resources";
+  const isSmithoniaWeapons = collectionName === "Smithonia Weapons";
+  const isSmithonia = isSmithoniaResources || isSmithoniaWeapons;
   const collection = useCollection(collectionName);
 
   const legacyMetadataResult = useQuery(
@@ -844,8 +843,12 @@ export function useMetadata(
     isFoundersItem && id ? [id] : []
   );
 
-  const smithoniaMetadataResult = useSmithoniaWeaponsMetadata(
-    isSmithonia && id ? [id] : []
+  const srMetadataResult = useSmithoniaResourcesMetadata(
+    isSmithoniaResources && id ? [id] : []
+  );
+
+  const swMetadataResult = useSmithoniaWeaponsMetadata(
+    isSmithoniaWeapons && id ? [id] : []
   );
 
   const data = {
@@ -855,7 +858,9 @@ export function useMetadata(
     founders: foundersMetadataResult.data?.[0],
     realm: realmMetadataResult.data,
     shared: sharedMetadataResult.data,
-    smithonia: smithoniaMetadataResult.data?.[0],
+    smithonia: isSmithoniaWeapons
+      ? swMetadataResult.data?.[0]
+      : srMetadataResult.data?.[0],
     smolverse: smolverseMetadataResult.data,
     token: tokenMetadataResult.data,
   };
@@ -931,8 +936,10 @@ export function useMetadata(
       ? !battleflyMetadataResult.isLoading && !!battleflyMetadataResult.data
       : isFoundersItem
       ? !foundersMetadataResult.isLoading && !!foundersMetadataResult.data
-      : isSmithonia
-      ? !smithoniaMetadataResult.isLoading && !!smithoniaMetadataResult.data
+      : isSmithoniaResources
+      ? !srMetadataResult.isLoading && !!srMetadataResult.data
+      : isSmithoniaWeapons
+      ? !swMetadataResult.isLoading && !!swMetadataResult.data
       : !legacyMetadataResult.isLoading && !!legacyMetadataResult.data && !!id
       ? !tokenMetadataResult.isLoading && !!tokenMetadataResult.data
       : true;

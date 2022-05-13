@@ -20,6 +20,7 @@ import {
   useCollection,
   useCollections,
   useFoundersMetadata,
+  useSmithoniaResourcesMetadata,
   useSmithoniaWeaponsMetadata,
 } from "../lib/hooks";
 import { shortenAddress, useEthers } from "@usedapp/core";
@@ -219,14 +220,18 @@ export function Activity({ title }: ActivityProps) {
     smolverseTokens,
     metadataTokens,
     realmTokens,
-    smithoniaTokens,
+    srTokens,
+    swTokens,
   } = useMemo(() => {
     return activities.reduce(
       (acc, { collection, token }) => {
         const collectionName =
           collections.find(({ id }) => id === collection.id)?.name ?? "";
 
-        if (BridgeworldItems.includes(collectionName)) {
+        if (
+          BridgeworldItems.includes(collectionName) ||
+          collectionName === "Treasures"
+        ) {
           acc.bridgeworldTokens.push(token.id);
         } else if (smolverseItems.includes(collectionName)) {
           acc.smolverseTokens.push(token.id);
@@ -234,8 +239,10 @@ export function Activity({ title }: ActivityProps) {
           acc.metadataTokens.push(token.id);
         } else if (collectionName === "Realm") {
           acc.realmTokens.push(token.id);
+        } else if (collectionName === "Smithonia Resources") {
+          acc.srTokens.push(token.id);
         } else if (collectionName === "Smithonia Weapons") {
-          acc.smithoniaTokens.push(token.id);
+          acc.swTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -254,7 +261,8 @@ export function Activity({ title }: ActivityProps) {
         smolverseTokens: [] as string[],
         metadataTokens: [] as string[],
         realmTokens: [] as string[],
-        smithoniaTokens: [] as string[],
+        srTokens: [] as string[],
+        swTokens: [] as string[],
       }
     );
   }, [activities, collections]);
@@ -309,7 +317,8 @@ export function Activity({ title }: ActivityProps) {
 
   const battleflyMetadata = useBattleflyMetadata(battleflyTokens);
   const foundersMetadata = useFoundersMetadata(foundersTokens);
-  const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(smithoniaTokens);
+  const smithoniaResourcesMetadata = useSmithoniaResourcesMetadata(srTokens);
+  const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(swTokens);
 
   if (
     (isMyActivity && queries.slice(1).every((query) => query.isLoading)) ||
@@ -423,6 +432,9 @@ export function Activity({ title }: ActivityProps) {
                   const fsMetadata = foundersMetadata.data?.find(
                     (item) => item.id === activity.token.id
                   );
+                  const srMetadata = smithoniaResourcesMetadata.data?.find(
+                    (item) => item.id === activity.token.tokenId
+                  );
                   const swMetadata = smithoniaWeaponsMetadata.data?.find(
                     (item) => item.id === activity.token.tokenId
                   );
@@ -474,6 +486,17 @@ export function Activity({ title }: ActivityProps) {
                         metadata: {
                           image: fsMetadata.image ?? "",
                           name: fsMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : srMetadata
+                    ? {
+                        id: srMetadata.id,
+                        name: srMetadata.name,
+                        tokenId: activity.token.tokenId,
+                        metadata: {
+                          image: srMetadata.image ?? "",
+                          name: srMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -640,6 +663,9 @@ export function Activity({ title }: ActivityProps) {
               const fsMetadata = foundersMetadata.data?.find(
                 (item) => item.id === activity.token.id
               );
+              const srMetadata = smithoniaResourcesMetadata.data?.find(
+                (item) => item.id === activity.token.tokenId
+              );
               const swMetadata = smithoniaWeaponsMetadata.data?.find(
                 (item) => item.id === activity.token.tokenId
               );
@@ -691,6 +717,17 @@ export function Activity({ title }: ActivityProps) {
                     metadata: {
                       image: fsMetadata.image ?? "",
                       name: fsMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : srMetadata
+                ? {
+                    id: srMetadata.id,
+                    name: srMetadata.name,
+                    tokenId: activity.token.tokenId,
+                    metadata: {
+                      image: srMetadata.image ?? "",
+                      name: srMetadata.name,
                       description: collectionName ?? "",
                     },
                   }

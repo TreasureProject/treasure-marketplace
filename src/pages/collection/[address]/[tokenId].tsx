@@ -1333,6 +1333,12 @@ async function getImageForToken(collection: string, tokenId: string) {
     }
     case collection === "Realm":
       return "https://marketplace.treasure.lol/img/realm.jpg";
+    case collection === "Smithonia Resources":
+      return fetch(
+        `${process.env.NEXT_PUBLIC_SMITHONIA_WEAPONS_API}/resources?ids=${tokenId}`
+      )
+        .then((res) => res.json())
+        .then((data) => data[0].image);
     case collection === "Smithonia Weapons":
       return fetch(
         `${process.env.NEXT_PUBLIC_SMITHONIA_WEAPONS_API}/nft/metadata?id=${tokenId}`

@@ -30,7 +30,12 @@ export default function ImageWrapper({
               "ipfs://QmUcEoYHwye65tsncGAtoz2bQLjQtrE2GiCa6L1PYNcbh7/0.png"
             )
           : token.metadata?.image.includes("ipfs")
-          ? generateIpfsLink(token.metadata.image)
+          ? generateIpfsLink(
+              token.metadata.image.replace(
+                "QmUqm5andJ4u6HMTuvtMmhMKs6oskGceRgXruRnt19CNR4",
+                "QmdbpWQ9tFdYQxjwktyYXNA86w8KG3vpbtmBWNrnzsdHyz"
+              )
+            )
           : token.metadata?.image ?? "")
       }
       objectFit="contain"

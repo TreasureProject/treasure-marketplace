@@ -36,12 +36,7 @@ import { marketplace } from "../lib/client";
 import { InboxIcon } from "@heroicons/react/solid";
 import { TreasureIcon } from "./Icons";
 
-const NEW_COLLECTIONS = [
-  "KOTE Squires",
-  "SamuRise Land",
-  "Toadstoolz",
-  "Toadstoolz Itemz",
-];
+const NEW_COLLECTIONS = ["KOTE Squires", "SamuRise Land", "Swolercycles"];
 
 const walletLink = new WalletLinkConnector({
   url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`,
