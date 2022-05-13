@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Metadata, MetadataProps } from "../../components/Metadata";
 import { ALL_COLLECTION_METADATA } from "../../const";
-import battlefly from "../../../public/img/Battlefly.jpg";
 import bridgeworld from "../../../public/img/Bridgeworld.jpg";
-import ecosystem from "../../../public/img/Ecosystem.jpg";
-import smolverse from "../../../public/img/Smolverse.jpg";
+import ecosystem from "../../../public/img/Ecosystem.png";
+import life from "../../../public/img/Life.png";
+import smolverse from "../../../public/img/Smolverse.png";
+import { useCollections } from "../../lib/hooks";
 
 type Cartridge = keyof typeof cartridgesMap;
 
@@ -18,12 +19,6 @@ const cartridges: string[] = unique(
 );
 
 const cartridgesMap = {
-  battlefly: {
-    name: "BattleFly",
-    description:
-      "BattleFly is an experimental PVP/P2E strategy game, powered by $MAGIC.",
-    image: battlefly,
-  },
   bridgeworld: {
     name: "Bridgeworld",
     description:
@@ -35,6 +30,12 @@ const cartridgesMap = {
     description:
       "The Treasure ecosystem is vast and evergrowing, here we capture new projects and metaverses as they are revealed.",
     image: ecosystem,
+  },
+  life: {
+    name: "Life",
+    description:
+      "In Life, as in life, nothing stays static. That which is not tended to wilts, that which is not cared for dies.",
+    image: life,
   },
   smolverse: {
     name: "Smolverse",
@@ -62,7 +63,8 @@ function CartridgeImage({ cartridge }: { cartridge: Cartridge }) {
 
 export default function Cartridge({ og }: { og: MetadataProps }) {
   const router = useRouter();
-  const { cartridge } = router.query;
+  const cartridge = router.query.cartridge as Cartridge;
+  const collections = useCollections();
 
   if (typeof cartridge === "string" && !cartridges.includes(cartridge)) {
     return router.replace("/");
@@ -73,52 +75,61 @@ export default function Cartridge({ og }: { og: MetadataProps }) {
       <Metadata {...og} />
       <main className="flex flex-col mt-16 pt-20 w-full min-h-screen landing">
         <div className="z-10 px-8 max-w-2xl lg:max-w-7xl mx-auto">
-          <CartridgeImage cartridge={cartridge as Cartridge} />
+          <CartridgeImage cartridge={cartridge} />
         </div>
 
         <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
           <h2 className="sr-only">Collections</h2>
 
           <div className="grid gap-4 grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
-            {ALL_COLLECTION_METADATA.filter(
-              (metadata) => metadata.cartridge === cartridge
-            ).map((product) => (
-              <div
-                key={product.href}
-                className="group relative bg-white dark:bg-gray-500 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col overflow-hidden"
-              >
+            {ALL_COLLECTION_METADATA.filter((metadata) =>
+              metadata.cartridge?.includes(cartridge)
+            )
+              .filter((metadata) =>
+                collections.some(
+                  (collection) => collection.slug === metadata.href
+                )
+              )
+              .map((product) => (
                 <div
-                  className={clsx(
-                    "relative aspect-none group-hover:opacity-75",
-                    product.imageBgColor
-                      ? `bg-[${product.imageBgColor}]`
-                      : "bg-gray-200"
-                  )}
+                  key={product.href}
+                  className="group relative bg-white dark:bg-gray-500 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col overflow-hidden"
                 >
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    layout="responsive"
-                    width={400}
-                    height={400}
-                    objectFit={product.imageContain ? "contain" : "fill"}
-                  />
+                  <div
+                    className={clsx(
+                      "relative aspect-none group-hover:opacity-75",
+                      product.imageBgColor
+                        ? `bg-[${product.imageBgColor}]`
+                        : "bg-gray-200 dark:bg-gray-800"
+                    )}
+                  >
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      layout="responsive"
+                      width={400}
+                      height={400}
+                      objectFit={product.imageContain ? "contain" : "fill"}
+                    />
+                  </div>
+                  <div className="flex-1 p-4 space-y-2 flex flex-col">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                      <Link href={`/collection/${product.href}`}>
+                        <a>
+                          <span
+                            aria-hidden="true"
+                            className="absolute inset-0"
+                          />
+                          {product.name}
+                        </a>
+                      </Link>
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                      {product.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 p-4 space-y-2 flex flex-col">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">
-                    <Link href={`/collection/${product.href}`}>
-                      <a>
-                        <span aria-hidden="true" className="absolute inset-0" />
-                        {product.name}
-                      </a>
-                    </Link>
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-300">
-                    {product.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </main>

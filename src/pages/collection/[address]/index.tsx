@@ -41,6 +41,7 @@ import { Activity } from "../../../components/Activity";
 import {
   useBattleflyMetadata,
   useCollection,
+  useCollections,
   useFoundersMetadata,
   useGridSizeState,
   useSmithoniaWeaponsMetadata,
@@ -216,6 +217,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
     name: collectionName,
     slug,
   } = useCollection(slugOrAddress);
+  const collections = useCollections();
 
   const formattedTab = tab ? (Array.isArray(tab) ? tab[0] : tab) : "collection";
 
@@ -224,9 +226,12 @@ const Collection = ({ og }: { og: MetadataProps }) => {
   const isTreasure = collectionName === "Treasures";
   const isShared = METADATA_COLLECTIONS.includes(collectionName);
   const isRealm = collectionName === "Realm";
-  const isLegacy = ["Smol Bodies", "Smol Brains", "Smol Cars"].includes(
-    collectionName
-  );
+  const isLegacy = [
+    "Smol Bodies",
+    "Smol Brains",
+    "Smol Cars",
+    "Seed of Life",
+  ].includes(collectionName);
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
   const isSmithonia = collectionName === "Smithonia Weapons";
@@ -950,7 +955,10 @@ const Collection = ({ og }: { og: MetadataProps }) => {
     ?.map((related) =>
       ALL_COLLECTION_METADATA.find((item) => item.href === related)
     )
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .filter((item) =>
+      collections.some((collection) => collection.slug === item.href)
+    );
 
   return (
     <div>
@@ -1076,7 +1084,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
               <div className="mt-12 flex">
                 <CollectionLinks />
               </div>
-              {related ? (
+              {related && related.length > 0 ? (
                 <div className="mt-12 flex flex-col md:flex-row items-center text-gray-600">
                   Related:
                   {related.map((item, index, array) => (

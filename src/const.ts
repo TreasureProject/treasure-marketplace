@@ -11,7 +11,12 @@ type CollectionData = Record<
 > & {
   imageContain?: boolean;
   imageBgColor?: string;
-  cartridge: "battlefly" | "bridgeworld" | "ecosystem" | "smolverse";
+  cartridge:
+    | "bridgeworld"
+    | "ecosystem"
+    | "life"
+    | "smolverse"
+    | "bridgeworld-life";
   docs?: string;
   discord?: string;
   game?: string;
@@ -65,7 +70,7 @@ const BRIDGEWORLD_DATA = {
 } as const;
 
 const BATTLEFLY_DATA = {
-  cartridge: "battlefly",
+  cartridge: "ecosystem",
   docs: "https://docs.battlefly.game/overview/welcome-to-battlefly",
   game: "https://mint.battlefly.game/mission-control",
   discord: "YzpajBfRNX ",
@@ -74,6 +79,7 @@ const BATTLEFLY_DATA = {
 } as const;
 
 const SMITHONIA_DATA = {
+  cartridge: "ecosystem",
   description:
     "Smithonia is a SmithyDAO project. It's a world of staking and adventure which supports a hybrid economy where the primary objective of the game is to build the rarity of your weapon through gameplay.",
   docs: "https://assets.smithydao.lol/SmithoniaWhitePaper.pdf",
@@ -136,7 +142,14 @@ const BALANCER_CRYSTAL = {
   description:
     "Exchange your SLP for one of these to further the fun in Bridgeworld and LIFE.",
   ...BRIDGEWORLD_DATA,
-  related: ["legion-genesis", "legion-auxiliary", "consumables", "treasures"],
+  cartridge: "bridgeworld-life",
+  related: [
+    "legion-genesis",
+    "legion-auxiliary",
+    "consumables",
+    "treasures",
+    "seed-of-life",
+  ],
 } as const;
 
 const EXTRA_LIFE = {
@@ -231,6 +244,7 @@ const SWOLERCYCLES = {
   image:
     "https://ipfs.io/ipfs/QmUqm5andJ4u6HMTuvtMmhMKs6oskGceRgXruRnt19CNR4/1.png",
   description: "Swols go vroom vroom.",
+  cartridge: "smolverse",
   related: ["smol-bodies", "smol-bodies-pets", "smol-cars", "smol-treasures"],
   website: "https://smolverse.lol",
 } as const;
@@ -279,7 +293,8 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
     description:
       "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
-    cartridge: "bridgeworld",
+    cartridge: "life",
+    related: ["balancer-crystal", "treasures"],
     docs: "https://drive.google.com/file/d/1HwV-90u5TwffAvk83DIxfCKKLHfBAdmo/view",
     game: "https://life.treasure.lol",
     twitter: "LifeNFT_",
@@ -305,6 +320,7 @@ export const COLLECTION_METADATA = [
     description:
       "Treasures are composable building blocks in Bridgeworld that will be used inter- and intra-metaverse.",
     ...BRIDGEWORLD_DATA,
+    cartridge: "bridgeworld-life",
     related: [
       "legion-genesis",
       "legion-auxiliary",
@@ -376,19 +392,6 @@ export const COLLECTION_METADATA = [
     website: "https://talesofelleria.com",
   },
   {
-    href: "smithonia-weapons",
-    name: "Smithonia Weapons",
-    image:
-      "https://ipfs.io/ipfs/bafkreibzmyesy7amoir273ckdcnpndkaz4b3ljdpc6lgexv2abzfnuieq4",
-    description:
-      "Smithonia is a SmithyDAO project. It's a world of staking and adventure which supports a hybrid economy where the primary objective of the game is to build the rarity of your weapon through gameplay.",
-    cartridge: "ecosystem",
-    docs: "https://assets.smithydao.lol/SmithoniaWhitePaper.pdf",
-    discord: "smithydao",
-    twitter: "SmithyDAO",
-    website: "https://smithydao.lol",
-  },
-  {
     href: "peek-a-boo",
     name: "Peek-A-Boo",
     image: peekabooImg.src,
@@ -453,10 +456,12 @@ export const ALL_COLLECTION_METADATA = [
     related: ["toadstoolz"],
     tools: undefined,
   },
-  ...COLLECTION_METADATA,
-  SAMURISE_LAND,
-  KOTE_SQUIRES,
   BATTLEFLY,
+  BATTLEFLY_FOUNDERS_V1,
+  BATTLEFLY_FOUNDERS_V2,
+  KOTE_SQUIRES,
+  SAMURISE_LAND,
+  ...COLLECTION_METADATA,
   {
     href: "smithonia-resources",
     name: "Smithonia Resources",
@@ -467,8 +472,6 @@ export const ALL_COLLECTION_METADATA = [
   },
   EXTRA_LIFE,
   BALANCER_CRYSTAL,
-  BATTLEFLY_FOUNDERS_V1,
-  BATTLEFLY_FOUNDERS_V2,
   KEYS,
   SMOL_BODIES_PETS,
   SMOL_BRAINS_LAND,
@@ -492,7 +495,7 @@ export const COLLECTION_DESCRIPTIONS = {
     "The Smol Brains are a dynamic PFP of a monkey whose head gets bigger the larger its IQ becomes.",
   "smol-brains-pets":
     "The Smol Brains Pets are cute companions to accompany your Smol Brain in Smolverse.",
-  "seed-of-Life":
+  "seed-of-life":
     "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
   "smol-cars":
     "The Smol Cars are here to get you around in Smolverse. Vroom vroom.",

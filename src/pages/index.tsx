@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import logoImg from "../../public/img/logotransparent.png";
-import battlefly from "../../public/img/Battlefly.jpg";
 import bridgeworld from "../../public/img/Bridgeworld.jpg";
-import ecosystem from "../../public/img/Ecosystem.jpg";
-import smolverse from "../../public/img/Smolverse.jpg";
+import ecosystem from "../../public/img/Ecosystem.png";
+import life from "../../public/img/Life.png";
+import smolverse from "../../public/img/Smolverse.png";
 import { Metadata } from "../components/Metadata";
 
 type CardProps = {
@@ -61,7 +61,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
           <Card image={bridgeworld} name="Bridgeworld" />
           <Card image={smolverse} name="Smolverse" />
-          <Card image={battlefly} name="BattleFly" />
+          <Card image={life} name="Life" />
           <Card image={ecosystem} name="Ecosystem" />
         </div>
       </main>
