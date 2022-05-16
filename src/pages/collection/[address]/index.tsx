@@ -173,10 +173,10 @@ const getInititalFilters = (search: string | undefined) => {
   return searchParams.reduce<{ [key: string]: string[] }>(
     (acc, [key, value]) => {
       if (!acc[key]) {
-        acc[key] = [value];
+        acc[key] = value.split(",");
         return acc;
       }
-      acc[key] = [...acc[key], value];
+      acc[key] = [...acc[key], ...value.split(",")];
       return acc;
     },
     {}
