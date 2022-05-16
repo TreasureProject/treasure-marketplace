@@ -348,7 +348,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       return bridgeworld.getFilteredLegions({
         constellation: {
           id_in: isConstellation ? listedTokens.data : [],
-          ...Object.entries(filters).reduce((acc, [key, [value]]) => {
+          ...Object.entries(filters).reduce((acc, [key, value]) => {
             switch (key) {
               case "Constellation: Dark":
               case "Constellation: Earth":
@@ -357,7 +357,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
               case "Constellation: Water":
               case "Constellation: Wind":
                 acc[`${key.toLowerCase().replace("constellation: ", "")}_gte`] =
-                  Number(value.split(",")[0].replace(/[^\d]+/, ""));
+                  Number(value[0].replace(/[^\d]+/, ""));
 
                 break;
               default:
@@ -371,22 +371,20 @@ const Collection = ({ og }: { og: MetadataProps }) => {
           id_in: isLegionInfo
             ? listedTokens.data?.map((id) => `${id}-metadata`)
             : [],
-          ...Object.entries(filters).reduce((acc, [key, [value]]) => {
+          ...Object.entries(filters).reduce((acc, [key, value]) => {
             switch (key) {
               case "Summon Fatigue":
-                acc[value === "Yes" ? "cooldown_not" : "cooldown"] = null;
+                acc[value[0] === "Yes" ? "cooldown_not" : "cooldown"] = null;
 
                 break;
               case "Times Summoned":
-                acc["summons_in"] = value.split(",");
+                acc["summons_in"] = value;
 
                 break;
               case "Atlas Mine Boost":
-                acc["boost_in"] = value
-                  .split(",")
-                  .map((choice) =>
-                    (Number(choice.replace("%", "")) / 100).toString()
-                  );
+                acc["boost_in"] = value.map((choice) =>
+                  (Number(choice.replace("%", "")) / 100).toString()
+                );
 
                 break;
               case "Constellation: Dark":
@@ -405,11 +403,11 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                     .toLowerCase()
                     .replace(" xp", "Xp")
                     .replace(" level", "")}_gte`
-                ] = Number(value.split(",")[0].replace(/[^\d]+/, ""));
+                ] = Number(value[0].replace(/[^\d]+/, ""));
 
                 break;
               default:
-                acc[`${key.toLowerCase()}_in`] = value.split(",");
+                acc[`${key.toLowerCase()}_in`] = value;
             }
 
             return acc;
@@ -445,20 +443,18 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       bridgeworld.getFilteredTreasures({
         filters: {
           id_in: listedTokens.data?.map((id) => `${id}-metadata`),
-          ...Object.entries(filters).reduce((acc, [key, [value]]) => {
+          ...Object.entries(filters).reduce((acc, [key, value]) => {
             switch (key) {
               case "Atlas Mine Boost":
-                acc["boost_in"] = value
-                  .split(",")
-                  .map((choice) =>
-                    (Number(choice.replace("%", "")) / 100).toString()
-                  );
+                acc["boost_in"] = value.map((choice) =>
+                  (Number(choice.replace("%", "")) / 100).toString()
+                );
 
                 break;
               default:
-                acc[`${key.toLowerCase()}_in`] = value
-                  .split(",")
-                  .map((item) => (key === "Tier" ? Number(item) : item));
+                acc[`${key.toLowerCase()}_in`] = value.map((item) =>
+                  key === "Tier" ? Number(item) : item
+                );
             }
 
             return acc;
@@ -659,9 +655,9 @@ const Collection = ({ og }: { og: MetadataProps }) => {
           id_in: listedTokens.data?.map(
             (id) => `${parseInt(id.slice(45), 16)}`
           ),
-          ...Object.entries(filters).reduce((acc, [key, [value]]) => {
+          ...Object.entries(filters).reduce((acc, [key, value]) => {
             acc[`total${key.replace(" ", "")}_gte`] = Number(
-              value.split(",")[0].replace(/[^\d]+/, "")
+              value[0].replace(/[^\d]+/, "")
             );
 
             return acc;
