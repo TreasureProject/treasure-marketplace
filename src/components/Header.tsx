@@ -42,6 +42,7 @@ const NEW_COLLECTIONS = [
   "Smithonia Resources",
   "Swolercycles",
   "The Lost Donkeys",
+  "Tales of Elleria Relics",
 ];
 
 const walletLink = new WalletLinkConnector({
