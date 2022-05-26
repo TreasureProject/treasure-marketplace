@@ -4,6 +4,7 @@ module.exports = {
       "ipfs.io",
       "storage.googleapis.com",
       "treasure-marketplace.mypinata.cloud",
+      "cdn.talesofelleria.com",
     ],
   },
   async redirects() {

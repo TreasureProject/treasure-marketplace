@@ -1,5 +1,6 @@
 import { ChainId } from "@usedapp/core";
 import smolBodiesImg from "../public/img/smolbodies.png";
+import talesOfElleriaRelicsImg from "../public/img/tales-of-elleria-relics.png";
 import toadstoolzImg from "../public/img/toadstoolz.jpg";
 import toadstoolzItemzImg from "../public/img/toadstoolz-itemz.svg";
 import theLostDonkeysImg from "../public/img/the-lost-donkeys.png";
@@ -60,6 +61,7 @@ export const METADATA_COLLECTIONS = [
   "SamuRise Items",
   "SamuRise Land",
   "Tales of Elleria",
+  "Tales of Elleria Relics",
   "The Lost Donkeys",
   "Toadstoolz",
   "Toadstoolz Itemz",
@@ -100,6 +102,15 @@ const SAMURISE_DATA = {
   docs: "https://docs.samurise.xyz/docs/washipaper/prologue",
   twitter: "SamuRiseNFT",
   website: "https://samurise.xyz",
+} as const;
+
+const TALES_OF_ELLERIA_DATA = {
+  cartridge: "ecosystem",
+  docs: "https://docs.talesofelleria.com",
+  discord: "talesofelleria",
+  game: "https://app.talesofelleria.com",
+  twitter: "TalesofElleria",
+  website: "https://talesofelleria.com",
 } as const;
 
 export const TOADSTOOLZ = {
@@ -413,12 +424,17 @@ export const COLLECTION_METADATA = [
       "https://ipfs.io/ipfs/Qmd66PRkYUWN78VUSzYyxmZeP4zLpC8Wroif3QNCyofvj7",
     description:
       "Tales of Elleria is an immersive three-dimensional role-playing GameFi project. Summon heroes, take on assignments, go on quests and epic adventures to battle dangerous monsters earn tremendous rewards.",
-    cartridge: "ecosystem",
-    docs: "https://docs.talesofelleria.com",
-    discord: "talesofelleria",
-    game: "https://app.talesofelleria.com",
-    twitter: "TalesofElleria",
-    website: "https://talesofelleria.com",
+    ...TALES_OF_ELLERIA_DATA,
+    related: ["tales-of-elleria-relics"],
+  },
+  {
+    href: "tales-of-elleria-relics",
+    name: "Tales of Elleria Relics",
+    image: talesOfElleriaRelicsImg.src,
+    description:
+      "Relics are functional objects used mainly in Tales of Elleria. Obtainable from various in-game sources, they can crafted and used on your heroes and equipment and for various other purposes...",
+    ...TALES_OF_ELLERIA_DATA,
+    related: ["tales-of-elleria"],
   },
   {
     href: "peek-a-boo",
@@ -540,6 +556,8 @@ export const COLLECTION_DESCRIPTIONS = {
     "Realm is a decentralized world-building experience. Enjoy $MAGIC emissions and Loot from across the Metaverse.",
   "tales-of-elleria":
     "Tales of Elleria is an immersive three-dimensional role-playing GameFi project built on Arbitrum One. Summon heroes, take on assignments, go on quests and epic adventures to battle dangerous monsters earn tremendous rewards.",
+  "tales-of-elleria-relics":
+    "Relics are functional objects used mainly in Tales of Elleria. Obtainable from various in-game sources, they can crafted and used on your heroes and equipment and for various other purposes...",
   toadstoolz:
     "Toadstoolz is an on-chain toad life simulation NFT game. Toadz love to hunt for $BUGZ, go on adventures and are obsessed with collecting NFTs.",
   "toadstoolz-itemz":

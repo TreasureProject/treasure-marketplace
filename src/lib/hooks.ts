@@ -648,6 +648,39 @@ export function useSmithoniaWeaponsMetadata(input: string[]) {
   return useSmithoniaApi("weapons", input);
 }
 
+export function useTalesOfElleriaRelicsMetadata(input: string[]) {
+  return useQuery(
+    [`tales-of-elleria-relics-metadata`, input],
+    () =>
+      fetch(
+        `${
+          process.env.NEXT_PUBLIC_TALES_OF_ELLERIA_RELICS_API
+        }/api/relic/${input
+          .map((tokenId) => parseInt(tokenId.slice(45), 16))
+          .join(",")}`
+      ).then((res) => res.json()),
+    {
+      enabled: input.filter(Boolean).length > 0,
+      refetchInterval: false,
+      keepPreviousData: true,
+      select: (data) => {
+        return {
+          ...data,
+          image: data.imageUrl,
+          description: data.desc,
+          attributes: [
+            { attribute: { name: "Tier", value: data.tier } },
+            {
+              attribute: { name: "Classification", value: data.classification },
+            },
+            { attribute: { name: "Type", value: data.type } },
+          ],
+        };
+      },
+    }
+  );
+}
+
 type Attribute = Awaited<
   ReturnType<typeof metadata.getTokenMetadata>
 >["tokens"][number]["attributes"][number];
@@ -673,6 +706,7 @@ export function useMetadata(
   const isSmithoniaResources = collectionName === "Smithonia Resources";
   const isSmithoniaWeapons = collectionName === "Smithonia Weapons";
   const isSmithonia = isSmithoniaResources || isSmithoniaWeapons;
+  const isTalesOfElleriaRelics = collectionName === "Tales of Elleria Relics";
   const collection = useCollection(collectionName);
 
   const legacyMetadataResult = useQuery(
@@ -851,6 +885,10 @@ export function useMetadata(
     isSmithoniaWeapons && id ? [id] : []
   );
 
+  const toeRelicsMetadataResult = useTalesOfElleriaRelicsMetadata(
+    isTalesOfElleriaRelics && id ? [id] : []
+  );
+
   const data = {
     battlefly: battleflyMetadataResult.data?.[0],
     bridgeworld: bridgeworldMetadataResult.data,
@@ -862,6 +900,7 @@ export function useMetadata(
       ? swMetadataResult.data?.[0]
       : srMetadataResult.data?.[0],
     smolverse: smolverseMetadataResult.data,
+    toeRelics: toeRelicsMetadataResult.data,
     token: tokenMetadataResult.data,
   };
 
@@ -875,6 +914,7 @@ export function useMetadata(
       realmMetadata?: Metadata,
       smolverseMetadata?: Metadata,
       smithoniaMetadata?: Metadata,
+      toeRelicsMetadata?: Metadata,
       tokenMetadata?: Metadata
     ) => {
       const metadata = bridgeworldMetadata
@@ -916,6 +956,7 @@ export function useMetadata(
           foundersMetadata ??
           battleflyMetadata ??
           smithoniaMetadata ??
+          toeRelicsMetadata ??
           null;
 
       return metadata;
@@ -940,6 +981,8 @@ export function useMetadata(
       ? !srMetadataResult.isLoading && !!srMetadataResult.data
       : isSmithoniaWeapons
       ? !swMetadataResult.isLoading && !!swMetadataResult.data
+      : isTalesOfElleriaRelics
+      ? !toeRelicsMetadataResult.isLoading && !!toeRelicsMetadataResult.data
       : !legacyMetadataResult.isLoading && !!legacyMetadataResult.data && !!id
       ? !tokenMetadataResult.isLoading && !!tokenMetadataResult.data
       : true;

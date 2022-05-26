@@ -286,6 +286,7 @@ export default function TokenDetails({ og }: { og: MetadataProps }) {
     realmMetadata,
     smolverseMetadata,
     metadataData.smithonia,
+    metadataData.toeRelics,
     tokenMetadata
       ? { ...tokenInfo, ...tokenMetadata, name: tokenMetadata.name ?? "", id }
       : undefined
@@ -1345,6 +1346,8 @@ async function getImageForToken(collection: string, tokenId: string) {
       )
         .then((res) => res.json())
         .then((data) => data[0].image);
+    case collection === "Tales of Elleria Relics":
+      return `https://cdn.talesofelleria.com/assets/items/images/hd/${tokenId}.png`;
     default: {
       const id = await getCollectionId(collection);
 

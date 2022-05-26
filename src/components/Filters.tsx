@@ -225,6 +225,7 @@ export function useFiltersList() {
   const isTreasure = collectionName === "Treasures";
   const isBattleflyItem = collectionName === "BattleFly";
   const isSmithoniaWeaponsItem = collectionName === "Smithonia Weapons";
+  const isTalesOfElleriaRelic = collectionName === "Tales of Elleria Relics";
   const isLegacy = ["Smol Bodies", "Smol Brains", "Smol Cars"].includes(
     collectionName
   );
@@ -404,6 +405,24 @@ export function useFiltersList() {
         return reduceAttributes(battleflyAttributes.data);
       case isSmithoniaWeaponsItem:
         return reduceAttributes(smithoniaWeaponsAttributes.data);
+      case isTalesOfElleriaRelic:
+        return {
+          Tier: [
+            { value: "1", percentage: undefined },
+            { value: "2", percentage: undefined },
+            { value: "3", percentage: undefined },
+            { value: "4", percentage: undefined },
+            { value: "5", percentage: undefined },
+            { value: "6", percentage: undefined },
+          ],
+          Classification: [
+            { value: "Upgrade Material", percentage: undefined },
+            { value: "Crafting Component", percentage: undefined },
+            { value: "Artifacts", percentage: undefined },
+            { value: "Consumables", percentage: undefined },
+            { value: "Misc", percentage: undefined },
+          ],
+        };
       case isShared:
         return reduceAttributes(
           sharedAttributes.data?.attributes,

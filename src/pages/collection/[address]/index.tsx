@@ -45,6 +45,7 @@ import {
   useFoundersMetadata,
   useGridSizeState,
   useSmithoniaWeaponsMetadata,
+  useTalesOfElleriaRelicsMetadata,
 } from "../../../lib/hooks";
 import {
   EthIcon,
@@ -235,6 +236,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
   const isBattleflyItem = collectionName === "BattleFly";
   const isFoundersItem = collectionName.includes("Founders");
   const isSmithonia = collectionName === "Smithonia Weapons";
+  const isTalesOfElleriaRelics = collectionName === "Tales of Elleria Relics";
 
   // This is a faux collection with only recruits. Which are not sellable. Redirect to Legion Auxiliary collection.
   if (collectionName === "Legions") {
@@ -555,6 +557,48 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       ),
     }
   );
+  const filteredTalesOfElleriaRelicsTokens = useQuery(
+    ["toe-relics-filtered-tokens", listedTokens.data, filters],
+    () =>
+      fetch(
+        `${
+          process.env.NEXT_PUBLIC_TALES_OF_ELLERIA_RELICS_API
+        }/api/relics?${formattedSearch
+          ?.split("&")
+          .map((filters) =>
+            filters.split("=").reduce(
+              (field, values) =>
+                field
+                  ? `${field}=${values
+                      .split("%2C")
+                      .map((value, index) =>
+                        index > 0 ? `${field}=${value}` : value
+                      )
+                      .join("&")}`
+                  : values.slice(0, 1).toLowerCase().concat(values.slice(1)),
+              ""
+            )
+          )
+          .join("&")}`
+      ).then((res) => res.json()),
+    {
+      enabled:
+        Boolean(listedTokens.data) &&
+        Object.keys(filters).length > 0 &&
+        isTalesOfElleriaRelics,
+      refetchInterval: false,
+      select: React.useCallback(
+        (data: { items: number[] }) => {
+          const hexxed = data.items.map((id) => `0x${id.toString(16)}`);
+
+          return listedTokens.data?.filter((id) =>
+            hexxed.some((hex) => id.endsWith(hex))
+          );
+        },
+        [listedTokens.data]
+      ),
+    }
+  );
   const filteredSharedTokensQueries = useQueries({
     queries: Object.entries(filters).map(([name, value]) => ({
       queryKey: ["shared-filtered-tokens", listedTokens.data, name, value],
@@ -728,6 +772,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       "searched-token",
       filteredBattleflyTokens.data,
       filteredSmithoniaWeaponsTokens.data,
+      filteredTalesOfElleriaRelicsTokens.data,
       filteredSharedTokens.data,
       filteredRealmTokens.data,
       filteredTreasureTokens.data,
@@ -747,6 +792,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
         ids:
           filteredBattleflyTokens.data ??
           filteredSmithoniaWeaponsTokens.data ??
+          filteredTalesOfElleriaRelicsTokens.data ??
           filteredSharedTokens.data ??
           filteredRealmTokens.data ??
           filteredTreasureTokens.data ??
@@ -782,6 +828,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       searchedTokens.data ??
       filteredBattleflyTokens.data ??
       filteredSmithoniaWeaponsTokens.data ??
+      filteredTalesOfElleriaRelicsTokens.data ??
       filteredSharedTokens.data ??
       filteredRealmTokens.data ??
       filteredTreasureTokens.data ??
@@ -793,6 +840,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       searchedTokens.data,
       filteredBattleflyTokens.data,
       filteredSmithoniaWeaponsTokens.data,
+      filteredTalesOfElleriaRelicsTokens.data,
       filteredSharedTokens.data,
       filteredRealmTokens.data,
       filteredTreasureTokens.data,
@@ -903,6 +951,9 @@ const Collection = ({ og }: { og: MetadataProps }) => {
   );
   const smithoniaMetadata = useSmithoniaWeaponsMetadata(
     isSmithonia ? listingIds : []
+  );
+  const talesOfElleriaRelicsMetadata = useTalesOfElleriaRelicsMetadata(
+    isTalesOfElleriaRelics ? listingIds : []
   );
 
   const isLoading = React.useMemo(
@@ -1339,7 +1390,11 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                 (item) => item.id === listing.token.tokenId
                               )
                             : null;
-
+                          const toeRelicsMetadata = isTalesOfElleriaRelics
+                            ? talesOfElleriaRelicsMetadata.data?.find(
+                                (item) => item.id === listing.token.tokenId
+                              )
+                            : null;
                           const legionsMetadata = isBridgeworldItem
                             ? bridgeworldMetadata.data?.tokens.find(
                                 (item) => item.id === listing.token.id
@@ -1579,7 +1634,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                   description: collectionName,
                                 },
                               }
-                            : erc721Metadata;
+                            : erc721Metadata ?? toeRelicsMetadata;
 
                           const normalizedLegion =
                             normalizeBridgeworldTokenMetadata(legionsMetadata);
