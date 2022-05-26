@@ -569,13 +569,11 @@ const Collection = ({ og }: { og: MetadataProps }) => {
             filters.split("=").reduce(
               (field, values) =>
                 field
-                  ? `${field}=${values
+                  ? values
                       .split("%2C")
-                      .map((value, index) =>
-                        index > 0 ? `${field}=${value}` : value
-                      )
-                      .join("&")}`
-                  : values.slice(0, 1).toLowerCase().concat(values.slice(1)),
+                      .map((value) => `${field}=${value}`)
+                      .join("&")
+                  : values.slice(0, 1).concat(values.slice(1)),
               ""
             )
           )
@@ -588,8 +586,8 @@ const Collection = ({ og }: { og: MetadataProps }) => {
         isTalesOfElleriaRelics,
       refetchInterval: false,
       select: React.useCallback(
-        (data: { items: number[] }) => {
-          const hexxed = data.items.map((id) => `0x${id.toString(16)}`);
+        (data: Array<{ id: number }>) => {
+          const hexxed = data.map(({ id }) => `0x${id.toString(16)}`);
 
           return listedTokens.data?.filter((id) =>
             hexxed.some((hex) => id.endsWith(hex))
@@ -1296,6 +1294,14 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                 )
                               : null;
 
+                            const toeRelicsMetadata = isTalesOfElleriaRelics
+                              ? talesOfElleriaRelicsMetadata.data?.find(
+                                  (item) =>
+                                    parseInt(item.id) ===
+                                    parseInt(token.tokenId)
+                                )
+                              : null;
+
                             const metadata =
                               (isBridgeworldItem || isTreasure) &&
                               legionsMetadata
@@ -1328,6 +1334,17 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                     metadata: {
                                       image: shrdMetadata.image ?? "",
                                       name: shrdMetadata.name,
+                                      description: collectionName,
+                                    },
+                                  }
+                                : isTalesOfElleriaRelics && toeRelicsMetadata
+                                ? {
+                                    id: toeRelicsMetadata.id,
+                                    name: toeRelicsMetadata.name,
+                                    tokenId: token.tokenId,
+                                    metadata: {
+                                      image: toeRelicsMetadata.imageUrl ?? "",
+                                      name: toeRelicsMetadata.name,
                                       description: collectionName,
                                     },
                                   }
@@ -1387,11 +1404,6 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                           );
                           const swMetadata = isSmithonia
                             ? smithoniaMetadata.data?.find(
-                                (item) => item.id === listing.token.tokenId
-                              )
-                            : null;
-                          const toeRelicsMetadata = isTalesOfElleriaRelics
-                            ? talesOfElleriaRelicsMetadata.data?.find(
                                 (item) => item.id === listing.token.tokenId
                               )
                             : null;
@@ -1634,7 +1646,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                   description: collectionName,
                                 },
                               }
-                            : erc721Metadata ?? toeRelicsMetadata;
+                            : erc721Metadata;
 
                           const normalizedLegion =
                             normalizeBridgeworldTokenMetadata(legionsMetadata);
