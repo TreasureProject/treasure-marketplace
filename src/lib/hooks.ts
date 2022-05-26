@@ -655,27 +655,31 @@ export function useTalesOfElleriaRelicsMetadata(input: string[]) {
       fetch(
         `${
           process.env.NEXT_PUBLIC_TALES_OF_ELLERIA_RELICS_API
-        }/api/relic/${input
+        }/api/relics?ID=${input
           .map((tokenId) => parseInt(tokenId.slice(45), 16))
-          .join(",")}`
+          .join("&ID=")}`
       ).then((res) => res.json()),
     {
       enabled: input.filter(Boolean).length > 0,
       refetchInterval: false,
       keepPreviousData: true,
       select: (data) => {
-        return {
-          ...data,
-          image: data.imageUrl,
-          description: data.desc,
+        return data.map((value) => ({
+          ...value,
+          id: value.id.toString(),
+          image: value.imageUrl,
+          description: value.desc,
           attributes: [
-            { attribute: { name: "Tier", value: data.tier } },
+            { attribute: { name: "Tier", value: value.tier } },
             {
-              attribute: { name: "Classification", value: data.classification },
+              attribute: {
+                name: "Classification",
+                value: value.classification,
+              },
             },
-            { attribute: { name: "Type", value: data.type } },
+            { attribute: { name: "Type", value: value.type } },
           ],
-        };
+        }));
       },
     }
   );
@@ -951,12 +955,19 @@ export function useMetadata(
               attribute,
             })),
           }
+        : toeRelicsMetadata
+        ? {
+            id: toeRelicsMetadata.id,
+            description: collectionName,
+            image: toeRelicsMetadata.image,
+            name: toeRelicsMetadata.name,
+            attributes: toeRelicsMetadata.attributes,
+          }
         : tokenMetadata ??
           legacyMetadata ??
           foundersMetadata ??
           battleflyMetadata ??
           smithoniaMetadata ??
-          toeRelicsMetadata ??
           null;
 
       return metadata;

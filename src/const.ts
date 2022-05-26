@@ -61,7 +61,6 @@ export const METADATA_COLLECTIONS = [
   "SamuRise Items",
   "SamuRise Land",
   "Tales of Elleria",
-  "Tales of Elleria Relics",
   "The Lost Donkeys",
   "Toadstoolz",
   "Toadstoolz Itemz",

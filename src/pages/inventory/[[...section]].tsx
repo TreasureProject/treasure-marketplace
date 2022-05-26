@@ -67,6 +67,7 @@ import {
   useRemoveListing,
   useSmithoniaResourcesMetadata,
   useSmithoniaWeaponsMetadata,
+  useTalesOfElleriaRelicsMetadata,
   useUpdateListing,
 } from "../../lib/hooks";
 import type { Nft } from "../../types";
@@ -794,6 +795,7 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
     realmTokens,
     srTokens,
     swTokens,
+    toeRelicsTokens,
   } = useMemo(() => {
     return (data as InventoryToken[]).reduce(
       (acc, { token }) => {
@@ -816,6 +818,8 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
           acc.srTokens.push(token.id);
         } else if (collectionName === "Smithonia Weapons") {
           acc.swTokens.push(token.id);
+        } else if (collectionName === "Tales of Elleria Relics") {
+          acc.toeRelicsTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -836,6 +840,7 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
         realmTokens: [] as string[],
         srTokens: [] as string[],
         swTokens: [] as string[],
+        toeRelicsTokens: [] as string[],
       }
     );
   }, [allCollections, data]);
@@ -892,6 +897,8 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
   const foundersMetadata = useFoundersMetadata(foundersTokens);
   const smithoniaResourcesMetadata = useSmithoniaResourcesMetadata(srTokens);
   const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(swTokens);
+  const talesOfElleriaRelicsMetadata =
+    useTalesOfElleriaRelicsMetadata(toeRelicsTokens);
 
   const tabs = useMemo(() => {
     if (inventory.data?.user?.inactive.length) {
@@ -1078,7 +1085,10 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
                                   (item) => item.id === token.tokenId
                                 )
                               : undefined;
-
+                            const toeRelicsMetadata =
+                              talesOfElleriaRelicsMetadata.data?.find(
+                                (item) => item.id === token.tokenId
+                              );
                             const metadata = bwMetadata
                               ? {
                                   id: bwMetadata.id,
@@ -1153,6 +1163,17 @@ const Inventory = ({ og }: { og: MetadataProps }) => {
                                   metadata: {
                                     image: swMetadata.image ?? "",
                                     name: swMetadata.name,
+                                    description: token.collection.name,
+                                  },
+                                }
+                              : toeRelicsMetadata
+                              ? {
+                                  id: toeRelicsMetadata.id,
+                                  name: toeRelicsMetadata.name,
+                                  tokenId: token.tokenId,
+                                  metadata: {
+                                    image: toeRelicsMetadata.image ?? "",
+                                    name: toeRelicsMetadata.name,
                                     description: token.collection.name,
                                   },
                                 }

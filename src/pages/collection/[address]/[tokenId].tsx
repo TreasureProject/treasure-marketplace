@@ -286,7 +286,7 @@ export default function TokenDetails({ og }: { og: MetadataProps }) {
     realmMetadata,
     smolverseMetadata,
     metadataData.smithonia,
-    metadataData.toeRelics,
+    metadataData.toeRelics?.[0],
     tokenMetadata
       ? { ...tokenInfo, ...tokenMetadata, name: tokenMetadata.name ?? "", id }
       : undefined
