@@ -22,6 +22,7 @@ import {
   useFoundersMetadata,
   useSmithoniaResourcesMetadata,
   useSmithoniaWeaponsMetadata,
+  useTalesOfElleriaRelicsMetadata,
 } from "../lib/hooks";
 import { shortenAddress, useEthers } from "@usedapp/core";
 import { useRouter } from "next/router";
@@ -222,6 +223,7 @@ export function Activity({ title }: ActivityProps) {
     realmTokens,
     srTokens,
     swTokens,
+    toeRelicsTokens,
   } = useMemo(() => {
     return activities.reduce(
       (acc, { collection, token }) => {
@@ -243,6 +245,8 @@ export function Activity({ title }: ActivityProps) {
           acc.srTokens.push(token.id);
         } else if (collectionName === "Smithonia Weapons") {
           acc.swTokens.push(token.id);
+        } else if (collectionName === "Tales of Elleria Relics") {
+          acc.toeRelicsTokens.push(token.id);
         } else if (collectionName === "BattleFly") {
           acc.battleflyTokens.push(token.id);
         } else if (collectionName.startsWith("BattleFly")) {
@@ -263,6 +267,7 @@ export function Activity({ title }: ActivityProps) {
         realmTokens: [] as string[],
         srTokens: [] as string[],
         swTokens: [] as string[],
+        toeRelicsTokens: [] as string[],
       }
     );
   }, [activities, collections]);
@@ -319,6 +324,8 @@ export function Activity({ title }: ActivityProps) {
   const foundersMetadata = useFoundersMetadata(foundersTokens);
   const smithoniaResourcesMetadata = useSmithoniaResourcesMetadata(srTokens);
   const smithoniaWeaponsMetadata = useSmithoniaWeaponsMetadata(swTokens);
+  const talesOfElleriaRelicsMetadata =
+    useTalesOfElleriaRelicsMetadata(toeRelicsTokens);
 
   if (
     (isMyActivity && queries.slice(1).every((query) => query.isLoading)) ||
@@ -442,6 +449,10 @@ export function Activity({ title }: ActivityProps) {
                         (item) => item.id === activity.token.tokenId
                       )
                     : undefined;
+                  const toeRelicsMetadata =
+                    talesOfElleriaRelicsMetadata.data?.find(
+                      (item) => item.id === activity.token.tokenId
+                    );
                   const shrdMetadata = sharedMetadata?.tokens.find(
                     (item) => item.id === activity.token.id
                   );
@@ -512,6 +523,17 @@ export function Activity({ title }: ActivityProps) {
                         metadata: {
                           image: swMetadata.image ?? "",
                           name: swMetadata.name,
+                          description: collectionName ?? "",
+                        },
+                      }
+                    : toeRelicsMetadata
+                    ? {
+                        id: toeRelicsMetadata.id,
+                        name: toeRelicsMetadata.name,
+                        tokenId: activity.token.tokenId,
+                        metadata: {
+                          image: toeRelicsMetadata.image ?? "",
+                          name: toeRelicsMetadata.name,
                           description: collectionName ?? "",
                         },
                       }
@@ -677,6 +699,9 @@ export function Activity({ title }: ActivityProps) {
                     (item) => item.id === activity.token.tokenId
                   )
                 : undefined;
+              const toeRelicsMetadata = talesOfElleriaRelicsMetadata.data?.find(
+                (item) => item.id === activity.token.tokenId
+              );
               const shrdMetadata = sharedMetadata?.tokens.find(
                 (item) => item.id === activity.token.id
               );
@@ -747,6 +772,17 @@ export function Activity({ title }: ActivityProps) {
                     metadata: {
                       image: swMetadata.image ?? "",
                       name: swMetadata.name,
+                      description: collectionName ?? "",
+                    },
+                  }
+                : toeRelicsMetadata
+                ? {
+                    id: toeRelicsMetadata.id,
+                    name: toeRelicsMetadata.name,
+                    tokenId: activity.token.tokenId,
+                    metadata: {
+                      image: toeRelicsMetadata.image ?? "",
+                      name: toeRelicsMetadata.name,
                       description: collectionName ?? "",
                     },
                   }
