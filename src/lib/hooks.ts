@@ -667,7 +667,7 @@ export function useTalesOfElleriaRelicsMetadata(input: string[]) {
         return data.map((value) => ({
           ...value,
           id: value.id.toString(),
-          image: value.imageUrl,
+          image: `https://cdn.talesofelleria.com/assets/items/images/hd/${value.id}.png`,
           description: value.desc,
           attributes: [
             { attribute: { name: "Tier", value: value.tier } },

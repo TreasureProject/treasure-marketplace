@@ -1444,7 +1444,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                     name: toeRelicsMetadata.name,
                                     tokenId: token.tokenId,
                                     metadata: {
-                                      image: toeRelicsMetadata.imageUrl ?? "",
+                                      image: toeRelicsMetadata.image ?? "",
                                       name: toeRelicsMetadata.name,
                                       description: collectionName,
                                     },
