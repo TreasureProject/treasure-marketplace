@@ -17,6 +17,7 @@ import React from "react";
 import classNames from "clsx";
 import useLocalStorage from "use-local-storage-state";
 import { METADATA_COLLECTIONS, smolverseItems } from "../const";
+import RangeSlider from "./RangeSlider";
 
 type Attribute = {
   name: string;
@@ -104,7 +105,6 @@ const FEATURES = [
   "Volcano",
   "Waterfall",
 ];
-const STRUCTURES = ["1", "2", "3", "5", "8", "13"];
 
 const combine = (base?: string) =>
   Array.from(new URLSearchParams(base).entries()).reduce<
@@ -148,6 +148,20 @@ const removeFilter = (
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return new URLSearchParams(combined).toString();
+};
+
+const setFilter = (
+  base: string | undefined,
+  search: { key: string; value: string[] | number[] }
+) => {
+  const combined = combine(base);
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return new URLSearchParams({
+    ...combined,
+    [search.key]: search.value,
+  }).toString();
 };
 
 const getNumber = (value: string) => Number(value.replace(/[^\d]+/g, ""));
@@ -388,17 +402,28 @@ export function useFiltersList() {
           })),
         };
       case collectionName === "Realm": {
-        const options = STRUCTURES.map((value) => ({
-          value: `>= ${value}`,
-          percentage: null,
-        }));
-
         return {
-          Aquariums: options,
-          Cities: options,
-          Farms: options,
+          "Ancient Artifacts": [
+            { type: "slider", value: "1331", percentage: null },
+          ],
+          "Aquatic Resources": [
+            { type: "slider", value: "5289", percentage: null },
+          ],
+          "Land Abundance": [
+            { type: "slider", value: "2627", percentage: null },
+          ],
           Features: FEATURES.map((value) => ({ value, percentage: null })),
-          "Research Labs": options,
+          "Magic Refinery": ["1", "2", "3"].map((value) => ({
+            value: `Tier ${value}`,
+            percentage: null,
+          })),
+          "Mineral Deposits": [
+            { type: "slider", value: "27376", percentage: null },
+          ],
+          Reactor: [
+            { value: "Yes", percentage: null },
+            { value: "No", percentage: null },
+          ],
         };
       }
       case isBattleflyItem:
@@ -532,57 +557,86 @@ export function Filters() {
                     <Disclosure.Panel className="pt-6 lg:overflow-auto lg:max-h-72">
                       <div className="space-y-4">
                         {attributes?.map(
-                          ({ value, percentage }, optionIdx: number) => (
-                            <div
-                              key={value}
-                              className="flex justify-between text-sm"
-                            >
-                              <div className="flex items-center">
-                                <input
-                                  id={`filter-${value}-${optionIdx}`}
-                                  name={value}
-                                  onChange={(e) => {
-                                    const search = e.target.checked
-                                      ? createFilter(formattedSearch, {
-                                          key: attributeKey,
-                                          value,
-                                        })
-                                      : removeFilter(formattedSearch, {
-                                          key: attributeKey,
-                                          value,
-                                        });
-                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                    const { search: _search, ...query } =
-                                      router.query;
+                          ({ type, value, percentage }, optionIdx: number) =>
+                            type === "slider" ? (
+                              <RangeSlider
+                                key={value}
+                                label="Value"
+                                maxInputValue={Number(value)}
+                                maxSliderValue={500}
+                                defaultValue={
+                                  filters[attributeKey]?.map(Number) ?? [0, 0]
+                                }
+                                step={1}
+                                onChangeEnd={(value) => {
+                                  const search = setFilter(formattedSearch, {
+                                    key: attributeKey,
+                                    value,
+                                  });
+                                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                  const { search: _search, ...query } =
+                                    router.query;
 
-                                    router.replace({
-                                      pathname: router.pathname,
-                                      query:
-                                        Object.keys(search).length > 0
-                                          ? { ...query, search }
-                                          : query,
-                                    });
-                                  }}
-                                  checked={
-                                    filters[attributeKey]?.includes(
-                                      value.toString()
-                                    ) ?? false
-                                  }
-                                  type="checkbox"
-                                  className="h-4 w-4 border-gray-300 rounded accent-red-500"
-                                />
-                                <label
-                                  htmlFor={`filter-${value}-${optionIdx}`}
-                                  className="ml-3 text-gray-600 dark:text-gray-400"
-                                >
-                                  {value}
-                                </label>
+                                  router.replace({
+                                    pathname: router.pathname,
+                                    query:
+                                      Object.keys(search).length > 0
+                                        ? { ...query, search }
+                                        : query,
+                                  });
+                                }}
+                              />
+                            ) : (
+                              <div
+                                key={value}
+                                className="flex justify-between text-sm"
+                              >
+                                <div className="flex items-center">
+                                  <input
+                                    id={`filter-${value}-${optionIdx}`}
+                                    name={value}
+                                    onChange={(e) => {
+                                      const search = e.target.checked
+                                        ? createFilter(formattedSearch, {
+                                            key: attributeKey,
+                                            value,
+                                          })
+                                        : removeFilter(formattedSearch, {
+                                            key: attributeKey,
+                                            value,
+                                          });
+                                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                      const { search: _search, ...query } =
+                                        router.query;
+
+                                      router.replace({
+                                        pathname: router.pathname,
+                                        query:
+                                          Object.keys(search).length > 0
+                                            ? { ...query, search }
+                                            : query,
+                                      });
+                                    }}
+                                    checked={
+                                      filters[attributeKey]?.includes(
+                                        value.toString()
+                                      ) ?? false
+                                    }
+                                    type="checkbox"
+                                    className="h-4 w-4 border-gray-300 rounded accent-red-500"
+                                  />
+                                  <label
+                                    htmlFor={`filter-${value}-${optionIdx}`}
+                                    className="ml-3 text-gray-600 dark:text-gray-400"
+                                  >
+                                    {value}
+                                  </label>
+                                </div>
+                                <p className="text-gray-400 dark:text-gray-500">
+                                  {percentage ? formatPercent(percentage) : ""}
+                                </p>
                               </div>
-                              <p className="text-gray-400 dark:text-gray-500">
-                                {percentage ? formatPercent(percentage) : ""}
-                              </p>
-                            </div>
-                          )
+                            )
                         )}
                       </div>
                     </Disclosure.Panel>

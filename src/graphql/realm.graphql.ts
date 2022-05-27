@@ -7,15 +7,20 @@ export const getRealmMetadata = gql`
       feature1
       feature2
       feature3
-      metrics {
-        name
-        totalAmount
+      structures {
+        magicRefinery {
+          tier
+        }
+        staked
+        type
       }
-      totalStructures {
-        totalAquariums
-        totalCities
-        totalFarms
-        totalResearchLabs
+      terraformedAt
+      totalNaturalResources {
+        ancientArtifacts
+        aquaticResources
+        landAbundance
+        mineralDeposit
+        total
       }
     }
   }
@@ -44,10 +49,30 @@ export const getFilteredFeatures = gql`
   }
 `;
 
-export const getFilteredStructures = gql`
-  query getFilteredStructures($filters: TotalStructure_filter!) {
-    totalStructures(first: 1000, where: $filters) {
+export const getFilteredMagicRefineries = gql`
+  query getFilteredMagicRefineries($filters: MagicRefinery_filter!) {
+    magicRefineries(first: 1000, where: $filters) {
+      realm {
+        id
+      }
+    }
+  }
+`;
+
+export const getFilteredNaturalResources = gql`
+  query getFilteredNaturalResources($filters: TotalNaturalResource_filter!) {
+    totalNaturalResources(first: 1000, where: $filters) {
       id
+    }
+  }
+`;
+
+export const getFilteredStructures = gql`
+  query getFilteredStructures($filters: Structure_filter!) {
+    structures(first: 1000, where: $filters) {
+      realm {
+        id
+      }
     }
   }
 `;

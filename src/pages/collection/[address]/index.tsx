@@ -78,6 +78,7 @@ import { useEthers } from "@usedapp/core";
 import { GridSizeToggle } from "../../../components/GridToggle";
 import { CollectionLinks } from "../../../components/CollectionLinks";
 import useLocalStorage from "use-local-storage-state";
+import { format } from "date-fns";
 
 const MAX_ITEMS_PER_PAGE = 48;
 
@@ -125,6 +126,13 @@ const sortOptions = [
     value: Listing_OrderBy.blockTimestamp,
     direction: OrderDirection.desc,
   },
+];
+
+const NATURAL_RESOURCES = [
+  "Ancient Artifacts",
+  "Aquatic Resources",
+  "Land Abundance",
+  "Mineral Deposits",
 ];
 
 function range(value: number, start: number) {
@@ -689,18 +697,26 @@ const Collection = ({ og }: { og: MetadataProps }) => {
           : [],
     };
   }, [filteredSmolverseTokensQueries]);
-  const filteredRealmStructureTokens = useQuery(
-    ["realm-filtered-structure-tokens", listedTokens.data, filters],
+  const filteredRealmResourceTokens = useQuery(
+    ["realm-filtered-resource-tokens", listedTokens.data, filters],
     () =>
-      realm.getFilteredStructures({
+      realm.getFilteredNaturalResources({
         filters: {
           id_in: listedTokens.data?.map(
             (id) => `${parseInt(id.slice(45), 16)}`
           ),
           ...Object.entries(filters).reduce((acc, [key, value]) => {
-            acc[`total${key.replace(" ", "")}_gte`] = Number(
-              value[0].replace(/[^\d]+/, "")
-            );
+            if (!NATURAL_RESOURCES.includes(key)) {
+              return acc;
+            }
+
+            const filterKey = key[0]
+              .toLowerCase()
+              .concat(key.slice(1).replace(" ", ""))
+              .replace("Deposits", "Deposit");
+
+            acc[`${filterKey}_gte`] = value[0];
+            acc[`${filterKey}_lte`] = value[1];
 
             return acc;
           }, {}),
@@ -709,12 +725,82 @@ const Collection = ({ og }: { og: MetadataProps }) => {
     {
       enabled:
         Boolean(listedTokens.data) &&
-        Object.keys(filters).length >= (filters.Features ? 2 : 1) &&
+        Object.keys(filters).some((key) => NATURAL_RESOURCES.includes(key)) &&
+        isRealm,
+      select: React.useCallback(
+        (data: Awaited<ReturnType<typeof realm.getFilteredNaturalResources>>) =>
+          data.totalNaturalResources.map(
+            (item) => `${formattedAddress}-0x${Number(item.id).toString(16)}`
+          ),
+        [formattedAddress]
+      ),
+    }
+  );
+  const filteredRealmStructureTokens = useQuery(
+    ["realm-filtered-structure-tokens", listedTokens.data, filters],
+    () =>
+      realm.getFilteredStructures({
+        filters: {
+          realm_in: listedTokens.data?.map(
+            (id) => `${parseInt(id.slice(45), 16)}`
+          ),
+          ...Object.entries(filters).reduce((acc, [key, value]) => {
+            if (key !== "Reactor") {
+              return acc;
+            }
+
+            acc["type"] = "Reactor";
+            acc["staked"] = value[0] === "Yes";
+
+            return acc;
+          }, {}),
+        },
+      }),
+    {
+      enabled:
+        Boolean(listedTokens.data) &&
+        Object.keys(filters).some((key) => key === "Reactor") &&
         isRealm,
       select: React.useCallback(
         (data: Awaited<ReturnType<typeof realm.getFilteredStructures>>) =>
-          data.totalStructures.map(
-            (item) => `${formattedAddress}-0x${Number(item.id).toString(16)}`
+          data.structures.map(
+            (item) =>
+              `${formattedAddress}-0x${Number(item.realm?.id).toString(16)}`
+          ),
+        [formattedAddress]
+      ),
+    }
+  );
+  const filteredRealmRefineriesTokens = useQuery(
+    ["realm-filtered-refinery-tokens", listedTokens.data, filters],
+    () =>
+      realm.getFilteredMagicRefineries({
+        filters: {
+          realm_in: listedTokens.data?.map(
+            (id) => `${parseInt(id.slice(45), 16)}`
+          ),
+          ...Object.entries(filters).reduce((acc, [key, value]) => {
+            if (key !== "Magic Refinery") {
+              return acc;
+            }
+
+            acc["staked"] = true;
+            acc["tier_in"] = value.map((item) => item.slice(-1));
+
+            return acc;
+          }, {}),
+        },
+      }),
+    {
+      enabled:
+        Boolean(listedTokens.data) &&
+        Object.keys(filters).some((key) => key === "Magic Refinery") &&
+        isRealm,
+      select: React.useCallback(
+        (data: Awaited<ReturnType<typeof realm.getFilteredMagicRefineries>>) =>
+          data.magicRefineries.map(
+            (item) =>
+              `${formattedAddress}-0x${Number(item.realm?.id).toString(16)}`
           ),
         [formattedAddress]
       ),
@@ -726,7 +812,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
       realm.getFilteredFeatures({
         ids:
           listedTokens.data?.map((id) => `${parseInt(id.slice(45), 16)}`) ?? [],
-        feature: filters.Features[0]?.split(",") ?? [],
+        feature: filters.Features,
       }),
     {
       enabled:
@@ -749,18 +835,33 @@ const Collection = ({ og }: { og: MetadataProps }) => {
   const filteredRealmTokens = React.useMemo(
     () => ({
       data:
-        isRealm && Object.keys(filters).length > 0
+        isRealm &&
+        Object.keys(filters).length > 0 &&
+        [
+          filteredRealmRefineriesTokens.status,
+          filteredRealmResourceTokens.status,
+          filteredRealmStructureTokens.status,
+          filteredRealmFeaturesTokens.status,
+        ].some((status) => status === "success")
           ? unique([
-              ...(filteredRealmStructureTokens?.data ?? []),
-              ...(filteredRealmFeaturesTokens?.data ?? []),
+              ...(filteredRealmRefineriesTokens.data ?? []),
+              ...(filteredRealmResourceTokens.data ?? []),
+              ...(filteredRealmStructureTokens.data ?? []),
+              ...(filteredRealmFeaturesTokens.data ?? []),
             ])
           : undefined,
     }),
     [
-      filteredRealmFeaturesTokens?.data,
-      filteredRealmStructureTokens?.data,
-      filters,
       isRealm,
+      filters,
+      filteredRealmRefineriesTokens.status,
+      filteredRealmRefineriesTokens.data,
+      filteredRealmResourceTokens.status,
+      filteredRealmResourceTokens.data,
+      filteredRealmStructureTokens.status,
+      filteredRealmStructureTokens.data,
+      filteredRealmFeaturesTokens.status,
+      filteredRealmFeaturesTokens.data,
     ]
   );
 
@@ -1481,18 +1582,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                   crafting: legionsMetadata.metadata.crafting,
                                 }
                               : null;
-                          const REALM_METRIC_NAMES = [
-                            "Gold",
-                            "Food",
-                            "Culture",
-                            "Technology",
-                          ];
-                          const REALM_EMPTY_METRICS = REALM_METRIC_NAMES.map(
-                            (name) => ({
-                              name,
-                              totalAmount: "0",
-                            })
-                          );
+
                           const realmStats = rlmMetadata
                             ? {
                                 features: [
@@ -1501,32 +1591,50 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                                   rlmMetadata.feature3,
                                 ],
                                 attributes: [
+                                  ...(rlmMetadata.structures
+                                    ?.filter((item) => item.staked)
+                                    .map((item) => ({
+                                      name: item.type
+                                        .replace(/([A-Z])/g, " $1")
+                                        .trim(),
+                                      value: item.magicRefinery?.tier
+                                        ? `Tier ${item.magicRefinery.tier}`
+                                        : "Yes",
+                                    })) ?? []),
+                                  { name: "Magic Refinery", value: "No" },
+                                  { name: "Reactor", value: "No" },
+                                  {
+                                    name: "Terraformed At",
+                                    value:
+                                      rlmMetadata.terraformedAt === "0"
+                                        ? "Never"
+                                        : format(
+                                            new Date(
+                                              Number(
+                                                rlmMetadata.terraformedAt
+                                              ) * 1000
+                                            ),
+                                            "yyyy-MM-dd"
+                                          ),
+                                  },
                                   ...Object.entries(
-                                    rlmMetadata.totalStructures[0] ?? []
+                                    rlmMetadata.totalNaturalResources?.[0] ?? []
                                   ).map(([name, value]) => ({
-                                    name: name
-                                      .replace("total", "")
-                                      .replace("Labs", " Labs"),
+                                    name: name[0]
+                                      .toUpperCase()
+                                      .concat(
+                                        name.slice(1).replace(/([A-Z])/g, " $1")
+                                      ),
                                     value,
                                   })),
-                                  ...[
-                                    ...rlmMetadata.metrics,
-                                    ...REALM_EMPTY_METRICS,
-                                  ]
-                                    .filter(
-                                      (metric, index, array) =>
-                                        array.findIndex(
-                                          (item) => item.name === metric.name
-                                        ) === index
-                                    )
-                                    .filter((metric) =>
-                                      REALM_METRIC_NAMES.includes(metric.name)
-                                    )
-                                    .map(({ name, totalAmount: value }) => ({
-                                      name,
-                                      value,
-                                    })),
-                                ].map((attribute) => ({ attribute })),
+                                ]
+                                  .filter(
+                                    (attribute, index, array) =>
+                                      array.findIndex(
+                                        (item) => item.name === attribute.name
+                                      ) === index
+                                  )
+                                  .map((attribute) => ({ attribute })),
                               }
                             : null;
                           const elleriaStats =

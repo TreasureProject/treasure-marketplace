@@ -837,15 +837,8 @@ export function useMetadata(
             feature1,
             feature2,
             feature3,
-            metrics,
-            totalStructures: [
-              {
-                totalAquariums = "0",
-                totalCities = "0",
-                totalFarms = "0",
-                totalResearchLabs = "0",
-              } = {},
-            ],
+            structures,
+            totalNaturalResources,
           } = item;
           const image = "/img/realm.jpg";
           const name = `Realm #${item.id}`;
@@ -854,17 +847,22 @@ export function useMetadata(
             { name: "Feature 1", value: feature1 },
             { name: "Feature 2", value: feature2 },
             { name: "Feature 3", value: feature3 },
-            { name: "Aquariums", value: totalAquariums },
-            { name: "Cities", value: totalCities },
-            { name: "Farms", value: totalFarms },
-            { name: "Research Labs", value: totalResearchLabs },
-            ...[...metrics, ...REALM_EMPTY_METRICS]
-              .filter(
-                (metric, index, array) =>
-                  array.findIndex((item) => item.name === metric.name) === index
-              )
-              .filter((metric) => REALM_METRIC_NAMES.includes(metric.name))
-              .map(({ name, totalAmount: value }) => ({ name, value })),
+            ...(structures
+              ?.filter((item) => item.staked)
+              .map((item) => ({
+                name: item.type.replace(/([A-Z])/g, " $1").trim(),
+                value: item.magicRefinery?.tier
+                  ? `Tier ${item.magicRefinery.tier}`
+                  : "Yes",
+              })) ?? []),
+            ...Object.entries(totalNaturalResources?.[0] ?? []).map(
+              ([name, value]) => ({
+                name: name[0]
+                  .toUpperCase()
+                  .concat(name.slice(1).replace(/([A-Z])/g, " $1")),
+                value,
+              })
+            ),
           ];
 
           return { attributes, id, image, name };
