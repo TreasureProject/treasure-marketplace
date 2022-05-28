@@ -289,7 +289,7 @@ const KOTE_POTIONS = {
   href: "kote-potions",
   name: "KOTE Potions",
   image:
-    "https://ipfs.io/ipfs/QmYZXbjHrKSoy5ZPutJPnnuZURr6NLbVpd323HZ3G3sX9D/strengthG.png",
+    "https://knightsoftheether.com/squires/images/potions/Phantom%20Phial.png",
   description:
     "1 of 3 item types in the Knights of the Ether ecosystem, Potions have 5 rarity tiers and 2 upgrade levels.",
   ...KOTE_DATA,
@@ -300,7 +300,7 @@ const KOTE_TRINKETS = {
   href: "kote-trinkets",
   name: "KOTE Trinkets",
   image:
-    "https://ipfs.io/ipfs/QmYZXbjHrKSoy5ZPutJPnnuZURr6NLbVpd323HZ3G3sX9D/strengthG.png",
+    "https://knightsoftheether.com/squires/images/trinkets/Golem%20Eye.png",
   description:
     "1 of 3 item types in the Knights of the Ether ecosystem, Trinkets have 5 rarity tiers.",
   ...KOTE_DATA,
@@ -311,7 +311,7 @@ const KOTE_RINGS = {
   href: "kote-rings",
   name: "KOTE Rings",
   image:
-    "https://ipfs.io/ipfs/QmYZXbjHrKSoy5ZPutJPnnuZURr6NLbVpd323HZ3G3sX9D/strengthG.png",
+    "https://knightsoftheether.com/squires/images/rings/Etheric%20Ring%20of%20Renewal.png",
   description:
     "1 of 3 item types in the Knights of the Ether ecosystem, Rings have 5 rarity tiers, 5 makes and 5 upgrade levels.",
   ...KOTE_DATA,

@@ -5,6 +5,7 @@ module.exports = {
       "storage.googleapis.com",
       "treasure-marketplace.mypinata.cloud",
       "cdn.talesofelleria.com",
+      "knightsoftheether.com",
     ],
   },
   async redirects() {
