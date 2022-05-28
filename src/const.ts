@@ -611,7 +611,7 @@ export const COLLECTION_DESCRIPTIONS = {
       "SamuRise Land",
       "Smithonia Resources",
       "Smithonia Weapons",
-      "KOTE Squares",
+      "KOTE Squires",
       "KOTE Rings",
       "KOTE Potions",
       "KOTE Trinkets",
