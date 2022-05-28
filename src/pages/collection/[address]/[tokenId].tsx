@@ -440,7 +440,7 @@ export default function TokenDetails({ og }: { og: MetadataProps }) {
                                     }}
                                     passHref
                                   >
-                                    <a className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2 hover:shadow-xl shadow-red-500/50">
+                                    <a className="border-2 border-red-400 dark:border-gray-400 rounded-md bg-red-200 dark:bg-gray-300 flex items-center flex-col py-2 hover:shadow-xl shadow-red-500/50 text-center">
                                       <p className="text-red-700 dark:text-gray-500 text-xs font-light">
                                         {attribute.name}
                                       </p>

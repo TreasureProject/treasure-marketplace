@@ -37,7 +37,9 @@ import { InboxIcon } from "@heroicons/react/solid";
 import { TreasureIcon } from "./Icons";
 
 const NEW_COLLECTIONS = [
-  "KOTE Squires",
+  "KOTE Rings",
+  "KOTE Potions",
+  "KOTE Trinkets",
   "SamuRise Items",
   "Smithonia Resources",
   "Swolercycles",
