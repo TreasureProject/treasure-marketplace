@@ -1055,6 +1055,28 @@ const Collection = ({ og }: { og: MetadataProps }) => {
     isTalesOfElleriaRelics ? listingIds : []
   );
 
+  const tokensWithStats = isTalesOfElleriaRelics
+    ? listings.data?.pages[0].tokens?.map((token) => {
+        const metadata = talesOfElleriaRelicsMetadata.data?.find(
+          (item) => parseInt(item.id) === parseInt(token.tokenId)
+        );
+        return {
+          ...token,
+          name: metadata?.name,
+        };
+      })
+    : isShared
+    ? listings.data?.pages[0].tokens?.map((token) => {
+        const metadata = sharedMetadata.data?.tokens.find(
+          (item) => item.tokenId === token.tokenId
+        );
+        return {
+          ...token,
+          name: metadata?.name,
+        };
+      })
+    : listings.data?.pages[0].tokens;
+
   const isLoading = React.useMemo(
     () =>
       [
@@ -1992,7 +2014,7 @@ const Collection = ({ og }: { og: MetadataProps }) => {
         <DetailedFloorPriceModal
           isOpen={true}
           onClose={() => setDetailedFloorPriceModalOpen(false)}
-          tokens={listings.data?.pages[0].tokens}
+          tokens={tokensWithStats}
         />
       )}
       {modalProps.isOpen && modalProps.targetNft && (
