@@ -61,7 +61,7 @@ const CATEGORY = [
   "Alchemy",
   "Arcana",
   "Brewing",
-  "Enchanter",
+  "Enchanting",
   "Leatherworking",
   "Smithing",
 ];
