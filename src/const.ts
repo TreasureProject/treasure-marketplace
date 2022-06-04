@@ -526,8 +526,7 @@ export const COLLECTION_METADATA = [
     name: "Smol Treasures",
     image:
       "https://ipfs.io/ipfs/QmZK1i4y7qn7Fi7mEMgT4KZcb1Etb12yndcTZ5dnhigDPt/2.gif",
-    description:
-      "Smols and Swols are currently farming Smol treasures on the moon.",
+    description: "Smol Treasures were farmed by Smols and Swols on the moon.",
     cartridge: "smolverse",
     related: ["smol-brains", "smol-bodies"],
     website: "https://smolverse.lol",
@@ -595,7 +594,7 @@ export const COLLECTION_DESCRIPTIONS = {
   treasures:
     "Treasures are composable building blocks in Bridgeworld that will be used inter- and intra-metaverse.",
   "smol-treasures":
-    "Smols and Swols are currently farming Smol treasures on the moon.",
+    "Smol Treasures were farmed by Smols and Swols on the moon.",
   consumables:
     "Functional items that are crafted from Treasures and give utility in the Metaverse.",
   realm:
