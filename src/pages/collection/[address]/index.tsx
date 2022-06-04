@@ -284,18 +284,9 @@ const Collection = ({ og }: { og: MetadataProps }) => {
   // First get all possible listed tokens
   const listedTokens = useQuery(
     ["listed-tokens", formattedAddress],
-    () =>
-      marketplace.getCollectionsListedTokens({ collection: formattedAddress }),
+    () => fetch(`/api/listed/${formattedAddress}`).then((res) => res.json()),
     {
       enabled: !!formattedAddress,
-      select: React.useCallback(
-        (
-          data: Awaited<
-            ReturnType<typeof marketplace.getCollectionsListedTokens>
-          >
-        ) => unique(data.listings.map(({ token }) => token.id)),
-        []
-      ),
     }
   );
 
@@ -558,9 +549,11 @@ const Collection = ({ og }: { og: MetadataProps }) => {
         (data) => {
           const itemsToHex = (items: number[]): string[] => {
             const hexxed = items.map((id) => `0x${id.toString(16)}`);
-            return listedTokens.data?.filter((id) =>
-              hexxed.some((hex) => id.endsWith(hex))
-            ) ?? [];
+            return (
+              listedTokens.data?.filter((id) =>
+                hexxed.some((hex) => id.endsWith(hex))
+              ) ?? []
+            );
           };
 
           if (Array.isArray(data)) {
@@ -1180,13 +1173,17 @@ const Collection = ({ og }: { og: MetadataProps }) => {
                               Number(
                                 parseFloat(
                                   formatEther(
-                                    statData.collection.stats.floorPrice
+                                    listings.data?.pages?.[0].listings?.[0]
+                                      ?.pricePerItem ??
+                                      statData.collection.stats.floorPrice
                                   )
                                 )
                               ) * parseFloat(ethPrice)
                             )
                           : formatPrice(
-                              statData.collection.stats.floorPrice
+                              listings.data?.pages?.[0].listings?.[0]
+                                ?.pricePerItem ??
+                                statData.collection.stats.floorPrice
                             )}{" "}
                       </span>
                     </dd>
