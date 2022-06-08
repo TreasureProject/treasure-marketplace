@@ -2,6 +2,7 @@ module.exports = {
   images: {
     domains: [
       "ipfs.io",
+      "life-nft.mypinata.cloud",
       "storage.googleapis.com",
       "treasure-marketplace.mypinata.cloud",
       "cdn.talesofelleria.com",

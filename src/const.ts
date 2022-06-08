@@ -56,6 +56,7 @@ export const smolverseItems = [
 ];
 
 export const METADATA_COLLECTIONS = [
+  "Imbued Souls",
   "KOTE Squires",
   "KOTE Potions",
   "KOTE Trinkets",
@@ -63,6 +64,7 @@ export const METADATA_COLLECTIONS = [
   "Peek-A-Boo",
   "SamuRise Items",
   "SamuRise Land",
+  "Seed of Life Items",
   "Tales of Elleria",
   "The Lost Donkeys",
   "Toadstoolz",
@@ -113,6 +115,14 @@ const SAMURISE_DATA = {
   twitter: "SamuRiseNFT",
   website: "https://samurise.xyz",
 } as const;
+
+const SEED_OF_LIFE_DATA = {
+  cartridge: "life",
+  docs: "https://drive.google.com/file/d/1HwV-90u5TwffAvk83DIxfCKKLHfBAdmo/view",
+  game: "https://life.treasure.lol",
+  twitter: "LifeDAO_",
+  discord: "lifedao",
+};
 
 const TALES_OF_ELLERIA_DATA = {
   cartridge: "ecosystem",
@@ -190,13 +200,7 @@ const BALANCER_CRYSTAL = {
     "Exchange your SLP for one of these to further the fun in Bridgeworld and LIFE.",
   ...BRIDGEWORLD_DATA,
   cartridge: "bridgeworld-life",
-  related: [
-    "legion-genesis",
-    "legion-auxiliary",
-    "consumables",
-    "treasures",
-    "seed-of-life",
-  ],
+  related: ["legion-genesis", "legion-auxiliary", "consumables", "treasures"],
 } as const;
 
 const EXTRA_LIFE = {
@@ -367,18 +371,34 @@ export const COLLECTION_METADATA = [
     website: "https://smolverse.lol",
   },
   {
+    href: "imbued-souls",
+    name: "Imbued Souls",
+    image:
+      "https://life-nft.mypinata.cloud/ipfs/QmTa3Pf9k1JW14WGNa9YwKsk5yqjXZfRegtpig9EUp9TQ3",
+    description:
+      "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+    related: ["seed-of-life", "seed-of-life-items"],
+    ...SEED_OF_LIFE_DATA,
+  },
+  {
     href: "seed-of-life",
     name: "Seed of Life",
     image:
       "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
     description:
       "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
-    cartridge: "life",
-    related: ["balancer-crystal", "treasures"],
-    docs: "https://drive.google.com/file/d/1HwV-90u5TwffAvk83DIxfCKKLHfBAdmo/view",
-    game: "https://life.treasure.lol",
-    twitter: "LifeNFT_",
-    discord: "treasuredao",
+    related: ["imbued-souls", "seed-of-life-items"],
+    ...SEED_OF_LIFE_DATA,
+  },
+  {
+    href: "seed-of-life-items",
+    name: "Seed of Life Items",
+    image:
+      "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
+    description:
+      "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+    related: ["seed-of-life", "imbued-souls"],
+    ...SEED_OF_LIFE_DATA,
   },
   {
     href: "legion-auxiliary",
@@ -584,7 +604,11 @@ export const COLLECTION_DESCRIPTIONS = {
     "The Smol Brains are a dynamic PFP of a monkey whose head gets bigger the larger its IQ becomes.",
   "smol-brains-pets":
     "The Smol Brains Pets are cute companions to accompany your Smol Brain in Smolverse.",
+  "imbued-souls":
+    "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
   "seed-of-life":
+    "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+  "seed-of-life-items":
     "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
   "smol-cars":
     "The Smol Cars are here to get you around in Smolverse. Vroom vroom.",
