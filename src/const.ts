@@ -13,12 +13,7 @@ type CollectionData = Record<
 > & {
   imageContain?: boolean;
   imageBgColor?: string;
-  cartridge:
-    | "bridgeworld"
-    | "ecosystem"
-    | "life"
-    | "smolverse"
-    | "bridgeworld-life";
+  cartridge: "bridgeworld" | "ecosystem" | "life" | "smolverse";
   docs?: string;
   discord?: string;
   game?: string;
@@ -64,7 +59,7 @@ export const METADATA_COLLECTIONS = [
   "Peek-A-Boo",
   "SamuRise Items",
   "SamuRise Land",
-  "Seed of Life Items",
+  "Seed of Life Resources",
   "Tales of Elleria",
   "The Lost Donkeys",
   "Toadstoolz",
@@ -199,7 +194,7 @@ const BALANCER_CRYSTAL = {
   description:
     "Exchange your SLP for one of these to further the fun in Bridgeworld and LIFE.",
   ...BRIDGEWORLD_DATA,
-  cartridge: "bridgeworld-life",
+  cartridge: "bridgeworld",
   related: ["legion-genesis", "legion-auxiliary", "consumables", "treasures"],
 } as const;
 
@@ -376,8 +371,8 @@ export const COLLECTION_METADATA = [
     image:
       "https://life-nft.mypinata.cloud/ipfs/QmTa3Pf9k1JW14WGNa9YwKsk5yqjXZfRegtpig9EUp9TQ3",
     description:
-      "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
-    related: ["seed-of-life", "seed-of-life-items"],
+      "Character primitives evolved from the Seed of Life, Imbued Souls are the composable life forms originated in the land of Phanes. Every Imbued Soul has equal governance rights over LifeDAO.",
+    related: ["seed-of-life", "seed-of-life-resources"],
     ...SEED_OF_LIFE_DATA,
   },
   {
@@ -386,17 +381,17 @@ export const COLLECTION_METADATA = [
     image:
       "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
     description:
-      "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
-    related: ["imbued-souls", "seed-of-life-items"],
+      "Unevolved character primitive representing equal governance rights over LifeDAO. Can be evolved into an Imbued Soul by redeeming it at the Tree of Life.",
+    related: ["imbued-souls", "seed-of-life-resources"],
     ...SEED_OF_LIFE_DATA,
   },
   {
-    href: "seed-of-life-items",
-    name: "Seed of Life Items",
+    href: "seed-of-life-resources",
+    name: "Seed of Life Resources",
     image:
-      "https://ipfs.io/ipfs/QmbkpUo9dPsTVDfttdgkV6eqbPLCXyoKhFBxhwdAgqB15z/Seed of Life 1.png",
+      "https://ipfs.io/ipfs/QmS3YBo7xCh7h5rmXu96Y6zumjUMWCH43G333HvTeV2qhA",
     description:
-      "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+      "Limited resources from the world of Phanes. Future utility across different cartridges in the Treasure ecosystem.",
     related: ["seed-of-life", "imbued-souls"],
     ...SEED_OF_LIFE_DATA,
   },
@@ -420,7 +415,7 @@ export const COLLECTION_METADATA = [
     description:
       "Treasures are composable building blocks in Bridgeworld that will be used inter- and intra-metaverse.",
     ...BRIDGEWORLD_DATA,
-    cartridge: "bridgeworld-life",
+    cartridge: "bridgeworld",
     related: [
       "legion-genesis",
       "legion-auxiliary",
@@ -605,11 +600,11 @@ export const COLLECTION_DESCRIPTIONS = {
   "smol-brains-pets":
     "The Smol Brains Pets are cute companions to accompany your Smol Brain in Smolverse.",
   "imbued-souls":
-    "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+    "Character primitives evolved from the Seed of Life, Imbued Souls are the composable life forms originated in the land of Phanes. Every Imbued Soul has equal governance rights over LifeDAO.",
   "seed-of-life":
-    "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
-  "seed-of-life-items":
-    "Built atop the Magic ecosystem, Life embodies the metaverse as a living breathing ecosystem...",
+    "Unevolved character primitive representing equal governance rights over LifeDAO. Can be evolved into an Imbued Soul by redeeming it at the Tree of Life.",
+  "seed-of-life-resources":
+    "Limited resources from the world of Phanes. Future utility across different cartridges in the Treasure ecosystem.",
   "smol-cars":
     "The Smol Cars are here to get you around in Smolverse. Vroom vroom.",
   treasures:
