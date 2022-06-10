@@ -389,7 +389,7 @@ export const COLLECTION_METADATA = [
     href: "seed-of-life-resources",
     name: "Seed of Life Resources",
     image:
-      "https://ipfs.io/ipfs/QmS3YBo7xCh7h5rmXu96Y6zumjUMWCH43G333HvTeV2qhA",
+      "https://life-nft.mypinata.cloud/ipfs/QmS3YBo7xCh7h5rmXu96Y6zumjUMWCH43G333HvTeV2qhA",
     description:
       "Limited resources from the world of Phanes. Future utility across different cartridges in the Treasure ecosystem.",
     related: ["seed-of-life", "imbued-souls"],
