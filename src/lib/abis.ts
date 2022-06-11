@@ -870,10 +870,123 @@ export const erc721 = [
 ];
 
 export const marketplace = [
+  { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "seller",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "bidder",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nftAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "quantity",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "pricePerItem",
+        type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "enum BidType",
+        name: "bidType",
+        type: "uint8",
+      },
+    ],
+    name: "BidAccepted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "bidder",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nftAddress",
+        type: "address",
+      },
+    ],
+    name: "CollectionBidCancelled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "bidder",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nftAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "quantity",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "pricePerItem",
+        type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "expirationTime",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
+    ],
+    name: "CollectionBidCreatedOrUpdated",
+    type: "event",
   },
   {
     anonymous: false,
@@ -939,6 +1052,12 @@ export const marketplace = [
         name: "expirationTime",
         type: "uint64",
       },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
     ],
     name: "ItemListed",
     type: "event",
@@ -981,6 +1100,12 @@ export const marketplace = [
         internalType: "uint128",
         name: "pricePerItem",
         type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
       },
     ],
     name: "ItemSold",
@@ -1025,6 +1150,12 @@ export const marketplace = [
         name: "expirationTime",
         type: "uint64",
       },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
     ],
     name: "ItemUpdated",
     type: "event",
@@ -1045,12 +1176,7 @@ export const marketplace = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
       {
         indexed: true,
         internalType: "bytes32",
@@ -1070,12 +1196,7 @@ export const marketplace = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
       {
         indexed: true,
         internalType: "address",
@@ -1095,12 +1216,7 @@ export const marketplace = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
       {
         indexed: true,
         internalType: "address",
@@ -1120,20 +1236,95 @@ export const marketplace = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "nft",
-        type: "address",
-      },
+      { indexed: false, internalType: "address", name: "nft", type: "address" },
       {
         indexed: false,
         internalType: "enum TreasureMarketplace.TokenApprovalStatus",
         name: "status",
         type: "uint8",
       },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
     ],
     name: "TokenApprovalStatusUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "bidder",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nftAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "TokenBidCancelled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "bidder",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nftAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "quantity",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "pricePerItem",
+        type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "expirationTime",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
+    ],
+    name: "TokenBidCreatedOrUpdated",
     type: "event",
   },
   {
@@ -1154,10 +1345,30 @@ export const marketplace = [
     inputs: [
       {
         indexed: false,
+        internalType: "address",
+        name: "_collection",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_recipient",
+        type: "address",
+      },
+      {
+        indexed: false,
         internalType: "uint256",
-        name: "fee",
+        name: "_fee",
         type: "uint256",
       },
+    ],
+    name: "UpdateCollectionOwnerFee",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: "uint256", name: "fee", type: "uint256" },
     ],
     name: "UpdateFee",
     type: "event",
@@ -1176,99 +1387,72 @@ export const marketplace = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: "uint256", name: "fee", type: "uint256" },
+    ],
+    name: "UpdateFeeWithCollectionOwner",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "BASIS_POINTS",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "DEFAULT_ADMIN_ROLE",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
+    outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "MAX_COLLECTION_FEE",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "MAX_FEE",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "MIN_PRICE",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "TREASURE_MARKETPLACE_ADMIN_ROLE",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
+    outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_nftAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_owner",
-        type: "address",
-      },
-      {
-        internalType: "uint64",
-        name: "_quantity",
-        type: "uint64",
-      },
-      {
-        internalType: "uint128",
-        name: "_maxPricePerItem",
-        type: "uint128",
+        components: [
+          { internalType: "address", name: "nftAddress", type: "address" },
+          { internalType: "uint256", name: "tokenId", type: "uint256" },
+          { internalType: "address", name: "bidder", type: "address" },
+          { internalType: "uint64", name: "quantity", type: "uint64" },
+          { internalType: "uint128", name: "pricePerItem", type: "uint128" },
+          { internalType: "address", name: "paymentToken", type: "address" },
+        ],
+        internalType: "struct AcceptBidParams",
+        name: "_acceptBidParams",
+        type: "tuple",
       },
     ],
-    name: "buyItem",
+    name: "acceptCollectionBid",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1276,15 +1460,57 @@ export const marketplace = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_nftAddress",
-        type: "address",
+        components: [
+          { internalType: "address", name: "nftAddress", type: "address" },
+          { internalType: "uint256", name: "tokenId", type: "uint256" },
+          { internalType: "address", name: "bidder", type: "address" },
+          { internalType: "uint64", name: "quantity", type: "uint64" },
+          { internalType: "uint128", name: "pricePerItem", type: "uint128" },
+          { internalType: "address", name: "paymentToken", type: "address" },
+        ],
+        internalType: "struct AcceptBidParams",
+        name: "_acceptBidParams",
+        type: "tuple",
       },
+    ],
+    name: "acceptTokenBid",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "areBidsActive",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
       {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
+        components: [
+          { internalType: "address", name: "nftAddress", type: "address" },
+          { internalType: "uint256", name: "tokenId", type: "uint256" },
+          { internalType: "address", name: "owner", type: "address" },
+          { internalType: "uint64", name: "quantity", type: "uint64" },
+          { internalType: "uint128", name: "maxPricePerItem", type: "uint128" },
+          { internalType: "address", name: "paymentToken", type: "address" },
+          { internalType: "bool", name: "usingEth", type: "bool" },
+        ],
+        internalType: "struct BuyItemParams[]",
+        name: "_buyItemParams",
+        type: "tuple[]",
       },
+    ],
+    name: "buyItems",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "_nftAddress", type: "address" },
+      { internalType: "uint256", name: "_tokenId", type: "uint256" },
     ],
     name: "cancelListing",
     outputs: [],
@@ -1294,30 +1520,61 @@ export const marketplace = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_nftAddress",
-        type: "address",
+        components: [
+          { internalType: "enum BidType", name: "bidType", type: "uint8" },
+          { internalType: "address", name: "nftAddress", type: "address" },
+          { internalType: "uint256", name: "tokenId", type: "uint256" },
+        ],
+        internalType: "struct CancelBidParams[]",
+        name: "_cancelBidParams",
+        type: "tuple[]",
       },
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint64",
-        name: "_quantity",
-        type: "uint64",
-      },
-      {
-        internalType: "uint128",
-        name: "_pricePerItem",
-        type: "uint128",
-      },
-      {
-        internalType: "uint64",
-        name: "_expirationTime",
-        type: "uint64",
-      },
+    ],
+    name: "cancelManyBids",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "", type: "address" },
+      { internalType: "address", name: "", type: "address" },
+    ],
+    name: "collectionBids",
+    outputs: [
+      { internalType: "uint64", name: "quantity", type: "uint64" },
+      { internalType: "uint128", name: "pricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "expirationTime", type: "uint64" },
+      { internalType: "address", name: "paymentTokenAddress", type: "address" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "collectionToCollectionOwnerFee",
+    outputs: [
+      { internalType: "uint32", name: "fee", type: "uint32" },
+      { internalType: "address", name: "recipient", type: "address" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "collectionToPaymentToken",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "_nftAddress", type: "address" },
+      { internalType: "uint256", name: "_tokenId", type: "uint256" },
+      { internalType: "uint64", name: "_quantity", type: "uint64" },
+      { internalType: "uint128", name: "_pricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "_expirationTime", type: "uint64" },
+      { internalType: "address", name: "_paymentToken", type: "address" },
     ],
     name: "createListing",
     outputs: [],
@@ -1325,105 +1582,88 @@ export const marketplace = [
     type: "function",
   },
   {
+    inputs: [
+      { internalType: "address", name: "_nftAddress", type: "address" },
+      { internalType: "uint64", name: "_quantity", type: "uint64" },
+      { internalType: "uint128", name: "_pricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "_expirationTime", type: "uint64" },
+      { internalType: "address", name: "_paymentToken", type: "address" },
+    ],
+    name: "createOrUpdateCollectionBid",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "_nftAddress", type: "address" },
+      { internalType: "uint256", name: "_tokenId", type: "uint256" },
+      { internalType: "uint64", name: "_quantity", type: "uint64" },
+      { internalType: "uint128", name: "_pricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "_expirationTime", type: "uint64" },
+      { internalType: "address", name: "_paymentToken", type: "address" },
+    ],
+    name: "createOrUpdateTokenBid",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "fee",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "feeReceipient",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
+    outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-    ],
+    inputs: [],
+    name: "feeWithCollectionOwner",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_collection", type: "address" }],
+    name: "getPaymentTokenForCollection",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "bytes32", name: "role", type: "bytes32" }],
     name: "getRoleAdmin",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
+    outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "index",
-        type: "uint256",
-      },
+      { internalType: "bytes32", name: "role", type: "bytes32" },
+      { internalType: "uint256", name: "index", type: "uint256" },
     ],
     name: "getRoleMember",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
+    outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-    ],
+    inputs: [{ internalType: "bytes32", name: "role", type: "bytes32" }],
     name: "getRoleMemberCount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
+      { internalType: "bytes32", name: "role", type: "bytes32" },
+      { internalType: "address", name: "account", type: "address" },
     ],
     name: "grantRole",
     outputs: [],
@@ -1432,35 +1672,17 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
+      { internalType: "bytes32", name: "role", type: "bytes32" },
+      { internalType: "address", name: "account", type: "address" },
     ],
     name: "hasRole",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
-      {
-        internalType: "uint256",
-        name: "_initialFee",
-        type: "uint256",
-      },
+      { internalType: "uint256", name: "_initialFee", type: "uint256" },
       {
         internalType: "address",
         name: "_initialFeeRecipient",
@@ -1479,39 +1701,16 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
+      { internalType: "address", name: "", type: "address" },
+      { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "address", name: "", type: "address" },
     ],
     name: "listings",
     outputs: [
-      {
-        internalType: "uint64",
-        name: "quantity",
-        type: "uint64",
-      },
-      {
-        internalType: "uint128",
-        name: "pricePerItem",
-        type: "uint128",
-      },
-      {
-        internalType: "uint64",
-        name: "expirationTime",
-        type: "uint64",
-      },
+      { internalType: "uint64", name: "quantity", type: "uint64" },
+      { internalType: "uint128", name: "pricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "expirationTime", type: "uint64" },
+      { internalType: "address", name: "paymentTokenAddress", type: "address" },
     ],
     stateMutability: "view",
     type: "function",
@@ -1526,13 +1725,7 @@ export const marketplace = [
   {
     inputs: [],
     name: "paused",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
@@ -1540,27 +1733,15 @@ export const marketplace = [
     inputs: [],
     name: "paymentToken",
     outputs: [
-      {
-        internalType: "contract IERC20Upgradeable",
-        name: "",
-        type: "address",
-      },
+      { internalType: "contract IERC20Upgradeable", name: "", type: "address" },
     ],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
+      { internalType: "bytes32", name: "role", type: "bytes32" },
+      { internalType: "address", name: "account", type: "address" },
     ],
     name: "renounceRole",
     outputs: [],
@@ -1569,16 +1750,8 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
+      { internalType: "bytes32", name: "role", type: "bytes32" },
+      { internalType: "address", name: "account", type: "address" },
     ],
     name: "revokeRole",
     outputs: [],
@@ -1587,9 +1760,28 @@ export const marketplace = [
   },
   {
     inputs: [
+      { internalType: "address", name: "_collectionAddress", type: "address" },
+      {
+        components: [
+          { internalType: "uint32", name: "fee", type: "uint32" },
+          { internalType: "address", name: "recipient", type: "address" },
+        ],
+        internalType: "struct TreasureMarketplace.CollectionOwnerFee",
+        name: "_collectionOwnerFee",
+        type: "tuple",
+      },
+    ],
+    name: "setCollectionOwnerFee",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "_newFee", type: "uint256" },
       {
         internalType: "uint256",
-        name: "_newFee",
+        name: "_newFeeWithCollectionOwner",
         type: "uint256",
       },
     ],
@@ -1600,11 +1792,7 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "address",
-        name: "_newFeeRecipient",
-        type: "address",
-      },
+      { internalType: "address", name: "_newFeeRecipient", type: "address" },
     ],
     name: "setFeeRecipient",
     outputs: [],
@@ -1613,16 +1801,13 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "address",
-        name: "_nft",
-        type: "address",
-      },
+      { internalType: "address", name: "_nft", type: "address" },
       {
         internalType: "enum TreasureMarketplace.TokenApprovalStatus",
         name: "_status",
         type: "uint8",
       },
+      { internalType: "address", name: "_paymentToken", type: "address" },
     ],
     name: "setTokenApprovalStatus",
     outputs: [],
@@ -1631,31 +1816,29 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "bytes4",
-        name: "interfaceId",
-        type: "bytes4",
-      },
+      { internalType: "address", name: "_wethAddress", type: "address" },
     ],
+    name: "setWeth",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "bytes4", name: "interfaceId", type: "bytes4" }],
     name: "supportsInterface",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
+    inputs: [],
+    name: "toggleAreBidsActive",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
     name: "tokenApprovals",
     outputs: [
       {
@@ -1663,6 +1846,22 @@ export const marketplace = [
         name: "",
         type: "uint8",
       },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "", type: "address" },
+      { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "address", name: "", type: "address" },
+    ],
+    name: "tokenBids",
+    outputs: [
+      { internalType: "uint64", name: "quantity", type: "uint64" },
+      { internalType: "uint128", name: "pricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "expirationTime", type: "uint64" },
+      { internalType: "address", name: "paymentTokenAddress", type: "address" },
     ],
     stateMutability: "view",
     type: "function",
@@ -1676,35 +1875,25 @@ export const marketplace = [
   },
   {
     inputs: [
-      {
-        internalType: "address",
-        name: "_nftAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint64",
-        name: "_newQuantity",
-        type: "uint64",
-      },
-      {
-        internalType: "uint128",
-        name: "_newPricePerItem",
-        type: "uint128",
-      },
-      {
-        internalType: "uint64",
-        name: "_newExpirationTime",
-        type: "uint64",
-      },
+      { internalType: "address", name: "_nftAddress", type: "address" },
+      { internalType: "uint256", name: "_tokenId", type: "uint256" },
+      { internalType: "uint64", name: "_newQuantity", type: "uint64" },
+      { internalType: "uint128", name: "_newPricePerItem", type: "uint128" },
+      { internalType: "uint64", name: "_newExpirationTime", type: "uint64" },
+      { internalType: "address", name: "_paymentToken", type: "address" },
     ],
     name: "updateListing",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "weth",
+    outputs: [
+      { internalType: "contract IERC20Upgradeable", name: "", type: "address" },
+    ],
+    stateMutability: "view",
     type: "function",
   },
 ];

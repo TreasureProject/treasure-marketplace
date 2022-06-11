@@ -30,7 +30,7 @@ type CollectionData = Record<
 
 export const Contracts = {
   [ChainId.ArbitrumRinkeby]: {
-    magic: "0x7693604341fDC5B73c920b8825518Ec9b6bBbb8b",
+    magic: "0xd1D7B842D04C43FDe2B91453E91d678506A0620B",
     marketplace: "0x48d515a012429d97E27aA8fC84070cF2E45e5036",
   },
   [ChainId.Arbitrum]: {

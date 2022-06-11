@@ -278,7 +278,14 @@ export function useCreateListing() {
       expires: number
     ) => {
       setInfo({ nft, quantity });
-      sell.send(address, tokenId, quantity, price, Math.round(expires / 1000));
+      sell.send(
+        address,
+        tokenId,
+        quantity,
+        price,
+        Math.round(expires / 1000),
+        Contracts[chainId].magic
+      );
 
       webhook.current = () => {
         const { collection, name, source, slug } = nft;
@@ -352,7 +359,7 @@ export function useBuyItem() {
 
   const { send: sendBuy, state } = useContractFunction(
     new Contract(Contracts[chainId].marketplace, abis.marketplace),
-    "buyItem"
+    "buyItems"
   );
 
   useEffect(() => {
@@ -382,7 +389,17 @@ export function useBuyItem() {
       quantity: number,
       pricePerItem: string
     ) => {
-      sendBuy(address, tokenId, ownerAddress, quantity, pricePerItem);
+      sendBuy([
+        [
+          address,
+          tokenId,
+          ownerAddress,
+          quantity,
+          pricePerItem,
+          Contracts[chainId].magic,
+          false,
+        ],
+      ]);
 
       webhook.current = () => {
         const { metadata, payload, slug, collection } = nft;
@@ -471,7 +488,8 @@ export function useUpdateListing() {
         tokenId,
         quantity,
         price,
-        Math.round(expires / 1000)
+        Math.round(expires / 1000),
+        Contracts[chainId].magic
       );
 
       webhook.current = () => {
