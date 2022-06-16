@@ -35,7 +35,7 @@
     "react-aria": "^3.14.1",
     "react-dom": "^18.0.0",
     "react-hot-toast": "^2.2.0",
-    "react-intersection-observer": "^8.34.0",
+    "react-intersection-observer": "^9.3.3",
     "react-query": "^4.0.0-beta.3",
     "react-stately": "^3.12.2",
     "use-debounce": "^7.0.1",
