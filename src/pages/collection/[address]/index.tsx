@@ -2153,6 +2153,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         image,
         title,
         url: `https://marketplace.treasure.lol${context.resolvedUrl}`,
+        canonicalUrl: `https://trove.treasure.lol${context.resolvedUrl}`,
       },
     },
   };

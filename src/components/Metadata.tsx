@@ -6,9 +6,16 @@ export type MetadataProps = {
   image: string;
   title: string;
   url: string;
+  canonicalUrl?: string;
 };
 
-export function Metadata({ description, url, image, ...props }: MetadataProps) {
+export function Metadata({
+  description,
+  url,
+  image,
+  canonicalUrl,
+  ...props
+}: MetadataProps) {
   const title = props.exactTitle
     ? props.title
     : `${props.title} | Treasure Marketplace`;
@@ -52,6 +59,8 @@ export function Metadata({ description, url, image, ...props }: MetadataProps) {
         href="https://fonts.gstatic.com"
         crossOrigin="true"
       />
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap"

@@ -41,6 +41,7 @@ export default function Home() {
         image="https://marketplace.treasure.lol/img/seoBanner.png"
         title="Treasure Marketplace, native to Arbitrum"
         url="https://marketplace.treasure.lol"
+        canonicalUrl="https://trove.treasure.lol"
       />
       <main className="flex flex-col mt-16 pt-20 w-full min-h-screen landing">
         <div className="z-10 px-8 max-w-2xl lg:max-w-7xl mx-auto">
