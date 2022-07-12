@@ -878,7 +878,7 @@ export function useMetadata(
                 name: name[0]
                   .toUpperCase()
                   .concat(name.slice(1).replace(/([A-Z])/g, " $1")),
-                value,
+                value: String(value),
               })
             ),
           ];
